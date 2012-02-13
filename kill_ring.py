@@ -148,12 +148,12 @@ class KillLineCommand(sublime_plugin.TextCommand):
         # line, will kill the EOL character. Will
         # not do anything at EOF
 
-        if  atEOL(view, end):
+        if  self.atEOL(view, end):
             # select the EOL char
             selection = sublime.Region(begin, end+1)
             return selection
 
-        elif atEOF(view, end):
+        elif self.atEOF(view, end):
             # at the end of file, do nothing; the
             # selection is just the initial selection
             return sublime.Region(begin, end)
@@ -166,11 +166,11 @@ class KillLineCommand(sublime_plugin.TextCommand):
             selection = sublime.Region(begin,current)
             return selection
 
-    def atEOL(view, point):
+    def atEOL(self, view, point):
         nextChar = view.substr(point)
         return  nextChar == "\n"
 
-    def atEOF(view, point):
+    def atEOF(self, view, point):
         nextChar = view.substr(point)
         return ord(nextChar) == 0
 
