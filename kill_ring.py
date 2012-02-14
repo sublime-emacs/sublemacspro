@@ -127,6 +127,7 @@ class AddToKillRingCommand(sublime_plugin.TextCommand):
 
 class KillRingSaveCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
+    self.view.run_command("copy")
     self.view.run_command("add_to_kill_ring", {"forward": False})
     self.view.run_command("cancel_mark")
 
@@ -161,7 +162,7 @@ class KillLineCommand(sublime_plugin.TextCommand):
         else:
             # mid-string -- extend to EOL
             current = end
-            while not atEOF(view, current) and not atEOL(view, current):
+            while not self.atEOF(view, current) and not self.atEOL(view, current):
                 current = current+1
             selection = sublime.Region(begin,current)
             return selection
