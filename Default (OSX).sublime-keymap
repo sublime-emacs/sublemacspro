@@ -1,6 +1,6 @@
 [
-	{ "keys": ["alt+q"], "command": "wrap_paragraph" },
-	{ "keys": ["ctrl+o"], "command": "emacs_open_line" },
+	{ "keys": ["alt+q"], "command": "wrap_lines" },
+	{ "keys": ["ctrl+o"], "command": "sbp_open_line" },
 
 	// Emacs style
 	{ "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
@@ -22,27 +22,27 @@
   { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false} },
   { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true} },
 
-  { "keys": ["ctrl+l"], "command": "recenter_in_view" },
+  { "keys": ["ctrl+l"], "command": "sbp_recenter_in_view" },
   { "keys": ["alt+q"], "command": "wrap_paragraph"},
 
   // Kill Ring handling
-  { "keys": ["ctrl+k"], "command": "kill_line"},
+  { "keys": ["ctrl+k"], "command": "sbp_kill_line"},
   { "keys": ["ctrl+y"], "command": "paste" },
-  { "keys": ["ctrl+shift+y"], "command": "yank_choice" },
-  { "keys": ["ctrl+space"], "command": "set_mark" },
+  { "keys": ["ctrl+shift+y"], "command": "sbp_yank_choice" },
+  { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
 
-  { "keys": ["ctrl+w"], "command": "delete_to_mark" },
-  { "keys": ["alt+w"], "command": "kill_ring_save" },
-  { "keys": ["ctrl+g"], "command": "cancel_mark" },
+  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
+  { "keys": ["alt+w"], "command": "sbp_kill_ring_save" },
+  { "keys": ["ctrl+g"], "command": "sbp_cancel_mark" },
 
   { "keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context": 
     [
-        { "key": "emacs_has_mark", "operator": "equal", "operand": true }
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
   { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
     [
-        { "key": "emacs_has_mark", "operator": "equal", "operand": true }
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
 
@@ -87,8 +87,8 @@
 	},
 
   // Rectangles
-  { "keys": ["ctrl+x", "r", "t"], "command": "emacs_rectangle_insert" },
-  { "keys": ["ctrl+x", "r", "d"], "command": "emacs_rectangle_delete" },
+  { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
+  { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
 
   // Do it my way
   { "keys": ["ctrl+x", "k"], "command": "close" },

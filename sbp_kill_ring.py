@@ -1,11 +1,12 @@
 import sublime_plugin, sublime, functools
 
-class KillRing:
+class SBPKillRing:
     def __init__(self):
         self.limit = 16
         self.buffer = []
         self.kill_points = []
         self.kill_id = 0
+        
 
     def top(self):
         return self.buffer[self.head]
@@ -56,9 +57,9 @@ class KillRing:
     def __len__(self):
         return len(self.buffer)
 
-kill_ring = KillRing()
+sbp_kill_ring = SBPKillRing()
 
-class YankChoiceCommand(sublime_plugin.TextCommand):
+class SBPYankChoiceCommand(sublime_plugin.TextCommand):
     
     def insert(self, edit, idx):
 
@@ -82,7 +83,7 @@ class YankChoiceCommand(sublime_plugin.TextCommand):
         
 
 
-class YankCommand(sublime_plugin.TextCommand):
+class SBPYankCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         text = kill_ring.top()
         lines = text.splitlines()
@@ -109,7 +110,7 @@ class YankCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
         return len(kill_ring) > 0
 
-class AddToKillRingCommand(sublime_plugin.TextCommand):
+class SBPAddToKillRingCommand(sublime_plugin.TextCommand):
     def run(self, edit, forward):
         delta = 1
         if not forward:
@@ -125,11 +126,11 @@ class AddToKillRingCommand(sublime_plugin.TextCommand):
 
         kill_ring.add(self.view.id(), "\n".join(text), regions, forward)
 
-class KillRingSaveCommand(sublime_plugin.TextCommand):
+class SBPKillRingSaveCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
     self.view.run_command("copy")
-    self.view.run_command("add_to_kill_ring", {"forward": False})
-    self.view.run_command("cancel_mark")
+    self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+    self.view.run_command("sbp_cancel_mark")
 
 
 
@@ -137,7 +138,7 @@ class KillRingSaveCommand(sublime_plugin.TextCommand):
 #
 # Kill Line
 #
-class KillLineCommand(sublime_plugin.TextCommand):
+class SBPKillLineCommand(sublime_plugin.TextCommand):
 
     def expandSelectionForKill(self, view, begin, end):
         """Returns a selection that will be cut; basically,
@@ -195,5 +196,5 @@ class KillLineCommand(sublime_plugin.TextCommand):
         expanded = self.expandSelectionForKill(self.view, s.begin(), s.end())
         self.view.sel().clear()
         self.view.sel().add(expanded)
-        self.view.run_command("add_to_kill_ring", {"forward": False})
+        self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
         self.view.erase(edit, expanded)

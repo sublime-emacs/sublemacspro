@@ -2,7 +2,7 @@ import sublime, sublime_plugin
 
 # Remove any existing marks
 #
-class CancelMarkCommand(sublime_plugin.TextCommand):
+class SBPCancelMarkCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
 
 
@@ -14,13 +14,13 @@ class CancelMarkCommand(sublime_plugin.TextCommand):
         self.view.sel().add(sublime.Region(m[0].end(), m[0].end()))
 
 
-class SetMarkCommand(sublime_plugin.TextCommand):
+class SBPSetMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         mark = [s for s in self.view.sel()]
         self.view.add_regions("mark", mark, "mark", "dot",
             sublime.HIDDEN | sublime.PERSISTENT)
 
-class SwapWithMarkCommand(sublime_plugin.TextCommand):
+class SBPSwapWithMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         old_mark = self.view.get_regions("mark")
 
@@ -33,7 +33,7 @@ class SwapWithMarkCommand(sublime_plugin.TextCommand):
             for r in old_mark:
                 self.view.sel().add(r)
 
-class SelectToMarkCommand(sublime_plugin.TextCommand):
+class SBPSelectToMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         mark = self.view.get_regions("mark")
 
@@ -50,17 +50,17 @@ class SelectToMarkCommand(sublime_plugin.TextCommand):
         for r in regions:
             self.view.sel().add(r)
 
-class DeleteToMark(sublime_plugin.TextCommand):
+class SBPDeleteToMark(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command("select_to_mark")
-        self.view.run_command("add_to_kill_ring", {"forward": False})
+        self.view.run_command("sbp_select_to_mark")
+        self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
         self.view.run_command("left_delete")
-        self.view.run_command("cancel_mark")
+        self.view.run_command("sbp_cancel_mark")
 
 #
 # If a mark has been set, color the region between the mark and the point
 #
-class EmacsMarkDetector(sublime_plugin.EventListener):
+class SBPEmacsMarkDetector(sublime_plugin.EventListener):
   
   def __init__(self, *args, **kwargs):
     sublime_plugin.EventListener.__init__(self, *args, **kwargs)
@@ -87,6 +87,6 @@ class EmacsMarkDetector(sublime_plugin.EventListener):
       view.sel().add(r)
       
   def on_query_context(self, view, key, operator, operand, match_all):    
-    if key == "emacs_has_mark":
+    if key == "sbp_emacs_has_mark":
       if operator == sublime.OP_EQUAL:
         return len(view.get_regions("mark")) > 0

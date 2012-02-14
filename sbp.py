@@ -1,8 +1,35 @@
 import functools as fu
 import sublime, sublime_plugin
 
+class SBPOpenLineCommand(sublime_plugin.TextCommand):
+    '''
+    Emacs-style 'open-line' command: Inserts a newline at the current
+    cursor position, without moving the cursor like Sublime's insert
+    command does.
+    '''
+    def run(self, edit):
+        sel = self.view.sel()
+        if (sel is None) or (len(sel) == 0):
+            return
 
-class EmacsRectangleDelete(sublime_plugin.TextCommand):
+        point = sel[0].end()
+        self.view.insert(edit, point, '\n')
+        self.view.run_command('move', {'by': 'characters', 'forward': False})
+
+
+class SBPRecenterInView(sublime_plugin.TextCommand):
+    '''
+    Reposition the view so that the line containing the cursor is at the
+    center of the viewport, if possible. Unlike the corresponding Emacs
+    command, recenter-top-bottom, this command does not cycle through
+    scrolling positions. It always repositions the view the same way.
+
+    This command is frequently bound to Ctrl-l.
+    '''
+    def run(self, edit):
+        self.view.show_at_center(self.view.sel()[0])
+
+class SBPRectangleDelete(sublime_plugin.TextCommand):
 	def run(self, edit, **args):
 		sel = self.view.sel()[0]
 		b_row, b_col = self.view.rowcol(sel.begin())
@@ -24,10 +51,10 @@ class EmacsRectangleDelete(sublime_plugin.TextCommand):
 				self.view.erase(current_edit, r)
 				
 		self.view.end_edit(edit)
-		self.view.run_command("cancel_mark")
+		self.view.run_command("sbp_cancel_mark")
 
 
-class EmacsRectangleInsert(sublime_plugin.TextCommand):
+class SBPRectangleInsert(sublime_plugin.TextCommand):
 	def run(self, edit, **args):
 		self.view.window().show_input_panel("Content:", "", fu.partial(self.replace, edit), None, None)
 
@@ -54,6 +81,6 @@ class EmacsRectangleInsert(sublime_plugin.TextCommand):
 			
 			self.view.insert(current_edit, self.view.text_point(l, left), content)
 		self.view.end_edit(edit)
-		self.view.run_command("cancel_mark")
+		self.view.run_command("sbp_cancel_mark")
 		
 
