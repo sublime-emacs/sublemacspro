@@ -2,7 +2,7 @@ import sublime, sublime_plugin
 
 # Remove any existing marks
 #
-class SBPCancelMarkCommand(sublime_plugin.TextCommand):
+class SbpCancelMarkCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
 
 
@@ -14,13 +14,13 @@ class SBPCancelMarkCommand(sublime_plugin.TextCommand):
         self.view.sel().add(sublime.Region(m[0].end(), m[0].end()))
 
 
-class SBPSetMarkCommand(sublime_plugin.TextCommand):
+class SbpSetMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         mark = [s for s in self.view.sel()]
         self.view.add_regions("mark", mark, "mark", "dot",
             sublime.HIDDEN | sublime.PERSISTENT)
 
-class SBPSwapWithMarkCommand(sublime_plugin.TextCommand):
+class SbpSwapWithMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         old_mark = self.view.get_regions("mark")
 
@@ -33,7 +33,7 @@ class SBPSwapWithMarkCommand(sublime_plugin.TextCommand):
             for r in old_mark:
                 self.view.sel().add(r)
 
-class SBPSelectToMarkCommand(sublime_plugin.TextCommand):
+class SbpSelectToMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         mark = self.view.get_regions("mark")
 
@@ -50,7 +50,7 @@ class SBPSelectToMarkCommand(sublime_plugin.TextCommand):
         for r in regions:
             self.view.sel().add(r)
 
-class SBPDeleteToMark(sublime_plugin.TextCommand):
+class SbpDeleteToMark(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.run_command("sbp_select_to_mark")
         self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
@@ -60,7 +60,7 @@ class SBPDeleteToMark(sublime_plugin.TextCommand):
 #
 # If a mark has been set, color the region between the mark and the point
 #
-class SBPEmacsMarkDetector(sublime_plugin.EventListener):
+class SbpEmacsMarkDetector(sublime_plugin.EventListener):
   
   def __init__(self, *args, **kwargs):
     sublime_plugin.EventListener.__init__(self, *args, **kwargs)
