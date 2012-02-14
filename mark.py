@@ -55,6 +55,7 @@ class DeleteToMark(sublime_plugin.TextCommand):
         self.view.run_command("select_to_mark")
         self.view.run_command("add_to_kill_ring", {"forward": False})
         self.view.run_command("left_delete")
+        self.view.run_command("cancel_mark")
 
 #
 # If a mark has been set, color the region between the mark and the point
