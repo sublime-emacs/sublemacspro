@@ -1,7 +1,7 @@
 import functools as fu
 import sublime, sublime_plugin
 
-class SBPOpenLineCommand(sublime_plugin.TextCommand):
+class SbpOpenLineCommand(sublime_plugin.TextCommand):
     '''
     Emacs-style 'open-line' command: Inserts a newline at the current
     cursor position, without moving the cursor like Sublime's insert
@@ -17,7 +17,7 @@ class SBPOpenLineCommand(sublime_plugin.TextCommand):
         self.view.run_command('move', {'by': 'characters', 'forward': False})
 
 
-class SBPRecenterInView(sublime_plugin.TextCommand):
+class SbpRecenterInView(sublime_plugin.TextCommand):
     '''
     Reposition the view so that the line containing the cursor is at the
     center of the viewport, if possible. Unlike the corresponding Emacs
@@ -29,7 +29,7 @@ class SBPRecenterInView(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.show_at_center(self.view.sel()[0])
 
-class SBPRectangleDelete(sublime_plugin.TextCommand):
+class SbpRectangleDelete(sublime_plugin.TextCommand):
 	def run(self, edit, **args):
 		sel = self.view.sel()[0]
 		b_row, b_col = self.view.rowcol(sel.begin())
@@ -54,7 +54,7 @@ class SBPRectangleDelete(sublime_plugin.TextCommand):
 		self.view.run_command("sbp_cancel_mark")
 
 
-class SBPRectangleInsert(sublime_plugin.TextCommand):
+class SbpRectangleInsert(sublime_plugin.TextCommand):
 	def run(self, edit, **args):
 		self.view.window().show_input_panel("Content:", "", fu.partial(self.replace, edit), None, None)
 

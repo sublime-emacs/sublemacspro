@@ -1,6 +1,6 @@
 import sublime_plugin, sublime, functools
 
-class SBPKillRing:
+class SbpKillRing:
     def __init__(self):
         self.limit = 16
         self.buffer = []
@@ -57,9 +57,9 @@ class SBPKillRing:
     def __len__(self):
         return len(self.buffer)
 
-sbp_kill_ring = SBPKillRing()
+sbp_kill_ring = SbpKillRing()
 
-class SBPYankChoiceCommand(sublime_plugin.TextCommand):
+class SbpYankChoiceCommand(sublime_plugin.TextCommand):
     
     def insert(self, edit, idx):
 
@@ -69,7 +69,7 @@ class SBPYankChoiceCommand(sublime_plugin.TextCommand):
         regions = [r for r in self.view.sel()]
         regions.reverse()
 
-        text = kill_ring.get(idx)
+        text = sbp_kill_ring.get(idx)
         for s in regions:
             num = self.view.insert(edit, s.begin(), text)
             self.view.erase(edit, sublime.Region(s.begin() + num,
@@ -77,15 +77,15 @@ class SBPYankChoiceCommand(sublime_plugin.TextCommand):
 
 
     def run(self, edit):
-        names = [kill_ring.get(idx) for idx in range(len(kill_ring)) if kill_ring.get(idx) != None]
+        names = [sbp_kill_ring.get(idx) for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
         if len(names) > 0:
             self.view.window().show_quick_panel(names, functools.partial(self.insert, edit))
         
 
 
-class SBPYankCommand(sublime_plugin.TextCommand):
+class SbpYankCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        text = kill_ring.top()
+        text = sbp_kill_ring.top()
         lines = text.splitlines()
 
         regions = [r for r in self.view.sel()]
@@ -108,9 +108,9 @@ class SBPYankCommand(sublime_plugin.TextCommand):
                     s.end() + num))
 
     def is_enabled(self):
-        return len(kill_ring) > 0
+        return len(sbp_kill_ring) > 0
 
-class SBPAddToKillRingCommand(sublime_plugin.TextCommand):
+class SbpAddToKillRingCommand(sublime_plugin.TextCommand):
     def run(self, edit, forward):
         delta = 1
         if not forward:
@@ -124,9 +124,9 @@ class SBPAddToKillRingCommand(sublime_plugin.TextCommand):
             text.append(self.view.substr(s))
             regions.append(s)
 
-        kill_ring.add(self.view.id(), "\n".join(text), regions, forward)
+        sbp_kill_ring.add(self.view.id(), "\n".join(text), regions, forward)
 
-class SBPKillRingSaveCommand(sublime_plugin.TextCommand):
+class SbpKillRingSaveCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
     self.view.run_command("copy")
     self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
@@ -138,7 +138,7 @@ class SBPKillRingSaveCommand(sublime_plugin.TextCommand):
 #
 # Kill Line
 #
-class SBPKillLineCommand(sublime_plugin.TextCommand):
+class SbpKillLineCommand(sublime_plugin.TextCommand):
 
     def expandSelectionForKill(self, view, begin, end):
         """Returns a selection that will be cut; basically,
@@ -190,7 +190,7 @@ class SBPKillLineCommand(sublime_plugin.TextCommand):
         return True
 
     def run(self, edit, **args):
-        global kill_ring
+        global sbp_kill_ring
 
         s = self.view.sel()[0]
         expanded = self.expandSelectionForKill(self.view, s.begin(), s.end())
