@@ -86,9 +86,15 @@
 		]
 	},
 
+  { "keys": ["alt+;"], "command": "toggle_comment" },
+
   // Rectangles
   { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
   { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
+
+  // Registers
+  { "keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
+  { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
 
   // Do it my way
   { "keys": ["ctrl+x", "k"], "command": "close" },

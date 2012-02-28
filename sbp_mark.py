@@ -52,8 +52,9 @@ class SbpSelectToMarkCommand(sublime_plugin.TextCommand):
 
 class SbpDeleteToMark(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command("sbp_select_to_mark")
+        self.view.run_command("copy")
         self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+        #self.view.run_command("sbp_select_to_mark")
         self.view.run_command("left_delete")
         self.view.run_command("sbp_cancel_mark")
 
