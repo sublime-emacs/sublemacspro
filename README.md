@@ -38,6 +38,10 @@ semantics.
 I will try to extend this more and more to provide more features from Emacs to
 Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 
+## Contributors
+
+  * Brian M. Clapper provided lots of inspiration and code for this plugin
+
 
 [ot]: https://github.com/stiang/EmacsifySublimeText
 [ot2]: https://github.com/bmc/ST2EmacsMiscellanea
