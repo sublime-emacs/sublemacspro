@@ -17,7 +17,7 @@ Emacs-ish way to Sublime Text 2 than writing them in Lisp.
 
 ## Features
 
-The following features are supported and merged from [other][ot] approaches
+The following features are supported and merged [from][ot3] [other][ot] [approaches][ot2]
 and the base code of the new beta of [Sublime Text 2][subl].
 
    * Kill line, region ... with kill ring. All the sugar you love with a nice UI with ``M-w``, ``C-w``, ``C-y``
@@ -40,4 +40,6 @@ Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 
 
 [ot]: https://github.com/stiang/EmacsifySublimeText
+[ot2]: https://github.com/bmc/ST2EmacsMiscellanea
+[ot3]: https://github.com/stiang/EmacsKillRing
 [subl]: http://www.sublimetext.com/docs/2/api_reference.html
