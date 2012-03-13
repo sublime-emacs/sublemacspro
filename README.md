@@ -14,7 +14,8 @@ and the base code of the new beta of [Sublime Text 2][subl].
 
    * Kill line, region ... with kill ring
    * Yank with free choice from kill ring using fancy overlay
-   * Rectangular cut and insert 
+   * Rectangular cut and insert using ``C-x r t`` and ``C-x r d``
+   * Named registers to store data using ``C-x r s [register]`` and ``C-x r i [register]``
 
 
 ## Key Map
