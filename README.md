@@ -1,19 +1,27 @@
 # sublemacspro makes Sublime Text 2 your Emacs replacement
 
 The reasoning behind writing these set of functions is that I love Emacs,
-however, I don't like the UI and I feel that sometimes it just feels slow. My
-biggest problem with current "hyped" editors is that they don't support my
-native way of interacting with text requiring to use the mouse too often.
+however, the UI doesn't feel as snappy as other Mac apps. On the other hand 
+I cannot move to another editor since many of those *hyped* editors is 
+that they don't provide the keybindings I love.
 
-But, now there is sublemacs pro that brings Emacs feeling to your editor
+Then, I found Sublime Text 2. A completly customizable editor allowing you
+to easily modify all default behaviors so that they suit your editing sytle.
+
+
+So I wrote *sublemacspro* bringing Emacs keybindings and 
+sugar to Sublime Text 2. Even though Emacs lives from the plugins, I beleive 
+it is way easier to write new plugins in Python and integrate them in an
+Emacs-ish way to Sublime Text 2 than writing them in Lisp.
+
 
 ## Features
 
 The following features are supported and merged from [other][ot] approaches
 and the base code of the new beta of [Sublime Text 2][subl].
 
-   * Kill line, region ... with kill ring
-   * Yank with free choice from kill ring using fancy overlay
+   * Kill line, region ... with kill ring. All the sugar you love with a nice UI with ``M-w``, ``C-w`, ``C-y``
+   * Yank with free choice from kill ring using fancy overlay: Just press ``C-Y`` to access the kill ring and search for your last copy and pastie
    * Rectangular cut and insert using ``C-x r t`` and ``C-x r d``
    * Named registers to store data using ``C-x r s [register]`` and ``C-x r i [register]``
 
