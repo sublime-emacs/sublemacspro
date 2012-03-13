@@ -1,5 +1,6 @@
 import functools as fu
 import sublime, sublime_plugin
+import paragraph
 
 
 class SbpRegisterStore:
@@ -24,6 +25,28 @@ class SbpRegisterStore:
 # Global variable to store data in the registers
 sbp_registers = SbpRegisterStore()
 
+
+class SbpWrapParagraphCommand(paragraph.WrapLinesCommand):
+	'''
+	The Sublime "wrap_width" setting controls both on-screen wrapping and
+    the column at which the WrapLinesCommand folds lines. Those two
+    settings should be different; otherwise, things don't look right
+    on the screen. This plugin looks for a "wrap_paragraph" setting and,
+    if found, uses that value to override the value of "wrap_width". Then,
+    it invokes the stock SublimeText "wrap_lines" command.
+
+    Bind "wrap_paragraph" to a key to use this command.
+	'''
+
+	def run(self, edit, width=0):
+		print "Martin"
+		if width == 0 and self.view.settings().get("wrap_paragraph"):
+			try:
+				width = int(self.view.settings().get("wrap_paragraph"))
+			except TypeError:
+				pass
+		super(SbpWrapParagraphCommand, self).run(edit, width)
+        #super(SbpWrapParagraphCommand, self).run(edit, width)
 
 
 class SbpRegisterStore(sublime_plugin.TextCommand):

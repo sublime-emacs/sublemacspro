@@ -23,7 +23,7 @@
   { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true} },
 
   { "keys": ["ctrl+l"], "command": "sbp_recenter_in_view" },
-  { "keys": ["alt+q"], "command": "wrap_paragraph"},
+  { "keys": ["alt+q"], "command": "sbp_wrap_paragraph"},
 
   // Kill Ring handling
   { "keys": ["ctrl+k"], "command": "sbp_kill_line"},
@@ -55,7 +55,7 @@
   // Goto stuff
   { "keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
 
-  { "keys": ["alt+g", "g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": ":"}},
+  { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": ":"}},
 
   { "keys": ["ctrl+x", "b"], "command": "next_view" },
 
