@@ -20,7 +20,7 @@ Emacs-ish way to Sublime Text 2 than writing them in Lisp.
 The following features are supported and merged from [other][ot] approaches
 and the base code of the new beta of [Sublime Text 2][subl].
 
-   * Kill line, region ... with kill ring. All the sugar you love with a nice UI with ``M-w``, ``C-w`, ``C-y``
+   * Kill line, region ... with kill ring. All the sugar you love with a nice UI with ``M-w``, ``C-w``, ``C-y``
    * Yank with free choice from kill ring using fancy overlay: Just press ``C-Y`` to access the kill ring and search for your last copy and pastie
    * Rectangular cut and insert using ``C-x r t`` and ``C-x r d``
    * Named registers to store data using ``C-x r s [register]`` and ``C-x r i [register]``
