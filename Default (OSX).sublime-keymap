@@ -12,24 +12,32 @@
   { "keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
   { "keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
   { "keys": ["ctrl+h"], "command": "left_delete"},
+  { "keys": ["ctrl+shift+h"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete to Hard BOL.sublime-macro"}},
   { "keys": ["ctrl+d"], "command": "right_delete"},
   { "keys": ["alt+d"], "command": "delete_word", "args": { "forward": true } },
   { "keys": ["ctrl+backspace"], "command": "delete_word", "args": { "forward": false } },
   { "keys": ["alt+backspace"], "command": "delete_word", "args": { "forward": false } },
   { "keys": ["super+backspace"], "command": "delete_word", "args": { "forward": false } },
   { "keys": ["ctrl+/"], "command": "undo"},
+  { "keys": ["ctrl+shift+/"], "command": "redo"},
   { "keys": ["ctrl+_"], "command": "undo"}, // consistency with the Mac
   { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false} },
   { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true} },
 
+  { "keys": ["alt+shift+,"], "command": "move_to", "args": {"to": "bof", "extend": false}},
+  { "keys": ["alt+shift+."], "command": "move_to", "args": {"to": "eof", "extend": false}},
+  
   { "keys": ["ctrl+l"], "command": "sbp_recenter_in_view" },
   { "keys": ["alt+q"], "command": "sbp_wrap_paragraph"},
+
+  { "keys": ["ctrl+x","h"], "command": "select_all"},
 
   // Kill Ring handling
   { "keys": ["ctrl+k"], "command": "sbp_kill_line"},
   { "keys": ["ctrl+y"], "command": "paste" },
   { "keys": ["ctrl+shift+y"], "command": "sbp_yank_choice" },
   { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
+  { "keys": ["alt+space"], "command": "sbp_set_mark" }, //for asia user 
 
   { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
   { "keys": ["super+c"], "command": "sbp_kill_ring_save" },
@@ -56,7 +64,9 @@
   // Goto stuff
   { "keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
 
-  { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": ":"}},
+  { "keys": ["alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
+  { "keys": ["alt+shift+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": ":"}},
+  { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
 
   { "keys": ["ctrl+x", "b"], "command": "next_view" },
 
