@@ -37,7 +37,6 @@
   { "keys": ["ctrl+y"], "command": "paste" },
   { "keys": ["ctrl+shift+y"], "command": "sbp_yank_choice" },
   { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
-  { "keys": ["alt+space"], "command": "sbp_set_mark" }, //for asia user 
 
   { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
   { "keys": ["super+c"], "command": "sbp_kill_ring_save" },
@@ -63,9 +62,7 @@
 
   // Goto stuff
   { "keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
-
-  { "keys": ["alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
-  { "keys": ["alt+shift+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": ":"}},
+  { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true, "text": ":"}},
   { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
 
   { "keys": ["ctrl+x", "b"], "command": "next_view" },
