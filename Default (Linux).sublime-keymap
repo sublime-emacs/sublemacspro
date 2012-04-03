@@ -1,0 +1,113 @@
+[
+	{ "keys": ["alt+q"], "command": "wrap_lines" },
+	{ "keys": ["ctrl+o"], "command": "sbp_open_line" },
+
+	// Emacs style
+	{ "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
+  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "eol", "extend": false} },
+  { "keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false} },
+  { "keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true} },
+  { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
+  { "keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
+  { "keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
+  { "keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
+  { "keys": ["ctrl+h"], "command": "left_delete"},
+  { "keys": ["ctrl+shift+h"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete to Hard BOL.sublime-macro"}},
+  { "keys": ["ctrl+d"], "command": "right_delete"},
+  { "keys": ["alt+d"], "command": "delete_word", "args": { "forward": true } },
+  { "keys": ["ctrl+backspace"], "command": "delete_word", "args": { "forward": false } },
+  { "keys": ["alt+backspace"], "command": "delete_word", "args": { "forward": false } },
+  { "keys": ["super+backspace"], "command": "delete_word", "args": { "forward": false } },
+  { "keys": ["ctrl+/"], "command": "undo"},
+  { "keys": ["ctrl+shift+/"], "command": "redo"},
+  { "keys": ["ctrl+_"], "command": "undo"}, // consistency with the Mac
+  { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false} },
+  { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true} },
+
+  { "keys": ["alt+shift+,"], "command": "move_to", "args": {"to": "bof", "extend": false}},
+  { "keys": ["alt+shift+."], "command": "move_to", "args": {"to": "eof", "extend": false}},
+  
+  { "keys": ["ctrl+l"], "command": "sbp_recenter_in_view" },
+  { "keys": ["alt+q"], "command": "sbp_wrap_paragraph"},
+
+  { "keys": ["ctrl+x","h"], "command": "select_all"},
+
+  // Kill Ring handling
+  { "keys": ["ctrl+k"], "command": "sbp_kill_line"},
+  { "keys": ["alt+k"], "command": "sbp_kill_to_end_of_sentence"},
+  { "keys": ["ctrl+y"], "command": "paste" },
+  { "keys": ["ctrl+shift+y"], "command": "sbp_yank_choice" },
+  { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
+
+  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
+  { "keys": ["super+c"], "command": "sbp_kill_ring_save" },
+  { "keys": ["alt+w"], "command": "sbp_kill_ring_save" },
+  { "keys": ["ctrl+g"], "command": "sbp_cancel_mark" },
+
+  { "keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context": 
+    [
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
+  { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
+    [
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
+
+  // Search and Replace
+  { "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":true} },
+  { "keys": ["ctrl+s"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false} },
+  { "keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
+  { "keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
+
+  // Goto stuff
+  { "keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
+  { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true, "text": ":"}},
+  { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
+
+  { "keys": ["ctrl+x", "b"], "command": "next_view" },
+
+  // Completion
+  { "keys": ["alt+/"], "command": "auto_complete" },
+	{ "keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
+		[
+			{ "key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
+			{ "key": "auto_complete_visible", "operator": "equal", "operand": false },
+			{ "key": "setting.tab_completion", "operator": "equal", "operand": true }
+		]
+	},
+
+  // Aborter
+  { "keys": ["ctrl+g"], "command": "hide_overlay", "context":
+		[
+			{ "key": "overlay_visible", "operator": "equal", "operand": true }
+		]
+	},
+   { "keys": ["ctrl+g"], "command": "hide_auto_complete", "context":
+		[
+			{ "key": "auto_complete_visible", "operator": "equal", "operand": true }
+		]
+	},
+	{ "keys": ["ctrl+g"], "command": "hide_panel", "context":
+		[
+			{ "key": "panel_visible", "operator": "equal", "operand": true }
+		]
+	},
+
+  { "keys": ["alt+;"], "command": "toggle_comment" },
+
+  // Rectangles
+  { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
+  { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
+
+  // Registers
+  { "keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
+  { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
+
+  // Do it my way
+  { "keys": ["ctrl+x", "k"], "command": "close" },
+  { "keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
+  { "keys": ["ctrl+x", "ctrl+s"], "command": "save"}
+
+]
