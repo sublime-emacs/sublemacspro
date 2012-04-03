@@ -1,5 +1,18 @@
 import sublime_plugin, sublime, functools
 
+class SbpUtil:
+    # FIXME: Move to someplace common.
+
+    @classmethod
+    def atEOL(cls, view, point):
+        nextChar = view.substr(point)
+        return  nextChar == "\n"
+
+    @classmethod
+    def atEOF(cls, view, point):
+        nextChar = view.substr(point)
+        return ord(nextChar) == 0
+
 class SbpKillRing:
     def __init__(self):
         self.limit = 16
@@ -134,6 +147,44 @@ class SbpKillRingSaveCommand(sublime_plugin.TextCommand):
 
 
 
+class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
+    """
+    SbpKillToEndOfSentence is the equivalent of the Emacs (kill-sentence)
+    command, typically bound to M-k. It kills from point to the end of the
+    current sentence. "Current sentence" is defined as either (a) end of file,
+    or (b) a space preceded by ".", "?" or "!".
+    """
+    def run(self, edit):
+        s = self.view.sel()[0]
+        region = self._sentence_region(self.view, s.begin())
+        self.view.sel().clear()
+        self.view.sel().add(region)
+        self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+        self.view.erase(edit, region)
+
+    def _sentence_region(self, view, point):
+        last_was_punct = False
+        begin = end = point
+ 
+        while not SbpUtil.atEOF(self.view, end):
+            c = self.view.substr(end)
+            if c in ['.', '!', '?']:
+                last_was_punct = True
+
+            elif c.isspace():
+                if last_was_punct:
+                    break
+                last_was_punct = False
+
+            else:
+                last_was_punct = False
+
+            end += 1
+
+        if end > begin:
+            return sublime.Region(begin, end)
+        else:
+            return None
 
 #
 # Kill Line
@@ -169,12 +220,10 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
             return selection
 
     def atEOL(self, view, point):
-        nextChar = view.substr(point)
-        return  nextChar == "\n"
+        return SbpUtil.atEOL(view, point)
 
     def atEOF(self, view, point):
-        nextChar = view.substr(point)
-        return ord(nextChar) == 0
+        return SbpUtil.atEOF(view, point)
 
     def isEnabled(self, edit, args):
         if len(self.view.sel()) != 1:

@@ -34,6 +34,7 @@
 
   // Kill Ring handling
   { "keys": ["ctrl+k"], "command": "sbp_kill_line"},
+  { "keys": ["alt+k"], "command": "sbp_kill_to_end_of_sentence"},
   { "keys": ["ctrl+y"], "command": "paste" },
   { "keys": ["ctrl+shift+y"], "command": "sbp_yank_choice" },
   { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
