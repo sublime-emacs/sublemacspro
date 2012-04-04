@@ -1,3 +1,15 @@
+"""
+Emacs-style kill ring (and yank ring) commands.
+
+Settings:
+
+sbp_kill_with_copy - If true, kill or yank also performs an editor copy
+    (as if Ctrl-C, or Cmd-C on the Mac, had been pressed). If false, kill does
+    NOT perform a copy. The default is "true", which better mimics Emacs'
+    behavior. The setting allows you to disable the behavior, if you don't like
+    it.
+"""
+
 import sublime_plugin, sublime, functools
 
 class SbpUtil:
@@ -12,6 +24,15 @@ class SbpUtil:
     def atEOF(cls, view, point):
         nextChar = view.substr(point)
         return ord(nextChar) == 0
+
+    @classmethod
+    def add_to_kill_ring(cls, view):
+        # kill_with_copy setting enables editor copy when kill (C-w)
+        # or Emacs-copy (M-w) is invoked.
+        kill_with_copy = view.settings().get("sbp_kill_with_copy", True)
+        if kill_with_copy:
+            view.run_command("copy")
+        view.run_command("sbp_add_to_kill_ring", {"forward": False})
 
 class SbpKillRing:
     def __init__(self):
@@ -141,10 +162,8 @@ class SbpAddToKillRingCommand(sublime_plugin.TextCommand):
 
 class SbpKillRingSaveCommand(sublime_plugin.TextCommand):
   def run(self, edit, **args):
-    self.view.run_command("copy")
-    self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+    SbpUtil.add_to_kill_ring(self.view)
     self.view.run_command("sbp_cancel_mark")
-
 
 
 class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
@@ -159,7 +178,7 @@ class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
         region = self._sentence_region(self.view, s.begin())
         self.view.sel().clear()
         self.view.sel().add(region)
-        self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+        SbpUtil.add_to_kill_ring(self.view)
         self.view.erase(edit, region)
 
     def _sentence_region(self, view, point):
@@ -245,5 +264,5 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
         expanded = self.expandSelectionForKill(self.view, s.begin(), s.end())
         self.view.sel().clear()
         self.view.sel().add(expanded)
-        self.view.run_command("sbp_add_to_kill_ring", {"forward": False})
+        SbpUtil.add_to_kill_ring(self.view)
         self.view.erase(edit, expanded)
