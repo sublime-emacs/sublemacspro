@@ -11,6 +11,7 @@ sbp_kill_with_copy - If true, kill or yank also performs an editor copy
 """
 
 import sublime_plugin, sublime, functools
+import string
 
 class SbpUtil:
     # FIXME: Move to someplace common.
@@ -34,6 +35,9 @@ class SbpUtil:
             view.run_command("copy")
         view.run_command("sbp_add_to_kill_ring", {"forward": False})
 
+
+
+
 class SbpKillRing:
     def __init__(self):
         self.limit = 16
@@ -50,7 +54,16 @@ class SbpKillRing:
         self.kill_id = 0
 
     def push(self, text):
-        self.buffer.insert(0, text)
+        """This method pushes the string to the kill ring.
+
+        However, we do need some kind of sanitation to make sure
+        we don't push too many white spaces."""
+
+        sanitized = string.strip(text)
+        if len(sanitized) == 0:
+            return
+
+        self.buffer.insert(0, sanitized)
         if len(self.buffer) > self.limit:
             self.buffer.pop()
 
