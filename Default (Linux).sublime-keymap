@@ -108,6 +108,8 @@
   // Do it my way
   { "keys": ["ctrl+x", "k"], "command": "close" },
   { "keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
-  { "keys": ["ctrl+x", "ctrl+s"], "command": "save"}
+  { "keys": ["ctrl+x", "ctrl+s"], "command": "save"},
+
+  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" }
 
 ]

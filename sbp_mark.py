@@ -19,6 +19,7 @@ class SbpSetMarkCommand(sublime_plugin.TextCommand):
         mark = [s for s in self.view.sel()]
         self.view.add_regions("mark", mark, "mark", "dot",
             sublime.HIDDEN | sublime.PERSISTENT)
+        
 
 class SbpSwapWithMarkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
