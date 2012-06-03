@@ -10,8 +10,11 @@ sbp_kill_with_copy - If true, kill or yank also performs an editor copy
     it.
 """
 
-import sublime_plugin, sublime, functools
+import sublime_plugin
+import sublime
+import functools
 import string
+
 
 class SbpUtil:
     # FIXME: Move to someplace common.
@@ -36,15 +39,12 @@ class SbpUtil:
         view.run_command("sbp_add_to_kill_ring", {"forward": False})
 
 
-
-
 class SbpKillRing:
     def __init__(self):
         self.limit = 16
         self.buffer = []
         self.kill_points = []
         self.kill_id = 0
-        
 
     def top(self):
         return self.buffer[self.head]
@@ -106,8 +106,9 @@ class SbpKillRing:
 
 sbp_kill_ring = SbpKillRing()
 
+
 class SbpYankChoiceCommand(sublime_plugin.TextCommand):
-    
+
     def insert(self, edit, idx):
 
         if idx == -1:
@@ -122,12 +123,10 @@ class SbpYankChoiceCommand(sublime_plugin.TextCommand):
             self.view.erase(edit, sublime.Region(s.begin() + num,
                 s.end() + num))
 
-
     def run(self, edit):
         names = [sbp_kill_ring.get(idx) for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
         if len(names) > 0:
             self.view.window().show_quick_panel(names, functools.partial(self.insert, edit))
-        
 
 
 class SbpYankCommand(sublime_plugin.TextCommand):
@@ -157,6 +156,7 @@ class SbpYankCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
         return len(sbp_kill_ring) > 0
 
+
 class SbpAddToKillRingCommand(sublime_plugin.TextCommand):
     def run(self, edit, forward):
         delta = 1
@@ -173,10 +173,11 @@ class SbpAddToKillRingCommand(sublime_plugin.TextCommand):
 
         sbp_kill_ring.add(self.view.id(), "\n".join(text), regions, forward)
 
+
 class SbpKillRingSaveCommand(sublime_plugin.TextCommand):
-  def run(self, edit, **args):
-    SbpUtil.add_to_kill_ring(self.view)
-    self.view.run_command("sbp_cancel_mark")
+    def run(self, edit, **args):
+        SbpUtil.add_to_kill_ring(self.view)
+        self.view.run_command("sbp_cancel_mark")
 
 
 class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
@@ -197,7 +198,7 @@ class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
     def _sentence_region(self, view, point):
         last_was_punct = False
         begin = end = point
- 
+
         while not SbpUtil.atEOF(self.view, end):
             c = self.view.substr(end)
             if c in ['.', '!', '?']:
@@ -218,6 +219,7 @@ class SbpKillToEndOfSentence(sublime_plugin.TextCommand):
         else:
             return None
 
+
 #
 # Kill Line
 #
@@ -235,7 +237,7 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
 
         if  self.atEOL(view, end):
             # select the EOL char
-            selection = sublime.Region(begin, end+1)
+            selection = sublime.Region(begin, end + 1)
             return selection
 
         elif self.atEOF(view, end):
@@ -247,8 +249,8 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
             # mid-string -- extend to EOL
             current = end
             while not self.atEOF(view, current) and not self.atEOL(view, current):
-                current = current+1
-            selection = sublime.Region(begin,current)
+                current = current + 1
+            selection = sublime.Region(begin, current)
             return selection
 
     def atEOL(self, view, point):
