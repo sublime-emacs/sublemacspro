@@ -1,4 +1,5 @@
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 import re
 import os
 
@@ -7,14 +8,15 @@ EMACS_SYNTAX_MARK_RE = r'-\*-\s*(.+)\s*-\*-'
 
 # Aliases for some of the syntax values.
 SYNTAX_ALIASES = {
-    'sh'    : 'shell-unix-generic',
-    'shell' : 'shell-unix-generic',
-    'bash'  : 'shell-unix-generic',
+    'sh': 'shell-unix-generic',
+    'shell': 'shell-unix-generic',
+    'bash': 'shell-unix-generic',
 
     # HAML and SASS depend on https://github.com/n00ge/sublime-text-haml-sass
-    'sass'  : 'ruby sass',
-    'haml'  : 'ruby haml'
+    'sass': 'ruby sass',
+    'haml': 'ruby haml'
 }
+
 
 class SbpEmacsModeSetter(sublime_plugin.EventListener):
     '''
@@ -42,7 +44,7 @@ class SbpEmacsModeSetter(sublime_plugin.EventListener):
         # as a syntax setting.
         sep = r'\\' if os.sep == "\\" else os.sep
         package_pattern = '^.*%s(Packages%s.*)$' % (sep, sep)
-        package_re = re.compile(package_pattern)  
+        package_re = re.compile(package_pattern)
 
         # Recursively walk the Sublime Packages directory, looking for
         # '.tmLanguage' files. Convert each one to a short language name
@@ -83,7 +85,7 @@ class SbpEmacsModeSetter(sublime_plugin.EventListener):
         Called right after a save. Check the syntax then, in case it changed.
         '''
         self._check_syntax(view)
-    
+
     def _check_syntax(self, view):
         '''
         Does the actual work of checking the syntax setting and changing it,
@@ -126,7 +128,6 @@ class SbpEmacsModeSetter(sublime_plugin.EventListener):
         # Must be somewhere in the first nonblank line.
         first_nonblank_line = self._first_nonblank_line(view)
         syntax_expression = None
-        name = view.name() or view.file_name()
         if first_nonblank_line is not None:
             m = self._syntax_re.search(first_nonblank_line)
             if m is not None:

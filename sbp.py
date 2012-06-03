@@ -1,7 +1,8 @@
 import functools as fu
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 import paragraph
-import string
+
 
 class SbpRegisterStore:
     """
@@ -45,6 +46,7 @@ class SbpWrapParagraphCommand(paragraph.WrapLinesCommand):
             except TypeError:
                 pass
         super(SbpWrapParagraphCommand, self).run(edit, width)
+
 
 class SbpFixupWhitespaceCommand(sublime_plugin.TextCommand):
     '''
@@ -106,7 +108,7 @@ class SbpFixupWhitespaceCommand(sublime_plugin.TextCommand):
 
                 if letter_or_digit(c) or letter_or_digit(c_prev):
                     self.view.insert(edit, point, ' ')
-       
+
     def _handle_prefix_whitespace(self, point, line):
         p = point - 1
         c = self.view.substr(p)
@@ -126,12 +128,11 @@ class SbpFixupWhitespaceCommand(sublime_plugin.TextCommand):
     def _handle_suffix_whitespace(self, point, line):
         p = point
         c = self.view.substr(p)
-        bol = line.begin()
         eol = line.end()
         while (p <= eol) and (c.isspace()) and (not self._line_end(c)):
             p += 1
             c = self.view.substr(p)
-        
+
         # Return the region of white space.
         return sublime.Region(point, p)
 
@@ -191,7 +192,7 @@ class SbpRegisterInsert(sublime_plugin.TextCommand):
     def insert(self, edit, register):
         if not self.panel:
             return
-        
+
         self.panel.window().run_command("hide_panel")
 
         sel = self.view.sel()
@@ -206,7 +207,6 @@ class SbpRegisterInsert(sublime_plugin.TextCommand):
 
             sel.clear()
             self.view.sel().add(begin + len(cnt))
-
 
 
 class SbpOpenLineCommand(sublime_plugin.TextCommand):
@@ -237,6 +237,7 @@ class SbpRecenterInView(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.show_at_center(self.view.sel()[0])
 
+
 class SbpRectangleDelete(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         sel = self.view.sel()[0]
@@ -249,7 +250,7 @@ class SbpRectangleDelete(sublime_plugin.TextCommand):
 
         bot = e_row
         right = max(b_col, e_col)
-        
+
         # For each line in the region, replace the contents by what we
         # gathered from the overlay
         current_edit = self.view.begin_edit()
@@ -257,7 +258,7 @@ class SbpRectangleDelete(sublime_plugin.TextCommand):
             r = sublime.Region(self.view.text_point(l, left), self.view.text_point(l, right))
             if not r.empty():
                 self.view.erase(current_edit, r)
-                
+
         self.view.end_edit(edit)
         self.view.run_command("sbp_cancel_mark")
 
@@ -278,7 +279,7 @@ class SbpRectangleInsert(sublime_plugin.TextCommand):
 
         bot = e_row
         right = max(b_col, e_col)
-        
+
         # For each line in the region, replace the contents by what we
         # gathered from the overlay
         current_edit = self.view.begin_edit()
@@ -286,9 +287,7 @@ class SbpRectangleInsert(sublime_plugin.TextCommand):
             r = sublime.Region(self.view.text_point(l, left), self.view.text_point(l, right))
             if not r.empty():
                 self.view.erase(current_edit, r)
-            
+
             self.view.insert(current_edit, self.view.text_point(l, left), content)
         self.view.end_edit(edit)
         self.view.run_command("sbp_cancel_mark")
-        
-
