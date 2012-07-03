@@ -110,6 +110,8 @@
   { "keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
   { "keys": ["ctrl+x", "ctrl+s"], "command": "save"},
 
-  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" }
+  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" },
 
+  // Emacs style tabs
+  { "keys": ["tab"], "command": "reindent"}
 ]
