@@ -21,9 +21,8 @@
   { "keys": ["ctrl+/"], "command": "undo"},
   { "keys": ["ctrl+shift+/"], "command": "redo"},
   { "keys": ["ctrl+_"], "command": "undo"}, // consistency with the Mac
-  { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false} },
-  { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true} },
 
+  
   { "keys": ["alt+shift+,"], "command": "move_to", "args": {"to": "bof", "extend": false}},
   { "keys": ["alt+shift+."], "command": "move_to", "args": {"to": "eof", "extend": false}},
   
@@ -50,6 +49,16 @@
     ]
   },
   { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
+    [
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
+  { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false, "extend": true}, "context": 
+    [
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ] 
+  },
+  { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true, "extend": true}, "context": 
     [
         { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]

@@ -77,8 +77,13 @@ class SbpEmacsMarkDetector(sublime_plugin.EventListener):
 
     def on_selection_modified(self, view):
         mark = view.get_regions("mark")
+
+        print "mark ", mark
+        print "sel ", view.sel()
+
         num = min(len(mark), len(view.sel()))
         regions = []
+
         for i in xrange(num):
             regions.append(view.sel()[i].cover(mark[i]))
 
