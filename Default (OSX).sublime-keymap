@@ -94,6 +94,8 @@
   { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true, "text" : ":"}},
   { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
   { "keys": ["ctrl+x", "b"], "command": "next_view" },
+  { "keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
+
   { "keys": ["ctrl+x", "o"], "command": "sbp_cycle_focus_group"},
 
   {
