@@ -291,3 +291,14 @@ class SbpRectangleInsert(sublime_plugin.TextCommand):
             self.view.insert(current_edit, self.view.text_point(l, left), content)
         self.view.end_edit(edit)
         self.view.run_command("sbp_cancel_mark")
+
+class SbpCycleFocusGroup(sublime_plugin.WindowCommand):
+    def run(self):
+        window = sublime.active_window()
+        num = window.num_groups()
+        active = window.active_group()
+        if (num - 1) == active:
+            next = 0
+        else:
+            next = active + 1
+        window.focus_group(next)
