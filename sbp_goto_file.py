@@ -1,30 +1,56 @@
-import os
-import sublime
+import sublime, sublime_plugin, os
 
-#bootstrapping
-plugin_path = os.path.dirname(__file__)
-if not os.path.exists(os.path.join(plugin_path, 'GotoOpenFile.py')):
+class GotoOpenFileCommand(sublime_plugin.TextCommand):
 
-    # Download the file
-    url = "https://raw.github.com/grundprinzip/sublime-goto-open-file/d86ed0230d56d5f6309c7ab6af1ca81c760edc5c/GotoOpenFile.py"
-    crc = "4b54d7c5ff90066e8bc3b414be2bcf55"
+  def run(self, edit, active_group=False):
+    window = sublime.active_window()
     
-    import urllib
-    from hashlib import md5
+    selector = ViewSelector(window, active_group)
+    window.show_quick_panel(selector.get_items(), selector.select)
 
-    payload = urllib.urlopen(url).read()
-    if md5(payload).hexdigest() != crc:
-        sublime.error_message("Could not install GotoOpenFile.py")
-        raise ImportError('Invalid checksum.')
+class ViewSelector(object):
 
+  def __init__(self, window, active_group):
+    self.window = window
+    if active_group:
+      self.views = window.views_in_group(window.active_group())
+    else:
+      self.views = window.views()
 
-    # Open file to write result
-    fid = open(os.path.join(plugin_path, "GotoOpenFile.py"), "w+")
-    fid.write(payload)
-    fid.close
+  def select(self, index):
+    if index != -1:
+      self.window.focus_view(self.views[index])
 
-    sublime.status_message("Installed GotoOpenFile.py (c)phildopus ")
+  def get_items(self):
+    return [[self.__get_display_name(view), self.__get_path(view)] for view in self.views]
 
-# end bootstrap
+  def __get_display_name(self, view):
+    mod_star = '*' if view.is_dirty() else ''
 
-import GotoOpenFile
+    if view.is_scratch() or not view.file_name():
+      disp_name = view.name() if len(view.name()) > 0 else 'untitled'
+    else:
+      disp_name = os.path.basename(view.file_name())
+    
+    return '%s%s' % (disp_name, mod_star)
+
+  def __get_path(self, view):
+    if view.is_scratch():
+      return ''
+
+    if not view.file_name():
+      return '<unsaved>'
+
+    folders = self.window.folders()
+
+    for folder in folders:
+      if os.path.commonprefix([folder, view.file_name()]) == folder:
+        relpath = os.path.relpath(view.file_name(), folder)
+        
+        if len(folders) > 1:
+          return os.path.join(os.path.basename(folder), relpath)
+
+        return relpath
+
+    return view.file_name()
+    
