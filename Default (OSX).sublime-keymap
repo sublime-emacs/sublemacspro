@@ -94,6 +94,42 @@
   { "keys": ["alt+g", "alt+g"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true, "text" : ":"}},
   { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
   { "keys": ["ctrl+x", "b"], "command": "next_view" },
+  { "keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
+
+  { "keys": ["ctrl+x", "o"], "command": "sbp_cycle_focus_group"},
+
+  {
+    "keys": ["ctrl+x", "2"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 1.0],
+      "rows": [0.0, 0.5, 1.0],
+      "cells": [[0, 0, 1, 1], [0, 1, 1, 2]]
+    }
+  },
+  {
+    "keys": ["ctrl+x", "1"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 1.0],
+      "rows": [0.0, 1.0],
+      "cells": [[0, 0, 1, 1]]
+    }
+  },
+  {
+    "keys": ["ctrl+x", "3"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 0.5, 1.0],
+      "rows": [0.0, 1.0],
+      "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
+    }
+  },
+
+  // { "keys": ["ctrl+1"], "command": "focus_group", "args": { "group": 0 } },
 
   // Completion
   { "keys": ["alt+/"], "command": "auto_complete" },
