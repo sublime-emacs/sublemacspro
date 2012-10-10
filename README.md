@@ -40,3 +40,6 @@ Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 
 ### Authors and Contributors
 2012 Martin Grund (@grundprinzip), Brian M. Clapper (@bmc)
+
+* @dustym - focus groups
+* @phildopus - for goto-open-file
