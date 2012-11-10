@@ -174,8 +174,5 @@
   { "keys": ["ctrl+x", "ctrl+s"], "command": "save"},
 
   // Other Emacs features
-  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" },
-
-  // Emacs style tabs
-  { "keys": ["tab"], "command": "reindent"}
+  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" }
 ]
