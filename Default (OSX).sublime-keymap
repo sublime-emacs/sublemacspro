@@ -5,6 +5,11 @@
   // Emacs style
   { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
   { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "eol", "extend": false} },
+  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context":
+    [
+      { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
   { "keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false} },
   { "keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true} },
   { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
