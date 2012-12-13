@@ -181,6 +181,11 @@
   // Other Emacs features
   { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" },
 
-  // Emacs style tabs
-  { "keys": ["tab"], "command": "reindent"}
+    // Emacs style tabs
+  { "keys": ["tab"], "command": "reindent",  "context": [
+    { "key": "panel_has_focus",  "operand": false },
+    { "key": "auto_complete_visible", "operand": false },
+    { "key": "has_next_field", "operand": false },
+    { "key": "overlay_visible", "operand": false }]
+  }
 ]
