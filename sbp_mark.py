@@ -8,10 +8,12 @@ class SbpCancelMarkCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **args):
         m = self.view.get_regions("mark")
+        # Get current selection:
+        currentSel = self.view.sel()[0]
         if m:
             self.view.erase_regions("mark")
             self.view.sel().clear()
-            self.view.sel().add(sublime.Region(m[0].end(), m[0].end()))
+            self.view.sel().add(sublime.Region(currentSel.b, currentSel.b))
 
 
 class SbpSetMarkCommand(sublime_plugin.TextCommand):
