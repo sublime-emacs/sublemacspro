@@ -55,7 +55,17 @@
         { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
+  { "keys": ["right"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context": 
+    [
+        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
   { "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
+    [
+      { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
+    ]
+  },
+  { "keys": ["left"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
     [
       { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
