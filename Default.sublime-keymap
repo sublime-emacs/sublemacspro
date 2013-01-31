@@ -102,11 +102,6 @@
         { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
-  { "keys": ["ctrl+space"], "command": "sbp_cancel_mark", "context" :
-    [
-        { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
-    ]
-  },
 
   // Search and Replace
   { "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":true} },
@@ -180,6 +175,11 @@
   { "keys": ["ctrl+g"], "command": "hide_panel", "context":
     [
       { "key": "panel_visible", "operator": "equal", "operand": true }
+    ]
+  },
+  { "keys": ["ctrl+g"], "command": "sbp_cancel_mark", "context":
+    [
+      { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
 
