@@ -8,6 +8,7 @@ class GotoOpenFileCommand(sublime_plugin.TextCommand):
     selector = ViewSelector(window, active_group)
     window.show_quick_panel(selector.get_items(), selector.select)
 
+
 class ViewSelector(object):
 
   def __init__(self, window, active_group):

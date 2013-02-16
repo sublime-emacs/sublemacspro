@@ -140,7 +140,7 @@ class SbpYankCommand(sublime_plugin.TextCommand):
         if len(regions) > 1 and len(regions) == len(lines):
             # insert one line from the top of the kill ring at each
             # corresponding selection
-            for i in xrange(len(regions)):
+            for i in range(len(regions)):
                 s = regions[i]
                 line = lines[i]
                 num = self.view.insert(edit, s.begin(), line)

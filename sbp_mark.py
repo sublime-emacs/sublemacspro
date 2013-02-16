@@ -42,10 +42,10 @@ class SbpSelectToMarkCommand(sublime_plugin.TextCommand):
         num = min(len(mark), len(self.view.sel()))
 
         regions = []
-        for i in xrange(num):
+        for i in range(num):
             regions.append(self.view.sel()[i].cover(mark[i]))
 
-        for i in xrange(num, len(self.view.sel())):
+        for i in range(num, len(self.view.sel())):
             regions.append(self.view.sel()[i])
 
         self.view.sel().clear()
@@ -80,10 +80,10 @@ class SbpEmacsMarkDetector(sublime_plugin.EventListener):
         num = min(len(mark), len(view.sel()))
         regions = []
 
-        for i in xrange(num):
+        for i in range(num):
             regions.append(view.sel()[i].cover(mark[i]))
 
-        for i in xrange(num, len(view.sel())):
+        for i in range(num, len(view.sel())):
             regions.append(view.sel()[i])
 
         view.sel().clear()
