@@ -1,7 +1,13 @@
 import functools as fu
 import sublime
 import sublime_plugin
-import paragraph
+
+# Sublime 3 compatibility
+try:
+    import paragraph
+except ImportError:
+    import Default.paragraph as paragraph
+
 
 
 class SbpRegisterStore:
