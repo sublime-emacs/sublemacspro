@@ -27,7 +27,8 @@ class SbpUtil:
     @classmethod
     def atEOF(cls, view, point):
         nextChar = view.substr(point)
-        return nextChar == ""
+        return ord(nextChar) == 0
+        #return nextChar == ""
 
     @classmethod
     def add_to_kill_ring(cls, view):
@@ -107,10 +108,17 @@ class SbpKillRing:
 sbp_kill_ring = SbpKillRing()
 
 
+class SbpInsertTextCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit, text, begin, end):
+        region = sublime.Region(long(begin), long(end))
+        num = self.view.insert(edit, region.begin(), text)
+        self.view.erase(edit, sublime.Region(region.begin() + num,
+                region.end() + num))
+
 class SbpYankChoiceCommand(sublime_plugin.TextCommand):
 
-    def insert(self, edit, idx):
-
+    def insert(self, idx):
         if idx == -1:
             return
 
@@ -119,14 +127,13 @@ class SbpYankChoiceCommand(sublime_plugin.TextCommand):
 
         text = sbp_kill_ring.get(idx)
         for s in regions:
-            num = self.view.insert(edit, s.begin(), text)
-            self.view.erase(edit, sublime.Region(s.begin() + num,
-                s.end() + num))
+            self.view.run_command("sbp_insert_text", {"text":text, "begin":s.a, "end":s.b})
 
     def run(self, edit):
         names = [sbp_kill_ring.get(idx) for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
+        self.edit = edit
         if len(names) > 0:
-            self.view.window().show_quick_panel(names, functools.partial(self.insert, edit))
+            self.view.window().show_quick_panel(names, self.insert)
 
 
 class SbpYankCommand(sublime_plugin.TextCommand):
