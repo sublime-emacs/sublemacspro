@@ -27,7 +27,7 @@ class SbpUtil:
     @classmethod
     def atEOF(cls, view, point):
         nextChar = view.substr(point)
-        return ord(nextChar) == 0
+        return nextChar == ""
 
     @classmethod
     def add_to_kill_ring(cls, view):
@@ -59,7 +59,7 @@ class SbpKillRing:
         However, we do need some kind of sanitation to make sure
         we don't push too many white spaces."""
 
-        sanitized = string.strip(text)
+        sanitized = text.strip()
         if len(sanitized) == 0:
             return
 
@@ -266,7 +266,7 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
         # if we are at the end of the file, we can't kill.
         s = self.view.sel()[0]
         charAfterPoint = self.view.substr(s.end())
-        if ord(charAfterPoint) == 0:
+        if charAfterPoint == "":
             # EOF
             return False
 
