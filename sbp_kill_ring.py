@@ -27,7 +27,7 @@ class SbpUtil:
     @classmethod
     def atEOF(cls, view, point):
         nextChar = view.substr(point)
-        return ord(nextChar) == 0
+        return nextChar == '\0' or nextChar == ''
         #return nextChar == ""
 
     @classmethod
@@ -277,7 +277,7 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
         # if we are at the end of the file, we can't kill.
         s = self.view.sel()[0]
         charAfterPoint = self.view.substr(s.end())
-        if charAfterPoint == "":
+        if charAfterPoint == '\0' or charAfterPoint == '':
             # EOF
             return False
 
