@@ -185,7 +185,7 @@
     ]
   },
 
-  { "keys": ["alt+;"], "command": "toggle_comment" },
+  { "keys": ["alt+;"], "command": "sbp_toggle_comment" },
 
   // Rectangles
   { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },

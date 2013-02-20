@@ -2,19 +2,23 @@ import sublime
 import sublime_plugin
 
 
+class SbpToggleCommentCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        self.view.run_command("toggle_comment")
+        self.view.run_command("sbp_cancel_mark")
+
+
 # Remove any existing marks
 #
 class SbpCancelMarkCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **args):
         m = self.view.get_regions("mark")
-        # Get current selection:
-        currentSel = self.view.sel()[0]
+        cursor = self.view.sel()[0]
         if m:
             self.view.erase_regions("mark")
             self.view.sel().clear()
-            self.view.sel().add(sublime.Region(currentSel.b, currentSel.b))
-            
+            self.view.sel().add(sublime.Region(cursor.end(), cursor.end()))
 
 
 class SbpSetMarkCommand(sublime_plugin.TextCommand):
