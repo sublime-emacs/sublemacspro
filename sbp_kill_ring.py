@@ -111,7 +111,11 @@ sbp_kill_ring = SbpKillRing()
 class SbpInsertTextCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, text, begin, end):
-        region = sublime.Region(long(begin), long(end))
+        try:
+            region = sublime.Region(long(begin), long(end))
+        except NameError:
+            region = sublime.Region(int(begin), int(end))
+            
         num = self.view.insert(edit, region.begin(), text)
         self.view.erase(edit, sublime.Region(region.begin() + num,
                 region.end() + num))
