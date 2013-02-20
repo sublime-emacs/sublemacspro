@@ -45,3 +45,10 @@ Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 * @phildopus - for goto-open-file
 * @aflc - toggle comment improvements
 * @jinschoi - ST3 bugfix
+
+
+[ot]: https://github.com/stiang/EmacsifySublimeText
+[ot2]: https://github.com/bmc/ST2EmacsMiscellanea
+[ot3]: https://github.com/stiang/EmacsKillRing
+[subl]: http://www.sublimetext.com/docs/2/api_reference.html
+[bmc]: https://github.com/bmc/
