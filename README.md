@@ -43,3 +43,5 @@ Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 
 * @dustym - focus groups
 * @phildopus - for goto-open-file
+* @aflc - toggle comment improvements
+* @jinschoi - ST3 bugfix
