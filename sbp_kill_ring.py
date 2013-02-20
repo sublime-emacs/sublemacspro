@@ -85,16 +85,16 @@ class SbpKillRing:
         else:
             compare_points = end_points
 
-        if compare_points == self.kill_points:
-            # Selection hasn't moved since the last kill, append/prepend the
-            # text to the current entry
-            if forward:
-                self.buffer[self.head] = self.buffer[self.head] + text
-            else:
-                self.buffer[self.head] = text + self.buffer[self.head]
-        else:
-            # Create a new entry in the kill ring for this text
-            self.push(text)
+        #if compare_points == self.kill_points:
+        #    # Selection hasn't moved since the last kill, append/prepend the
+        #    # text to the current entry
+        #    if forward:
+        #        self.buffer[self.head] = self.buffer[self.head] + text
+        #    else:
+        #        self.buffer[self.head] = text + self.buffer[self.head]
+        #else:
+        #    # Create a new entry in the kill ring for this text
+        self.push(text)
 
         self.kill_points = begin_points
         self.kill_id = view_id
