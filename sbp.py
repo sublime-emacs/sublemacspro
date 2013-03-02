@@ -1,6 +1,7 @@
 import functools as fu
 import sublime
 import sublime_plugin
+import helper
 
 # Sublime 3 compatibility
 try:
@@ -230,18 +231,63 @@ class SbpOpenLineCommand(sublime_plugin.TextCommand):
         self.view.insert(edit, point, '\n')
         self.view.run_command('move', {'by': 'characters', 'forward': False})
 
+################################################################################
+# Centering View
+################################################################################
+
+
+
+# All Scroll Types
+SCROLL_TYPES = helper.enum(TOP=1, CENTER=0, BOTTOM=2)
 
 class SbpRecenterInView(sublime_plugin.TextCommand):
     '''
     Reposition the view so that the line containing the cursor is at the
-    center of the viewport, if possible. Unlike the corresponding Emacs
-    command, recenter-top-bottom, this command does not cycle through
-    scrolling positions. It always repositions the view the same way.
+    center of the viewport, if possible. Like the corresponding Emacs
+    command, recenter-top-bottom, this command cycles through
+    scrolling positions.
 
     This command is frequently bound to Ctrl-l.
     '''
+
+    last_sel = None
+    last_scroll_type = None
+    last_visible_region = None
+
+
+    def rowdiff(self, start, end):
+        r1,c1 = self.view.rowcol(start)
+        r2,c2 = self.view.rowcol(end)
+        return r2 - r1
+
+    
     def run(self, edit):
-        self.view.show_at_center(self.view.sel()[0])
+        start = self.view.sel()[0]
+        print start == SbpRecenterInView.last_sel
+        if start != SbpRecenterInView.last_sel:
+            SbpRecenterInView.last_visible_region = None
+            SbpRecenterInView.last_scroll_type = SCROLL_TYPES.CENTER
+            SbpRecenterInView.last_sel = start
+            self.view.show_at_center(SbpRecenterInView.last_sel)
+            return
+        else:
+            SbpRecenterInView.last_scroll_type = (SbpRecenterInView.last_scroll_type + 1) % 3
+
+        SbpRecenterInView.last_sel = start
+        if SbpRecenterInView.last_visible_region == None:
+            SbpRecenterInView.last_visible_region = self.view.visible_region()
+
+        # Now Scroll to position
+        if SbpRecenterInView.last_scroll_type == SCROLL_TYPES.CENTER:
+            self.view.show_at_center(SbpRecenterInView.last_sel)
+        elif SbpRecenterInView.last_scroll_type == SCROLL_TYPES.TOP:
+            row,col = self.view.rowcol(SbpRecenterInView.last_visible_region.end())
+            diff = self.rowdiff(SbpRecenterInView.last_sel.begin(), SbpRecenterInView.last_visible_region.end())
+            self.view.show(self.view.text_point(row + diff-2, 0), False)
+        elif SbpRecenterInView.last_scroll_type == SCROLL_TYPES.BOTTOM:
+            row, col = self.view.rowcol(SbpRecenterInView.last_visible_region.begin())
+            diff = self.rowdiff(SbpRecenterInView.last_visible_region.begin(), SbpRecenterInView.last_sel.begin())
+            self.view.show(self.view.text_point(row - diff+2, 0), False)            
 
 
 class SbpRectangleDelete(sublime_plugin.TextCommand):
