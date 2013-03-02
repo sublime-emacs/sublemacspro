@@ -240,7 +240,7 @@ class SbpOpenLineCommand(sublime_plugin.TextCommand):
 
 
 # All Scroll Types
-SCROLL_TYPES = helper.enum(TOP=1, CENTER=0, BOTTOM=2)
+SCROLL_TYPES = enum(TOP=1, CENTER=0, BOTTOM=2)
 
 class SbpRecenterInView(sublime_plugin.TextCommand):
     '''
