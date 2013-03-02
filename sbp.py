@@ -263,7 +263,6 @@ class SbpRecenterInView(sublime_plugin.TextCommand):
     
     def run(self, edit):
         start = self.view.sel()[0]
-        print start == SbpRecenterInView.last_sel
         if start != SbpRecenterInView.last_sel:
             SbpRecenterInView.last_visible_region = None
             SbpRecenterInView.last_scroll_type = SCROLL_TYPES.CENTER
