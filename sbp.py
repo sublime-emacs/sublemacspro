@@ -1,7 +1,9 @@
 import functools as fu
 import sublime
 import sublime_plugin
-import helper
+
+def enum(**enums):
+    return type('Enum', (), enums)
 
 # Sublime 3 compatibility
 try:
@@ -281,11 +283,11 @@ class SbpRecenterInView(sublime_plugin.TextCommand):
             self.view.show_at_center(SbpRecenterInView.last_sel)
         elif SbpRecenterInView.last_scroll_type == SCROLL_TYPES.TOP:
             row,col = self.view.rowcol(SbpRecenterInView.last_visible_region.end())
-            diff = self.rowdiff(SbpRecenterInView.last_sel.begin(), SbpRecenterInView.last_visible_region.end())
+            diff = self.rowdiff(SbpRecenterInView.last_visible_region.begin(), SbpRecenterInView.last_sel.begin())
             self.view.show(self.view.text_point(row + diff-2, 0), False)
         elif SbpRecenterInView.last_scroll_type == SCROLL_TYPES.BOTTOM:
             row, col = self.view.rowcol(SbpRecenterInView.last_visible_region.begin())
-            diff = self.rowdiff(SbpRecenterInView.last_visible_region.begin(), SbpRecenterInView.last_sel.begin())
+            diff = self.rowdiff(SbpRecenterInView.last_sel.begin(), SbpRecenterInView.last_visible_region.end())
             self.view.show(self.view.text_point(row - diff+2, 0), False)            
 
 
