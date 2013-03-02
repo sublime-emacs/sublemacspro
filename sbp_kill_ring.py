@@ -27,7 +27,7 @@ class SbpUtil:
     @classmethod
     def atEOF(cls, view, point):
         nextChar = view.substr(point)
-        return ord(nextChar) == 0
+        return nextChar == '\0' or nextChar == ''
         #return nextChar == ""
 
     @classmethod
@@ -85,16 +85,16 @@ class SbpKillRing:
         else:
             compare_points = end_points
 
-        if compare_points == self.kill_points:
-            # Selection hasn't moved since the last kill, append/prepend the
-            # text to the current entry
-            if forward:
-                self.buffer[self.head] = self.buffer[self.head] + text
-            else:
-                self.buffer[self.head] = text + self.buffer[self.head]
-        else:
-            # Create a new entry in the kill ring for this text
-            self.push(text)
+        #if compare_points == self.kill_points:
+        #    # Selection hasn't moved since the last kill, append/prepend the
+        #    # text to the current entry
+        #    if forward:
+        #        self.buffer[self.head] = self.buffer[self.head] + text
+        #    else:
+        #        self.buffer[self.head] = text + self.buffer[self.head]
+        #else:
+        #    # Create a new entry in the kill ring for this text
+        self.push(text)
 
         self.kill_points = begin_points
         self.kill_id = view_id
@@ -111,7 +111,11 @@ sbp_kill_ring = SbpKillRing()
 class SbpInsertTextCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, text, begin, end):
-        region = sublime.Region(long(begin), long(end))
+        try:
+            region = sublime.Region(long(begin), long(end))
+        except NameError:
+            region = sublime.Region(int(begin), int(end))
+            
         num = self.view.insert(edit, region.begin(), text)
         self.view.erase(edit, sublime.Region(region.begin() + num,
                 region.end() + num))
@@ -273,7 +277,7 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
         # if we are at the end of the file, we can't kill.
         s = self.view.sel()[0]
         charAfterPoint = self.view.substr(s.end())
-        if charAfterPoint == "":
+        if charAfterPoint == '\0' or charAfterPoint == '':
             # EOF
             return False
 

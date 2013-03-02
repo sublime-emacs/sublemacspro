@@ -10,6 +10,10 @@ So I wrote sublemacspro bringing Emacs keybindings and sugar to Sublime Text 2. 
 
 To install SublemacsPro you have to install [Package Control](http://wbond.net/sublime_packages/package_control) as an automatic package manager for Sublime Text 2. Now you can easily install Sublemacs Pro and your installation will never be outdated. When you installed Package Control, hit ``S-Shift P`` to open up the command palette and type ``install``. Now select "Package Control: Install Package". This will load all packages from the remote repository and you can select ``sublemacspro`` from the drop-down list.
 
+## Sublime Text 3 Support
+
+Currently, we are working on Sublime Text 3 support. Most of the features should work and some bugs with regard to Python 3 are already fixed. So feel free to try the Package Control Beta for ST3 and install sublemacspro. If there are any issues feel free to report them.
+
 ## Features
 
 The following features are supported and merged [from][ot3] [other][ot] [approaches][ot2]
@@ -43,3 +47,12 @@ Sublime Text 2 and make this my fast and beautiful Emacs replacement.
 
 * @dustym - focus groups
 * @phildopus - for goto-open-file
+* @aflc - toggle comment improvements
+* @jinschoi - ST3 bugfix
+
+
+[ot]: https://github.com/stiang/EmacsifySublimeText
+[ot2]: https://github.com/bmc/ST2EmacsMiscellanea
+[ot3]: https://github.com/stiang/EmacsKillRing
+[subl]: http://www.sublimetext.com/docs/2/api_reference.html
+[bmc]: https://github.com/bmc/
