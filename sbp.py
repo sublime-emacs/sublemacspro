@@ -306,7 +306,7 @@ class SbpRectangleDelete(sublime_plugin.TextCommand):
 
         # For each line in the region, replace the contents by what we
         # gathered from the overlay
-        current_edit = self.view.begin_edit()
+        current_edit = edit
         for l in range(top, bot + 1):
             r = sublime.Region(self.view.text_point(l, left), self.view.text_point(l, right))
             if not r.empty():
@@ -316,12 +316,9 @@ class SbpRectangleDelete(sublime_plugin.TextCommand):
         self.view.run_command("sbp_cancel_mark")
 
 
-class SbpRectangleInsert(sublime_plugin.TextCommand):
-    def run(self, edit, **args):
-        self.view.window().show_input_panel("Content:", "", fu.partial(self.replace, edit), None, None)
+class SbpRectangleInsertHandler(sublime_plugin.TextCommand):
 
-    def replace(self, edit, content):
-
+    def run(self, edit, content):
         sel = self.view.sel()[0]
         b_row, b_col = self.view.rowcol(sel.begin())
         e_row, e_col = self.view.rowcol(sel.end())
@@ -335,7 +332,7 @@ class SbpRectangleInsert(sublime_plugin.TextCommand):
 
         # For each line in the region, replace the contents by what we
         # gathered from the overlay
-        current_edit = self.view.begin_edit()
+        current_edit = edit#self.view.begin_edit()
         for l in range(top, bot + 1):
             r = sublime.Region(self.view.text_point(l, left), self.view.text_point(l, right))
             if not r.empty():
@@ -344,6 +341,16 @@ class SbpRectangleInsert(sublime_plugin.TextCommand):
             self.view.insert(current_edit, self.view.text_point(l, left), content)
         self.view.end_edit(edit)
         self.view.run_command("sbp_cancel_mark")
+
+
+class SbpRectangleInsert(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        self.view.window().show_input_panel("Content:", "", self.replace, None, None)
+
+    def replace(self, content):
+        self.view.run_command("sbp_rectangle_insert_handler", {"content": content})
+
+        
 
 class SbpCycleFocusGroup(sublime_plugin.WindowCommand):
     def run(self):
