@@ -41,8 +41,6 @@ class SbpMoveToParagraphCommand(sublime_plugin.TextCommand):
         if point > self.view.size():
             point = self.view.size()
 
-        print(point)
-
         self.view.sel().add(sublime.Region(point, point))
         self.view.show(self.view.sel()[0].begin())
 
