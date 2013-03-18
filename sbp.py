@@ -2,6 +2,8 @@ import functools as fu
 import sublime
 import sublime_plugin
 
+import paragraph
+
 def enum(**enums):
     return type('Enum', (), enums)
 
@@ -12,6 +14,21 @@ except ImportError:
     import Default.paragraph as paragraph
 
 
+class SbpMoveToParagraphCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit, forward):
+
+        # Clear all selections
+        s = self.view.sel()[0]
+        if not forward:
+            point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
+        else:
+            point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
+
+        self.view.sel().clear()
+        #Clear selections
+        self.view.sel().add(sublime.Region(point, point))
+        self.view.show(self.view.sel()[0].begin())
 
 class SbpRegisterStore:
     """

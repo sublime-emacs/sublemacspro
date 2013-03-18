@@ -53,6 +53,7 @@ and the base code of the new beta of [Sublime Text 2][subl].
    * ``alt+z`` zap-to-char, delete from current point until next occurrence of character
    * ``ctrl+x, ctrl+b`` will present a list of open buffers
    * ``ctrl+x, (`` and ``ctrl+x, )`` will toggle macro recording and execution is done by ``ctrl+x, e``
+   * ``ctrl+alt+[`` and ``ctrl+alt+]`` for paragraph navigation
    * And many more, most likely a key binding that you expect from Emacs will
      work as well in sublemacs
 
