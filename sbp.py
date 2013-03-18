@@ -21,12 +21,25 @@ class SbpMoveToParagraphCommand(sublime_plugin.TextCommand):
         # Clear all selections
         s = self.view.sel()[0]
         if not forward:
+            if s.begin() == 0:
+                return
             point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
         else:
+            if s.end() == self.view.size():
+                return
             point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
 
         self.view.sel().clear()
         #Clear selections
+
+        if point < 0:
+            point = 0
+
+        if point > self.view.size():
+            point = self.view.size()
+
+        print(point)
+
         self.view.sel().add(sublime.Region(point, point))
         self.view.show(self.view.sel()[0].begin())
 
