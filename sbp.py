@@ -362,3 +362,45 @@ class SbpCycleFocusGroup(sublime_plugin.WindowCommand):
         else:
             next = active + 1
         window.focus_group(next)
+
+
+
+class SbpZapToChar(sublime_plugin.TextCommand):
+
+    panel = None
+
+    def run(self, edit, **args):
+        self.edit = edit
+        self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
+
+    def on_change(self, content):
+        """Search forward from the current selection to the next ocurence
+        of char"""
+
+        if self.panel == None:
+            return
+
+        self.panel.window().run_command("hide_panel")
+
+        sel = self.view.sel()
+        if (sel is None) or len(sel) != 1:
+            return
+
+        sel = sel[0]
+
+        # Convert to point
+        new_sel = sel.begin()
+        found = False
+        while not found and new_sel < self.view.size():
+            data = self.view.substr(new_sel)
+            if data == content:
+                found = True
+                break
+            new_sel += 1
+        
+        # Zap to char
+        self.view.erase(self.edit, sublime.Region(sel.begin(), new_sel+1))
+        self.view.run_command("sbp_cancel_mark")
+
+    def zap(self, content):
+       pass

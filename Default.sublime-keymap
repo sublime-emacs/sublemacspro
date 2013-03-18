@@ -47,6 +47,7 @@
   { "keys": ["ctrl+x", "u"], "command": "undo" },
   { "keys": ["ctrl+shift+/"], "command": "redo"},
   { "keys": ["ctrl+_"], "command": "undo"}, // consistency with the Mac
+  { "keys": ["alt+z"], "command": "sbp_zap_to_char"},
 
   
   { "keys": ["alt+shift+,"], "command": "move_to", "args": {"to": "bof", "extend": false}},
