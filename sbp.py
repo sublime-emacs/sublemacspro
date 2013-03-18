@@ -2,7 +2,10 @@ import functools as fu
 import sublime
 import sublime_plugin
 
-import paragraph
+try:
+    import paragraph
+except ImportError:
+    import Default.paragraph as paragraph
 
 def enum(**enums):
     return type('Enum', (), enums)
