@@ -365,6 +365,12 @@ class SbpCycleFocusGroup(sublime_plugin.WindowCommand):
 
 
 
+class SbpZapToCharEdit(sublime_plugin.TextCommand):
+
+    def run(self, edit, begin, end):
+        self.view.erase(edit, sublime.Region(int(begin), int(end)))
+
+
 class SbpZapToChar(sublime_plugin.TextCommand):
 
     panel = None
@@ -399,7 +405,7 @@ class SbpZapToChar(sublime_plugin.TextCommand):
             new_sel += 1
         
         # Zap to char
-        self.view.erase(self.edit, sublime.Region(sel.begin(), new_sel+1))
+        self.view.run_command("sbp_zap_to_char_edit", {"begin": sel.begin(), "end": new_sel + 1})
         self.view.run_command("sbp_cancel_mark")
 
     def zap(self, content):
