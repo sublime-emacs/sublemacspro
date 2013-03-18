@@ -1,5 +1,6 @@
 import sublime, sublime_plugin, os
 
+# This code is inspired and modified from https://github.com/phildopus/sublime-goto-open-file/blob/master/GotoOpenFile.py
 class GotoOpenFileCommand(sublime_plugin.TextCommand):
 
   def run(self, edit, active_group=False):
@@ -20,7 +21,7 @@ class ViewSelector(object):
 
   def select(self, index):
     if index != -1:
-      self.window.focus_view(self.views[index])
+      sublime.active_window().focus_view(self.views[index])
 
   def get_items(self):
     return [[self.__get_display_name(view), self.__get_path(view)] for view in self.views]

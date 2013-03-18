@@ -51,6 +51,7 @@ and the base code of the new beta of [Sublime Text 2][subl].
    * ``ctrl+g`` will try to exit any kind of overlays, exit snippet mode etc
    * ``alt+/`` is used for tab completion since ``tab`` is bound to reindent
    * ``alt+z`` zap-to-char, delete from current point until next occurrence of character
+   * ``ctrl+x, ctrl+b`` will present a list of open buffers
    * And many more, most likely a key binding that you expect from Emacs will
      work as well in sublemacs
 
