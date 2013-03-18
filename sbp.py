@@ -405,8 +405,11 @@ class SbpZapToChar(sublime_plugin.TextCommand):
             new_sel += 1
         
         # Zap to char
-        self.view.run_command("sbp_zap_to_char_edit", {"begin": sel.begin(), "end": new_sel + 1})
-        self.view.run_command("sbp_cancel_mark")
+        if found:
+            self.view.run_command("sbp_zap_to_char_edit", {"begin": sel.begin(), "end": new_sel + 1})
+            self.view.run_command("sbp_cancel_mark")
+        else:
+            sublime.status_message("Character %s not found" % content)
 
     def zap(self, content):
        pass
