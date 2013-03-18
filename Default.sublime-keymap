@@ -262,5 +262,10 @@
     { "key": "auto_complete_visible", "operand": false },
     { "key": "has_next_field", "operand": false },
     { "key": "overlay_visible", "operand": false }]
-  }
+  },
+
+  // Macro recording
+  { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
+  { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
+  { "keys": ["ctrl+x", "e"], "command": "run_macro" }
 ]
