@@ -271,5 +271,9 @@
   // Macro recording
   { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
   { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
-  { "keys": ["ctrl+x", "e"], "command": "run_macro" }
+  { "keys": ["ctrl+x", "e"], "command": "run_macro" },
+  { "keys": ["home"], "command": "move_to", "args": {"to": "bof"} },
+  { "keys": ["end"], "command": "move_to", "args": {"to": "eof"} },
+  { "keys": ["shift+end"], "command": "move_to", "args": {"to": "eof", "extend": true} },
+  { "keys": ["shift+home"], "command": "move_to", "args": {"to": "bof", "extend": true } }
 ]
