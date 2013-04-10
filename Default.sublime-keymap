@@ -50,7 +50,7 @@
   { "keys": ["ctrl+/"], "command": "undo"},
   { "keys": ["ctrl+x", "u"], "command": "undo" },
   { "keys": ["ctrl+shift+/"], "command": "redo"},
-  { "keys": ["ctrl+_"], "command": "undo"}, // consistency with the Mac
+  { "keys": ["ctrl+shift+-"], "command": "undo"}, // consistency with the Mac
   { "keys": ["alt+z"], "command": "sbp_zap_to_char"},
 
   
