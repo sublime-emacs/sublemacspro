@@ -17,6 +17,38 @@ except ImportError:
     import Default.paragraph as paragraph
 
 
+class SbpSearchFocus:
+
+    def __init__(self):
+        self.value = False
+        self.vid = -1
+
+    def set(self, val, id):
+        self.vid = id
+        self.value = val
+
+    def get(self):
+        return self.vid, self.value
+
+sbp_has_open_search = SbpSearchFocus()
+
+# The goal of this event listener is to be able to close the search panel
+# once we loose focus of the orignal search query
+class HideSearchIfFocusLost(sublime_plugin.EventListener):
+
+    def on_activated(self, view):
+        pair = sbp_has_open_search.get()
+        if pair[0] == view.id() and pair[1]:
+            sbp_has_open_search.set(False, -1)
+            view.window().run_command("hide_panel")
+
+    def on_query_context(self, view, key, operator, operand, match_all):
+        if key == "sbp_search_focus_check" and operand == True:
+            self.status = True
+            sbp_has_open_search.set(True, view.id())
+            return True
+        return None
+    
 class SbpMoveToParagraphCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, forward):

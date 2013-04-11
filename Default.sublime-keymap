@@ -70,7 +70,10 @@
   { "keys": ["alt+y"], "command": "sbp_yank_choice" },
   { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
 
-  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
+  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark", "context": [
+      { "key": "panel_visible", "operator": "equal", "operand": false }
+    ]
+  },
   { "keys": ["super+c"], "command": "sbp_kill_ring_save" },
   { "keys": ["alt+w"], "command": "sbp_kill_ring_save" },
   { "keys": ["ctrl+g"], "command": "sbp_cancel_mark" },
@@ -129,7 +132,9 @@
   },
 
   // Search and Replace
-  { "keys": ["ctrl+s"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false} },
+  { "keys": ["ctrl+s"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false}, "context": [
+    { "key": "sbp_search_focus_check", "operator": "equal", "operand": true }
+  ] },
   { "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":true} },
   { "keys": ["ctrl+s"], "command": "find_next",  "context": [
       { "key": "panel_visible", "operator": "equal", "operand": true }
