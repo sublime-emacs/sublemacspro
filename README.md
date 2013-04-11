@@ -54,6 +54,10 @@ and the base code of the new beta of [Sublime Text 2][subl].
    * ``ctrl+x, ctrl+b`` will present a list of open buffers
    * ``ctrl+x, (`` and ``ctrl+x, )`` will toggle macro recording and execution is done by ``ctrl+x, e``
    * ``ctrl+alt+[`` and ``ctrl+alt+]`` for paragraph navigation
+   * ``ctrl+x r SPC r`` for point-to-register
+   * ``ctrl+x r j r`` for jump to point in register
+   * ``ctrl+x r s r`` for text-to-register
+   * ``ctrl+x r i r`` for insert text from register
    * And many more, most likely a key binding that you expect from Emacs will
      work as well in sublemacs
 
