@@ -194,6 +194,7 @@
   // Indentation  
   { "keys": ["ctrl+c", ">"], "command": "indent" },
   { "keys": ["ctrl+c", "<"], "command": "unindent" },
+  { "keys": ["alt+i"], "command": "insert", "args": {"characters": "\t" } },
   
   // Completion
   { "keys": ["alt+/"], "command": "auto_complete" },
