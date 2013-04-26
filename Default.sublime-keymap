@@ -284,5 +284,9 @@
   { "keys": ["home"], "command": "move_to", "args": {"to": "bof"} },
   { "keys": ["end"], "command": "move_to", "args": {"to": "eof"} },
   { "keys": ["shift+end"], "command": "move_to", "args": {"to": "eof", "extend": true} },
-  { "keys": ["shift+home"], "command": "move_to", "args": {"to": "bof", "extend": true } }
+  { "keys": ["shift+home"], "command": "move_to", "args": {"to": "bof", "extend": true } },
+
+  // Capitalization commands
+  { "keys": ["ctrl+x", "ctrl+u"], "command": "upper_case" },
+	{ "keys": ["ctrl+x", "ctrl+l"], "command": "lower_case" }
 ]
