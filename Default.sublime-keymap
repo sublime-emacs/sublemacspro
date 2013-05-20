@@ -237,7 +237,7 @@
       { "key": "auto_complete_visible", "operator": "equal", "operand": true }
     ]
   },
-  { "keys": ["ctrl+g"], "command": "hide_panel", "context":
+  { "keys": ["ctrl+g"], "command": "hide_panel", "args": {"cancel": true}, "context":
     [
       { "key": "panel_visible", "operator": "equal", "operand": true }
     ]
