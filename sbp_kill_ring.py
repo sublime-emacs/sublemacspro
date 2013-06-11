@@ -15,6 +15,11 @@ import sublime
 import functools
 import string
 
+# ST3 handling
+try:
+    import Default.delete_word as delete_word
+except ImportError:
+    import delete_word
 
 class SbpUtil:
     # FIXME: Move to someplace common.
@@ -292,3 +297,33 @@ class SbpKillLineCommand(sublime_plugin.TextCommand):
         self.view.sel().add(expanded)
         SbpUtil.add_to_kill_ring(self.view)
         self.view.erase(edit, expanded)
+
+
+
+class SbpDeleteWord(delete_word.DeleteWordCommand):
+    def run(self, edit, forward = True, sub_words = False):
+        if forward:
+            classes = sublime.CLASS_WORD_END | sublime.CLASS_PUNCTUATION_END | sublime.CLASS_LINE_START
+            if sub_words:
+                classes |= sublime.CLASS_SUB_WORD_END
+        else:
+            classes = sublime.CLASS_WORD_START | sublime.CLASS_PUNCTUATION_START | sublime.CLASS_LINE_END
+            if sub_words:
+                classes |= sublime.CLASS_SUB_WORD_START
+
+        new_sels = []
+        for s in reversed(self.view.sel()):
+            if s.empty():
+                new_sels.append(self.expand_word(self.view, s.b, classes, forward))
+
+        sz = self.view.size()
+        for s in new_sels:
+            self.view.sel().add(sublime.Region(delete_word.clamp(0, s.a, sz),
+                delete_word.clamp(0, s.b, sz)))
+
+        SbpUtil.add_to_kill_ring(self.view)
+
+        if forward:
+            self.view.run_command('right_delete')
+        else:
+            self.view.run_command('left_delete')
