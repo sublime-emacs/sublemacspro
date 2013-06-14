@@ -13,13 +13,13 @@
 
   // Emacs Move to hard beol eol for ctrl shortcuts
   { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false}},
-  { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false}, "context":
+  { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": true}, "context":
     [
       { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
   { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false}},
-  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false}, "context":
+  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": true}, "context":
     [
       { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
