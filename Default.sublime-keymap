@@ -13,13 +13,13 @@
 
   // Emacs Move to hard beol eol for ctrl shortcuts
   { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false}},
-  { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false}, "context":
+  { "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": true}, "context":
     [
       { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
   },
   { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false}},
-  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false}, "context":
+  { "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": true}, "context":
     [
       { "key": "sbp_emacs_has_mark", "operator": "equal", "operand": true }
     ]
@@ -38,8 +38,8 @@
   { "keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
   { "keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
   { "keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
-  { "keys": ["alt+b"], "command": "move", "args": {"by": "words", "forward": false}},
-  { "keys": ["alt+f"], "command": "move", "args": {"by": "word_ends", "forward": true}},
+  { "keys": ["alt+b"], "command": "move", "args": {"by": "subwords", "forward": false}},
+  { "keys": ["alt+f"], "command": "move", "args": {"by": "subword_ends", "forward": true}},
   { "keys": ["ctrl+h"], "command": "left_delete"},
   { "keys": ["ctrl+shift+h"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete to Hard BOL.sublime-macro"}},
   { "keys": ["ctrl+d"], "command": "right_delete"},
