@@ -135,7 +135,9 @@
   { "keys": ["ctrl+s"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false}, "context": [
     { "key": "sbp_search_focus_check", "operator": "equal", "operand": true }
   ] },
-  { "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":true} },
+  
+  { "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false} },
+
   { "keys": ["ctrl+s"], "command": "find_next",  "context": [
       { "key": "panel_visible", "operator": "equal", "operand": true }
     ]
