@@ -70,10 +70,7 @@
   { "keys": ["alt+y"], "command": "sbp_yank_choice" },
   { "keys": ["ctrl+space"], "command": "sbp_set_mark" },
 
-  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark", "context": [
-      { "key": "panel_visible", "operator": "equal", "operand": false }
-    ]
-  },
+  { "keys": ["ctrl+w"], "command": "sbp_delete_to_mark" },
   { "keys": ["super+c"], "command": "sbp_kill_ring_save" },
   { "keys": ["alt+w"], "command": "sbp_kill_ring_save" },
   { "keys": ["ctrl+g"], "command": "sbp_cancel_mark" },
