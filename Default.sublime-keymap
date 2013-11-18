@@ -4,6 +4,7 @@
 
   // Emacs style go to indentation, alt+e can be complicated on Macs
   { "keys": ["alt+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
+  { "keys": ["alt+m"], "command": "move_to", "args": {"to": "bol", "extend": false} },
   { "keys": ["alt+e"], "command": "move_to", "args": {"to": "eol", "extend": false} },
   { "keys": ["alt+e"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context":
     [
