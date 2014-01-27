@@ -13,12 +13,10 @@ class SbpToggleCommentCommand(sublime_plugin.TextCommand):
 class SbpCancelMarkCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **args):
-        m = self.view.get_regions("mark")
         cursor = self.view.sel()[0]
-        if m:
-            self.view.erase_regions("mark")
-            self.view.sel().clear()
-            self.view.sel().add(sublime.Region(cursor.end(), cursor.end()))
+        self.view.erase_regions("mark")
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(cursor.end(), cursor.end()))
 
 
 class SbpSetMarkCommand(sublime_plugin.TextCommand):
