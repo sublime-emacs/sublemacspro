@@ -265,6 +265,8 @@
   { "keys": ["ctrl+x", "k"], "command": "close" },
   { "keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
   { "keys": ["ctrl+x", "ctrl+s"], "command": "save"},
+  { "keys": ["ctrl+x", "s"],      "command": "save_all"},
+  { "keys": ["ctrl+x", "ctrl+w"], "command": "prompt_save_as"},
 
   // Other Emacs features
   { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" },
