@@ -9,18 +9,8 @@
 //
 [
     //
-    // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window,
-    // incremental search, etc./
+    // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
     //
-    {"keys": ["super+f"], "command": "jove_move_word", "args": {"direction": 1}},
-    {"keys": ["ctrl+super+f"], "command": "jove_move_sexpr", "args": {"direction": 1}},
-    {"keys": ["super+b"], "command": "jove_move_word", "args": {"direction": -1}},
-    {"keys": ["ctrl+super+b"], "command": "jove_move_sexpr", "args": {"direction": -1}},
-    {"keys": ["super+c"], "command": "jove_case_word", "args": {"direction": 1, "mode": "title"}},
-    {"keys": ["super+u"], "command": "jove_case_word", "args": {"direction": 1, "mode": "upper"}},
-    {"keys": ["super+l"], "command": "jove_case_word", "args": {"direction": 1, "mode": "lower"}},
-
-    // make sure alt commands use OUR version otherwise the kill ring will get very confusing
     {"keys": ["alt+f"], "command": "jove_move_word", "args": {"direction": 1}},
     {"keys": ["ctrl+alt+f"], "command": "jove_move_sexpr", "args": {"direction": 1}},
     {"keys": ["alt+b"], "command": "jove_move_word", "args": {"direction": -1}},
@@ -31,10 +21,10 @@
 
 
     // commands that move and set the mark first
-    {"keys": ["super+shift+."], "command": "jove_move_to", "args": {"to": "eof"}},
-    {"keys": ["super+shift+,"], "command": "jove_move_to", "args": {"to": "bof"}},
-    {"keys": ["super+."], "command": "jove_move_to", "args": {"to": "eow"}},
-    {"keys": ["super+,"], "command": "jove_move_to", "args": {"to": "bow"}},
+    {"keys": ["alt+shift+."], "command": "jove_move_to", "args": {"to": "eof"}},
+    {"keys": ["alt+shift+,"], "command": "jove_move_to", "args": {"to": "bof"}},
+    {"keys": ["alt+."], "command": "jove_move_to", "args": {"to": "eow"}},
+    {"keys": ["alt+,"], "command": "jove_move_to", "args": {"to": "bow"}},
 
     //
     // misc
@@ -42,7 +32,7 @@
     {"keys": ["ctrl+o"], "command": "jove_open_line"},
     {"keys": ["ctrl+l"], "command": "jove_center_view"},
     {"keys": ["ctrl+x", "g"], "command": "jove_goto_line"},
-    {"keys": ["super+g"], "command": "jove_goto_line"},
+    {"keys": ["alt+g"], "command": "jove_goto_line"},
 
     //
     // Mark and point, kill region, kill line, yank and yank pop, deletion commands.
@@ -51,38 +41,35 @@
     {"keys": ["ctrl+x", "ctrl+x"], "command": "jove_swap_point_and_mark"},
     {"keys": ["ctrl+k"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_for_kill_line"}},
     {"keys": ["ctrl+w"], "command": "jove_kill_region"},
-    {"keys": ["super+w"], "command": "jove_kill_region", "args": {"is_copy": true}},
     {"keys": ["ctrl+y"], "command": "jove_yank"},
-    {"keys": ["super+y"], "command": "jove_yank", "args": {"pop": 1}},
-    {"keys": ["super+shift+y"], "command": "jove_yank", "args": {"pop": -1}},
+    {"keys": ["alt+w"], "command": "jove_kill_region", "args": {"is_copy": true}},
+    {"keys": ["alt+y"], "command": "jove_yank", "args": {"pop": 1}},
+    {"keys": ["alt+shift+y"], "command": "jove_yank", "args": {"pop": -1}},
 
-    {"keys": ["super+d"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": 1}},
-    {"keys": ["super+backspace"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": -1}},
     {"keys": ["alt+d"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": 1}},
     {"keys": ["alt+backspace"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": -1}},
 
-    {"keys": ["ctrl+super+k"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_sexpr", "direction": 1}},
     {"keys": ["ctrl+alt+k"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_sexpr", "direction": 1}},
 
-    {"keys": ["super+\\"], "command": "jove_delete_white_space"},
+    {"keys": ["alt+\\"], "command": "jove_delete_white_space"},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "jove_universal_argument", "args": {"value": "by_four"}},
-    {"keys": ["super+-"], "command": "jove_universal_argument", "args": {"value": "negative"}},
-    {"keys": ["super+1"], "command": "jove_universal_argument", "args": {"value": 1}},
-    {"keys": ["super+2"], "command": "jove_universal_argument", "args": {"value": 2}},
-    {"keys": ["super+3"], "command": "jove_universal_argument", "args": {"value": 3}},
-    {"keys": ["super+4"], "command": "jove_universal_argument", "args": {"value": 4}},
-    {"keys": ["super+5"], "command": "jove_universal_argument", "args": {"value": 5}},
-    {"keys": ["super+6"], "command": "jove_universal_argument", "args": {"value": 6}},
-    {"keys": ["super+7"], "command": "jove_universal_argument", "args": {"value": 7}},
-    {"keys": ["super+8"], "command": "jove_universal_argument", "args": {"value": 8}},
-    {"keys": ["super+9"], "command": "jove_universal_argument", "args": {"value": 9}},
-    {"keys": ["super+0"], "command": "jove_universal_argument", "args": {"value": 0}},
+    {"keys": ["alt+-"], "command": "jove_universal_argument", "args": {"value": "negative"}},
+    {"keys": ["alt+1"], "command": "jove_universal_argument", "args": {"value": 1}},
+    {"keys": ["alt+2"], "command": "jove_universal_argument", "args": {"value": 2}},
+    {"keys": ["alt+3"], "command": "jove_universal_argument", "args": {"value": 3}},
+    {"keys": ["alt+4"], "command": "jove_universal_argument", "args": {"value": 4}},
+    {"keys": ["alt+5"], "command": "jove_universal_argument", "args": {"value": 5}},
+    {"keys": ["alt+6"], "command": "jove_universal_argument", "args": {"value": 6}},
+    {"keys": ["alt+7"], "command": "jove_universal_argument", "args": {"value": 7}},
+    {"keys": ["alt+8"], "command": "jove_universal_argument", "args": {"value": 8}},
+    {"keys": ["alt+9"], "command": "jove_universal_argument", "args": {"value": 9}},
+    {"keys": ["alt+0"], "command": "jove_universal_argument", "args": {"value": 0}},
 
 
-    {"keys": ["super+["], "command": "jove_shift_region", "args": {"direction": -1}},
-    {"keys": ["super+]"], "command": "jove_shift_region", "args": {"direction": 1}},
+    {"keys": ["alt+["], "command": "jove_shift_region", "args": {"direction": -1}},
+    {"keys": ["alt+]"], "command": "jove_shift_region", "args": {"direction": 1}},
 
     //////////////////////////////
     // Begin I-search //
@@ -93,6 +80,9 @@
         "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["super+d"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": true},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["alt+d"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": true},
         "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["ctrl+s"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": false, "forward": true},
@@ -107,10 +97,13 @@
     {"keys": ["super+a"], "command": "jove_inc_search", "args": {"cmd": "keep_all"},
         "context": [ {"key": "i_search_active"} ]
     },
+    {"keys": ["alt+a"], "command": "jove_inc_search", "args": {"cmd": "keep_all"},
+        "context": [ {"key": "i_search_active"} ]
+    },
 
-    ////////////////////////////
+    //////////////////
     // End I-search //
-    ////////////////////////////
+    //////////////////
 
 
     {"keys": ["tab"], "command": "jove_indent",  "context": [
@@ -142,36 +135,31 @@
     // Other settings/bindings to complete the Emacs picture for me personally. //
     //////////////////////////////////////////////////////////////////////////////
 
-    {"keys": ["super+e"], "command": "find_under_expand"},
     {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
-    {"keys": ["super+m"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
+    {"keys": ["alt+m"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
-    {"keys": ["super+v"], "command": "move", "args": {"by": "pages", "forward": false }},
+    {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
 
-    {"keys": ["super+n"], "command": "next_result"},
-    {"keys": ["super+p"], "command": "prev_result"},
+    {"keys": ["alt+n"], "command": "next_result"},
+    {"keys": ["alt+p"], "command": "prev_result"},
 
-    {"keys": ["super+/"], "command": "toggle_comment"},
+    {"keys": ["alt+/"], "command": "toggle_comment"},
     {"keys": ["ctrl+x", "k"], "command": "close"},
 
     {"keys": ["ctrl+d"], "command": "right_delete"},
 
     {"keys": ["ctrl+\\"], "command": "undo"},
     {"keys": ["ctrl+shift+\\"], "command": "redo"},
-    {"keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace" }},
 
-    {"keys": ["super+h"], "command": "auto_complete"},
+    {"keys": ["alt+h"], "command": "auto_complete"},
     {"keys": ["ctrl+x", "ctrl+s"], "command": "save"},
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
     {"keys": ["ctrl+x", "ctrl+f"], "command": "i_opener"},
     {"keys": ["ctrl+z"], "command": "scroll_lines", "args": {"amount": -1 }},
 
-    {"keys": ["super+z"], "command": "scroll_lines", "args": {"amount": 1 }},
-    {"keys": ["ctrl+x", "ctrl+e"], "command": "build", "args": {"name": "make_deploy" }},
+    {"keys": ["alt+z"], "command": "scroll_lines", "args": {"amount": 1 }},
 
-
-    {"keys": ["super+j"], "command": "wrap_lines", "args": {"width": 100}},
+    {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}},
     {"keys": ["shift+super+-"], "command": "decrease_font_size"},
-
 ]
