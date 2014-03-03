@@ -1167,6 +1167,8 @@ class JovePaneCmdCommand(JoveTextCommand):
         window = view.window()
         if cmd == 'split':
             self.split(window, jove, **kwargs)
+        elif cmd == 'splitv':
+            self.splitv(window, jove, **kwargs)
         elif cmd == 'grow':
             self.grow(window, jove, **kwargs)
         elif cmd == 'destroy':
@@ -1243,6 +1245,68 @@ class JovePaneCmdCommand(JoveTextCommand):
 
         # generate new cells
         layout['cells'] = [[0, index, 1, index + 1] for index in range(len(rows) - 1)]
+        window.set_layout(layout)
+
+        # look for another view in the current group that is already displaying this file
+        new_view = None
+        for v in window.views_in_group(current):
+            if v != view and v.buffer_id() == view.buffer_id():
+                new_view = v
+                break
+        if new_view is None:
+            # couldn't find an existing view so we have to clone the current one
+            window.run_command("clone_file")
+
+            # the cloned view becomes the new active view
+            new_view = window.active_view()
+
+        # move the new view into the new group (current + 1)
+        window.set_view_index(new_view, current + 1, 0)
+
+        # make sure the original view is the focus in the original pane
+        window.focus_view(view)
+
+        # switch to new pane
+        window.focus_group(current + 1)
+
+        # after a short delay make sure the two views are looking at the same area
+        def setup_views():
+            selection = new_view.sel()
+            selection.clear()
+            selection.add_all([r for r in view.sel()])
+            new_view.set_viewport_position(view.viewport_position(), False)
+
+            point = jove.get_point()
+            new_view.show(point)
+            view.show(point)
+
+        sublime.set_timeout(setup_views, 10)
+
+    def splitv(self, window, jove):
+        # For reference: this is what a layout looks like
+        # {'cells': [[0, 0, 1, 1], [0, 1, 1, 2], [0, 2, 1, 3]], 'cols': [0.0, 1.0], 'rows': [0.0, 0.3097919170673077, 0.6548959585336538, 1.0]}
+        view = jove.view
+        layout = window.layout()
+
+        # no more than three columns
+        if len(layout["cols"]) > 4:
+            return
+
+        # The view to split is the active cell
+        current = window.active_group()
+        cells = layout["cells"]
+        ac = cells[current]
+
+        diff = (layout["cols"][ac[2]] - layout["cols"][ac[0]]) / 2.0
+        layout["cols"] = sorted(layout["cols"] + [diff,])
+
+       
+        del(layout["cells"][current])
+
+        # Add new Cells
+        layout["cells"].append([ac[0], ac[1], ac[2], ac[3]])
+        layout["cells"].append([ac[2], ac[1], ac[2]+1, ac[3]])
+
         window.set_layout(layout)
 
         # look for another view in the current group that is already displaying this file

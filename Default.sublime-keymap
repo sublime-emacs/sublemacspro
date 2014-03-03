@@ -143,6 +143,7 @@
     /////////////////////////////
 
     {"keys": ["ctrl+x", "2"], "command": "jove_pane_cmd", "args": {"cmd": "split"}},
+    {"keys": ["ctrl+x", "3"], "command": "jove_pane_cmd", "args": {"cmd": "splitv"}},
     {"keys": ["ctrl+x", "g"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
     {"keys": ["ctrl+x", "s"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
     {"keys": ["ctrl+x", "d"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
@@ -186,8 +187,9 @@
     {"keys": ["ctrl+x", "ctrl+s"], "command": "save"},
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
     {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
-    
 
+    { "keys": ["ctrl+x","h"], "command": "select_all"},
+    
     { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
     { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
     { "keys": ["ctrl+x", "e"], "command": "run_macro" },
@@ -212,14 +214,14 @@
     { "keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
     { "keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
 
-    { "keys": ["ctrl+s"], "command": "find_next",  "context": [
-            { "key": "panel_visible", "operator": "equal", "operand": true }
-        ]
-    },
-    { "keys": ["ctrl+r"], "command": "find_prev", "context": [
-        { "key": "panel_visible", "operator": "equal", "operand": true }
-        ]
-    },
+    // { "keys": ["ctrl+s"], "command": "find_next",  "context": [
+    //         { "key": "panel_visible", "operator": "equal", "operand": true }
+    //     ]
+    // },
+    // { "keys": ["ctrl+r"], "command": "find_prev", "context": [
+    //     { "key": "panel_visible", "operator": "equal", "operand": true }
+    //     ]
+    // },
 
 
     // These override other commands
