@@ -20,6 +20,12 @@ import functools as fu
 import sublime, sublime_plugin
 from copy import copy
 
+# ST 3 compatibility
+try:
+    import paragraph
+except ImportError:
+    import Default.paragraph as paragraph
+
 JOVE_STATUS = "jove"
 
 ISEARCH_ESCAPE_CMDS = ('move_to', 'jove_center_view', 'move', 'jove_universal_argument',
@@ -812,6 +818,22 @@ class JoveToWordCommand(JoveTextCommand):
 
         jove.for_each_cursor(to_word)
 
+class JoveCaseRegion(JoveTextCommand):
+
+    def run_cmd(self, jove, mode):
+        region = jove.get_region()
+        text = jove.view.substr(region)
+        if mode == "upper":
+            text = text.upper()
+        elif mode == "lower":
+            text = text.lower()
+        else:
+            jove.set_status("Unknown Mode")
+            return
+
+        jove.view.replace(jove.edit, region, text)        
+
+
 class JoveCaseWordCommand(JoveTextCommand):
     should_reset_target_column = True
 
@@ -853,8 +875,7 @@ class JoveCaseWordCommand(JoveTextCommand):
                 else:
                     print("Unknown mode", mode)
                 if old_text != text:
-                    jove.view.erase(jove.edit, cursor)
-                    jove.view.insert(jove.edit, cursor.a, text)
+                    jove.view.replace(jove.edit, cursor, text)                    
 
             if direction < 0:
                 cursor.a = cursor.b = orig_point
@@ -914,6 +935,34 @@ class JoveMoveSexprCommand(JoveTextCommand):
         for c in range(count):
             jove.for_each_cursor(advance, first=(c == 0))
 
+# Move to paragraph depends on the functionality provided by the default
+# plugin in ST. So for now we use this
+class JoveMoveToParagraphCommand(JoveTextCommand):
+
+    def run_cmd(self, jove, direction=1):
+        # Clear all selections
+        s = self.view.sel()[0]
+        if direction == 1:
+            if s.begin() == 0:
+                return
+            point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
+        else:
+            if s.end() == self.view.size():
+                return
+            point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
+
+        self.view.sel().clear()
+        #Clear selections
+
+        if point < 0:
+            point = 0
+
+        if point > self.view.size():
+            point = self.view.size()
+
+        self.view.sel().add(sublime.Region(point, point))
+        self.view.show(self.view.sel()[0].begin())
+
 #
 # This command remembers all the current cursor positions, executes a command on all the cursors,
 # and then deletes all the data between the two.
@@ -960,7 +1009,7 @@ class JoveGotoLineCommand(JoveTextCommand):
         if jove.has_prefix_arg():
             jove.goto_line(jove.get_count())
         else:
-            self.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
+            jove.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
 
 class JoveDeleteWhiteSpaceCommand(JoveTextCommand):
     def run_cmd(self, jove):
@@ -1784,6 +1833,53 @@ class JoveQuitCommand(JoveTextCommand):
             jove.set_selection(pos, pos)
         if jove.state.active_mark:
             jove.toggle_active_mark_mode()
+
+
+# This is the actual editor of the zap command
+class SbpZapToCharEdit(sublime_plugin.TextCommand):
+
+    def run(self, edit, begin, end):
+        region = sublime.Region(int(begin), int(end))
+        kill_ring.add(self.view.substr(region), True, False)
+        self.view.erase(edit, region)
+
+
+# This command handles the actual selecting of the zap char
+class JoveZapToCharCommand(JoveTextCommand):
+
+    is_kill_cmd = True
+    panel = None
+
+    def run_cmd(self, jove, **args):
+        self.jove = jove
+        self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
+
+    def zap(self):
+        pass
+
+    def on_change(self, content):
+        """Search forward from the current selection to the next ocurence
+        of char"""
+
+        if self.panel == None:
+            return
+
+        self.panel.window().run_command("hide_panel")
+
+        start = finish = self.jove.get_point()
+        found = False
+        while not found and finish < self.view.size():
+            data = self.view.substr(finish)
+            if data == content:
+                found = True
+                break
+            finish += 1
+        
+        # Zap to char
+        if found:
+            self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
+        else:
+            sublime.status_message("Character %s not found" % content)
 
 class JoveConvertPlistToJsonCommand(JoveTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
