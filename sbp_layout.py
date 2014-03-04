@@ -228,9 +228,9 @@ class TestLayoutManager(unittest.TestCase):
     lm.split(0, 'v')
     self.assertEqual(4, lm._col_count)
     lm.split(0, 'v')
-    self.assertEqual(4, lm._col_count)
+    self.assertEqual(5, lm._col_count)
     lm.split(0, 'v')
-    self.assertEqual(4, lm._col_count)
+    self.assertEqual(6, lm._col_count)
 
   def testMixMaxCount(self):
     lm = LayoutManager(self.base)
@@ -242,8 +242,8 @@ class TestLayoutManager(unittest.TestCase):
     lm.split(0, 'h')
     lm.split(0, 'v')
     lm.split(0, 'h')
-    self.assertEqual(4, lm._col_count)
-    self.assertEqual(4, lm._row_count)
+    self.assertEqual(5, lm._col_count)
+    self.assertEqual(5, lm._row_count)
 
 
   def testShouldNotCreateMoreRowsThanMax(self):
@@ -254,9 +254,9 @@ class TestLayoutManager(unittest.TestCase):
     lm.split(0, 'h')
     self.assertEqual(4, lm._row_count)
     lm.split(0, 'h')
-    self.assertEqual(4, lm._row_count)
+    self.assertEqual(5, lm._row_count)
     lm.split(0, 'h')
-    self.assertEqual(4, lm._row_count)
+    self.assertEqual(6, lm._row_count)
 
 
 if __name__ == '__main__':
