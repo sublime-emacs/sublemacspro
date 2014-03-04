@@ -280,6 +280,11 @@ class ViewWatcher(sublime_plugin.EventListener):
             # we cannot dismiss the input panel because an overlay (if present) will lose focus
             info.deactivate()
 
+    # ST2 is not as nice as ST3, so we have to hook into the synchronous pipeline
+    def on_activated(self, view):
+      if not _ST3:
+        self.on_activated_async(view)
+
     def on_activated_async(self, view):
         info = ViewState.isearch_info
         if info and not view.settings().get("is_widget"):
@@ -1772,7 +1777,7 @@ class ISearchInfo():
         self.set_text(self.current.search)
 
     def cancel(self):
-        sublime.active_window().run_command("hide_panel")
+        self.view.window().run_command("hide_panel")
         self.finish(abort=True)
 
     def quit(self):
