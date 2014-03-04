@@ -20,6 +20,14 @@ import functools as fu
 import sublime, sublime_plugin
 from copy import copy
 
+import MyNextSBP.sbp_layout as ll
+
+# ST 3 compatibility
+try:
+    import paragraph
+except ImportError:
+    import Default.paragraph as paragraph
+
 JOVE_STATUS = "jove"
 
 ISEARCH_ESCAPE_CMDS = ('move_to', 'jove_center_view', 'move', 'jove_universal_argument',
@@ -812,6 +820,22 @@ class JoveToWordCommand(JoveTextCommand):
 
         jove.for_each_cursor(to_word)
 
+class JoveCaseRegion(JoveTextCommand):
+
+    def run_cmd(self, jove, mode):
+        region = jove.get_region()
+        text = jove.view.substr(region)
+        if mode == "upper":
+            text = text.upper()
+        elif mode == "lower":
+            text = text.lower()
+        else:
+            jove.set_status("Unknown Mode")
+            return
+
+        jove.view.replace(jove.edit, region, text)        
+
+
 class JoveCaseWordCommand(JoveTextCommand):
     should_reset_target_column = True
 
@@ -853,8 +877,7 @@ class JoveCaseWordCommand(JoveTextCommand):
                 else:
                     print("Unknown mode", mode)
                 if old_text != text:
-                    jove.view.erase(jove.edit, cursor)
-                    jove.view.insert(jove.edit, cursor.a, text)
+                    jove.view.replace(jove.edit, cursor, text)                    
 
             if direction < 0:
                 cursor.a = cursor.b = orig_point
@@ -914,6 +937,34 @@ class JoveMoveSexprCommand(JoveTextCommand):
         for c in range(count):
             jove.for_each_cursor(advance, first=(c == 0))
 
+# Move to paragraph depends on the functionality provided by the default
+# plugin in ST. So for now we use this
+class JoveMoveToParagraphCommand(JoveTextCommand):
+
+    def run_cmd(self, jove, direction=1):
+        # Clear all selections
+        s = self.view.sel()[0]
+        if direction == 1:
+            if s.begin() == 0:
+                return
+            point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
+        else:
+            if s.end() == self.view.size():
+                return
+            point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
+
+        self.view.sel().clear()
+        #Clear selections
+
+        if point < 0:
+            point = 0
+
+        if point > self.view.size():
+            point = self.view.size()
+
+        self.view.sel().add(sublime.Region(point, point))
+        self.view.show(self.view.sel()[0].begin())
+
 #
 # This command remembers all the current cursor positions, executes a command on all the cursors,
 # and then deletes all the data between the two.
@@ -960,7 +1011,7 @@ class JoveGotoLineCommand(JoveTextCommand):
         if jove.has_prefix_arg():
             jove.goto_line(jove.get_count())
         else:
-            self.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
+            jove.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
 
 class JoveDeleteWhiteSpaceCommand(JoveTextCommand):
     def run_cmd(self, jove):
@@ -1173,42 +1224,35 @@ class JovePaneCmdCommand(JoveTextCommand):
     #
     # Split the current pane in half. Clone the current view into the new pane. Refuses to split if
     # the resulting windows would be too small.
-    #
-    def split(self, window, jove):
-        # For reference: this is what a layout looks like
-        # {'cells': [[0, 0, 1, 1], [0, 1, 1, 2], [0, 2, 1, 3]], 'cols': [0.0, 1.0], 'rows': [0.0, 0.3097919170673077, 0.6548959585336538, 1.0]}
+    def split(self, window, jove, stype):
         view = jove.view
         layout = window.layout()
-        rows = layout['rows']
-
-        # this is the one we're splitting
         current = window.active_group()
-        y0 = rows[current]
-        y1 = rows[current + 1]
 
-        # we're willing to split down to 4 lines in each window
-        if view.viewport_extent()[1] / 2 <= 4 * view.line_height():
+        # Remember groups
+        all_elements = [ list(window.get_view_index(v)) + [v] for v in window.views()]
+
+        # Perform the layout
+        lm = ll.LayoutManager(layout)
+        if not lm.split(current, stype):
             return
+            
+        window.set_layout(lm.build())
 
-        rows.insert(current + 1, (y1 + y0) / 2)
+        # Apply posititiong
+        for element in all_elements:
+            pos = element[0]
+            if pos > current:
+                pos += 1
 
-        # generate new cells
-        layout['cells'] = [[0, index, 1, index + 1] for index in range(len(rows) - 1)]
-        window.set_layout(layout)
+            window.set_view_index(element[2], pos, element[1])
 
-        # look for another view in the current group that is already displaying this file
-        new_view = None
-        for v in window.views_in_group(current):
-            if v != view and v.buffer_id() == view.buffer_id():
-                new_view = v
-                break
-        if new_view is None:
-            # couldn't find an existing view so we have to clone the current one
-            window.run_command("clone_file")
+        # couldn't find an existing view so we have to clone the current one
+        window.run_command("clone_file")
 
-            # the cloned view becomes the new active view
-            new_view = window.active_view()
-
+        # the cloned view becomes the new active view
+        new_view = window.active_view()
+ 
         # move the new view into the new group (current + 1)
         window.set_view_index(new_view, current + 1, 0)
 
@@ -1239,25 +1283,21 @@ class JovePaneCmdCommand(JoveTextCommand):
             return
         view = jove.view
         layout = window.layout()
-        rows = layout['rows']
-        current = window.active_group()
 
-        # remember which views are where
-        views = [window.active_view_in_group(i) for i in range(window.num_groups())]
+        current = window.active_group()
+        lm = ll.LayoutManager(layout)
 
         if pane == "self":
+            views = [window.active_view_in_group(i) for i in range(window.num_groups())]
             del(views[current])
-
-            # we give the space to the window above if possible
-            del(rows[max(1, current)])
+            lm.killSelf(current)
         else:
-            # delete all but the first and last elements
-            rows[1:-1] = []
+            lm.killOther(current)
             views = [jove.view]
 
-        # generate new cells
-        layout['cells'] = [[0, index, 1, index + 1] for index in range(len(rows) - 1)]
-        window.set_layout(layout)
+        window.set_layout(lm.build())
+
+        
         for i in range(window.num_groups()):
             view = views[i]
             window.focus_group(i)
@@ -1265,6 +1305,7 @@ class JovePaneCmdCommand(JoveTextCommand):
 
         window.focus_group(max(0, current - 1))
         dedup_views(window)
+
 
     def move(self, window, jove, direction):
         if direction in ("prev", "next"):
@@ -1784,6 +1825,53 @@ class JoveQuitCommand(JoveTextCommand):
             jove.set_selection(pos, pos)
         if jove.state.active_mark:
             jove.toggle_active_mark_mode()
+
+
+# This is the actual editor of the zap command
+class SbpZapToCharEdit(sublime_plugin.TextCommand):
+
+    def run(self, edit, begin, end):
+        region = sublime.Region(int(begin), int(end))
+        kill_ring.add(self.view.substr(region), True, False)
+        self.view.erase(edit, region)
+
+
+# This command handles the actual selecting of the zap char
+class JoveZapToCharCommand(JoveTextCommand):
+
+    is_kill_cmd = True
+    panel = None
+
+    def run_cmd(self, jove, **args):
+        self.jove = jove
+        self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
+
+    def zap(self):
+        pass
+
+    def on_change(self, content):
+        """Search forward from the current selection to the next ocurence
+        of char"""
+
+        if self.panel == None:
+            return
+
+        self.panel.window().run_command("hide_panel")
+
+        start = finish = self.jove.get_point()
+        found = False
+        while not found and finish < self.view.size():
+            data = self.view.substr(finish)
+            if data == content:
+                found = True
+                break
+            finish += 1
+        
+        # Zap to char
+        if found:
+            self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
+        else:
+            sublime.status_message("Character %s not found" % content)
 
 class JoveConvertPlistToJsonCommand(JoveTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"

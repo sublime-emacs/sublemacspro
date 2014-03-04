@@ -1,0 +1,78 @@
+[
+  { "keys": ["ctrl+l"], "command": "sbp_recenter_in_view" },
+  { "keys": ["alt+q"], "command": "sbp_wrap_paragraph"},
+
+
+  // Kill Ring handling
+
+
+
+
+  { "keys": ["ctrl+x", "b"], "command": "next_view" },
+  
+
+  { "keys": ["ctrl+x", "o"], "command": "sbp_cycle_focus_group"},
+  { "keys": ["ctrl+x", "5", "2"], "command": "new_window" },
+  {
+    "keys": ["ctrl+x", "2"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 1.0],
+      "rows": [0.0, 0.5, 1.0],
+      "cells": [[0, 0, 1, 1], [0, 1, 1, 2]]
+    }
+  },
+  {
+    "keys": ["ctrl+x", "1"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 1.0],
+      "rows": [0.0, 1.0],
+      "cells": [[0, 0, 1, 1]]
+    }
+  },
+  {
+    "keys": ["ctrl+x", "3"],
+    "command": "set_layout",
+    "args":
+    {
+      "cols": [0.0, 0.5, 1.0],
+      "rows": [0.0, 1.0],
+      "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
+    }
+  },
+
+  // Search word under cursor in current file
+  { "keys": ["ctrl+x", "ctrl+d"], "command": "find_under_expand_skip" },
+
+  
+  { "keys": ["alt+i"], "command": "insert", "args": {"characters": "\t" } },
+  
+
+  // Rectangles
+  { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
+  { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
+
+  // Registers
+  { "keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
+  { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
+
+  { "keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
+  { "keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" },  
+
+  // Other Emacs features
+  { "keys": ["alt+x", "f", "f", "a", "p"], "command": "sbp_find_file_at_point" },
+
+
+  // Macro recording
+  { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
+  { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
+  { "keys": ["ctrl+x", "e"], "command": "run_macro" },
+  { "keys": ["home"], "command": "move_to", "args": {"to": "bof"} },
+  { "keys": ["end"], "command": "move_to", "args": {"to": "eof"} },
+  { "keys": ["shift+end"], "command": "move_to", "args": {"to": "eof", "extend": true} },
+  { "keys": ["shift+home"], "command": "move_to", "args": {"to": "bof", "extend": true } },
+
+]
