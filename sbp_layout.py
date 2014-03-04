@@ -105,12 +105,15 @@ class LayoutManager:
     Based on the cells with absolute coordinates build the structure required
     for sublime text
     """
-    cols = dict([ [v,k] for k,v in enumerate(set(sum([[x[0], x[2]] for x in self.coord_cells], [])))])
-    rows = dict([ [v,k] for k,v in enumerate(set(sum([[x[1], x[3]] for x in self.coord_cells], [])))])
+    col_list = sorted(list(set(sum([[x[0], x[2]] for x in self.coord_cells], []))))
+    cols = dict([ [v,k] for k,v in enumerate(col_list)])
+
+    row_list = sorted(list(set(sum([[x[1], x[3]] for x in self.coord_cells], []))))
+    rows = dict([ [v,k] for k,v in enumerate(row_list)])
 
     result = {
-      "cols" : list(cols.keys()),
-      "rows" : list(rows.keys()),
+      "cols" : sorted(list(cols.keys())),
+      "rows" : sorted(list(rows.keys())),
       "cells" : [ [  cols[cell[0]], rows[cell[1]], cols[cell[2]], rows[cell[3]]  ] for cell in self.coord_cells ]
     }
     return result
