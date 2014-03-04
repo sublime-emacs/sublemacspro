@@ -1664,7 +1664,8 @@ class ISearchInfo():
         if si is None:
             return
 
-        self.view.add_regions("find", si.regions, "text", "", sublime.DRAW_NO_FILL)
+        flags = sublime.DRAW_NO_FILL if _ST3 else sublime.DRAW_OUTLINED
+        self.view.add_regions("find", si.regions, "text", "", flags)
         selected = si.selected or []
         self.view.add_regions("selected", selected, "string", "", 0)
         if selected:
