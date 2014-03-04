@@ -238,7 +238,7 @@
     { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
 
     { "keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
-    { "keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" },  
+    { "keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }  
 
 
     // These override other commands
