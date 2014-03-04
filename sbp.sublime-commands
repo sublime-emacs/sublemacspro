@@ -1,0 +1,75 @@
+[
+    //
+    // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window,
+    //
+    {"caption": "Sublemacs - Forward Word", "command": "jove_move_word", "args": {"direction": 1}},
+    {"caption": "Sublemacs - Forward S-expression", "command": "jove_move_sexpr", "args": {"direction": 1}},
+    {"caption": "Sublemacs - Backward Word", "command": "jove_move_word", "args": {"direction": -1}},
+    {"caption": "Sublemacs - Backward S-expression", "command": "jove_move_sexpr", "args": {"direction": -1}},
+    {"caption": "Sublemacs - Capitalize Word", "command": "jove_case_word", "args": {"direction": 1, "mode": "title"}},
+    {"caption": "Sublemacs - Uppercase Word", "command": "jove_case_word", "args": {"direction": 1, "mode": "upper"}},
+    {"caption": "Sublemacs - Lowercase Word", "command": "jove_case_word", "args": {"direction": 1, "mode": "lower"}},
+
+    {"caption": "Sublemacs - Go to End of File", "command": "jove_move_to", "args": {"to": "eof"}},
+    {"caption": "Sublemacs - Go to Beginning of File", "command": "jove_move_to", "args": {"to": "bof"}},
+    {"caption": "Sublemacs - Go to End of Pane", "command": "jove_move_to", "args": {"to": "eow"}},
+    {"caption": "Sublemacs - Go to Beginning of Pane", "command": "jove_move_to", "args": {"to": "bow"}},
+    {"caption": "Sublemacs - Go to Line", "command": "jove_goto_line"},
+
+    {"caption": "Sublemacs - Open line", "command": "jove_open_line"},
+    {"caption": "Sublemacs - Center View Around Point", "command": "jove_center_view"},
+
+    //
+    // Mark and point, kill region, kill line, yank and yank pop, deletion commands.
+    //
+    {"caption": "Sublemacs - Set Emacs-Style Mark", "command": "jove_set_mark"},
+    {"caption": "Sublemacs - Swap Point and Mark", "command": "jove_swap_point_and_mark"},
+    {"caption": "Sublemacs - Kill to End of Line", "command": "jove_kill_line"},
+    {"caption": "Sublemacs - Kill Region", "command": "jove_kill_region"},
+    {"caption": "Sublemacs - Copy Region", "command": "jove_kill_region", "args": {"is_copy": true}},
+    {"caption": "Sublemacs - Yank", "command": "jove_yank"},
+    {"caption": "Sublemacs - Yank Pop", "command": "jove_yank", "args": {"pop": 1}},
+    {"caption": "Sublemacs - Yank Pop Backwards", "command": "jove_yank", "args": {"pop": -1}},
+    {"caption": "Sublemacs - Kill Word Forward", "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": 1}},
+    {"caption": "Sublemacs - Kill Word Backward", "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": -1}},
+    {"caption": "Sublemacs - Kill S-expression", "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_sexpr", "direction": 1}},
+
+    {"caption": "Sublemacs - Delete White Space", "command": "jove_delete_white_space"},
+
+    {"caption": "Sublemacs - I-Search Forward", "command": "jove_inc_search", "args": {"forward": true, "regex": false}},
+    {"caption": "Sublemacs - I-Search Backward", "command": "jove_inc_search", "args": {"forward": false, "regex": false}},
+    {"caption": "Sublemacs - I-Search Append From Cursor", "command": "jove_inc_search", "args": {"cmd": "append_from_cursor"}},
+    {"caption": "Sublemacs - I-Search Keep and Next", "command": "jove_inc_search", "args": {"cmd": "next", "keep": true}},
+    {"caption": "Sublemacs - I-Search Skip and Next", "command": "jove_inc_search", "args": {"cmd": "next", "keep": false, "forward": true}},
+    {"caption": "Sublemacs - I-Search Pop", "command": "jove_inc_search", "args": {"cmd": "pop"}},
+
+    // emacs-style numeric argument handling
+    {"caption": "Sublemacs - Emacs style universal argument", "command": "jove_universal_argument", "args": {"value": "by_four"}},
+    {"caption": "Sublemacs - Supply Digit Argument", "command": "jove_universal_argument", "args": {"value": "negative"}},
+    {"caption": "Sublemacs - Supply Digit Argument 1", "command": "jove_universal_argument", "args": {"value": 1}},
+    {"caption": "Sublemacs - Supply Digit Argument 2", "command": "jove_universal_argument", "args": {"value": 2}},
+    {"caption": "Sublemacs - Supply Digit Argument 3", "command": "jove_universal_argument", "args": {"value": 3}},
+    {"caption": "Sublemacs - Supply Digit Argument 4", "command": "jove_universal_argument", "args": {"value": 4}},
+    {"caption": "Sublemacs - Supply Digit Argument 5", "command": "jove_universal_argument", "args": {"value": 5}},
+    {"caption": "Sublemacs - Supply Digit Argument 6", "command": "jove_universal_argument", "args": {"value": 6}},
+    {"caption": "Sublemacs - Supply Digit Argument 7", "command": "jove_universal_argument", "args": {"value": 7}},
+    {"caption": "Sublemacs - Supply Digit Argument 8", "command": "jove_universal_argument", "args": {"value": 8}},
+    {"caption": "Sublemacs - Supply Digit Argument 9", "command": "jove_universal_argument", "args": {"value": 9}},
+    {"caption": "Sublemacs - Supply Digit Argument 0", "command": "jove_universal_argument", "args": {"value": 0}},
+
+    {"caption": "Sublemacs - Split Window Horizontal", "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
+    {"caption": "Sublemacs - Split Window Vertical", "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
+    {"caption": "Sublemacs - Grow Window", "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
+    {"caption": "Sublemacs - Shrink Window", "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
+    {"caption": "Sublemacs - Destroy Window", "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
+    {"caption": "Sublemacs - Destroy Other Windows", "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
+    {"caption": "Sublemacs - Go to Next Window", "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
+    {"caption": "Sublemacs - Go to Previous Window", "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
+    {"caption": "Sublemacs - Previous Tab", "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
+    {"caption": "Sublemacs - Next Tab", "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
+
+    {"caption": "Sublemacs - Quit All Open Panels, Overlays and Selections", "command": "jove_quit"},
+
+    {"caption": "Sublemacs - Convert PLIST to JSON", "command": "jove_convert_plist_to_json"},
+    {"caption": "Sublemacs - Convert JSON to PLIST", "command": "jove_convert_json_to_plist"}
+]

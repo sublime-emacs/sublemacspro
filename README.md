@@ -1,23 +1,23 @@
 # Welcome to SublemacsPro.
 
-The reasoning behind writing these set of functions is that I love Emacs,
-however, the UI doesn't feel as snappy as other Mac apps. On the other hand I
-cannot move to another editor since many of those hyped editors is that they
-don't provide the keybindings I love.
+The reasoning behind writing these set of functions is that we love Emacs,
+however, the UI doesn't feel as snappy as other Mac apps. On the other hand we
+cannot move to another editor since many of those hyped editors share that they
+don't provide the keybindings we love and embraced over time.
 
-Then, I found Sublime Text 2. A completely customizable editor allowing you to
+Then, we found Sublime Text. A completely customizable editor allowing you to
 easily modify all default behaviors so that they suit your editing style.
 
-So I wrote sublemacspro bringing Emacs keybindings and sugar to Sublime Text 2.
-Even though Emacs lives from the plugins, I believe it is way easier to write
-new plugins in Python and integrate them in an Emacs-ish way to Sublime Text 2
+So, we wrote sublemacspro bringing Emacs keybindings and sugar to Sublime Text.
+Even though Emacs lives from the plugins, we believe it is way easier to write
+new plugins in Python and integrate them in an Emacs-ish way to Sublime Text
 than writing them in Lisp.
 
 ## Installation
 
 To install SublemacsPro you have to install [Package
 Control](http://wbond.net/sublime_packages/package_control) as an automatic
-package manager for Sublime Text 2. Now you can easily install Sublemacs Pro and
+package manager for Sublime Text. Now you can easily install Sublemacs Pro and
 your installation will never be outdated. When you installed Package Control,
 hit ``S-Shift P`` to open up the command palette and type ``install``. Now
 select "Package Control: Install Package". This will load all packages from the
@@ -104,7 +104,7 @@ semantics.
 ## Future
 
 We will try to extend this more and more to provide more features from Emacs to
-Sublime Text 2 and make this my fast and beautiful Emacs replacement.
+Sublime Text and make this my fast and beautiful Emacs replacement.
 
 
 ### Authors and Contributors
