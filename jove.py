@@ -569,11 +569,13 @@ class CmdHelper:
             self.set_status("No mark in this buffer")
 
     def set_selection(self, a=None, b=None):
-        if a is None:
+        if a is None or b is None:
             a = b = self.get_point()
         selection = self.view.sel()
         selection.clear()
-        selection.add(sublime.Region(a, b))
+
+        r = sublime.Region(a, b)
+        selection.add(r)
 
     def get_line_info(self, point):
         view = self.view
@@ -635,7 +637,9 @@ class CmdHelper:
 
         # restore the cursors
         selection.clear()
-        selection.add_all(view.get_regions(key))
+        for r in view.get_regions(key):
+            selection.add(r)
+
         view.erase_regions(key)
 
     def goto_line(self, line):
@@ -1431,8 +1435,9 @@ class JoveMoveForKillLineCommand(JoveTextCommand):
                 import re
                 if re.match(r'[ \t]*$', text[index:]):
                     end += 1
-            cursor.a = cursor.b = end
-            return cursor
+            
+            # ST2 / ST3 compatibility
+            return sublime.Region(end,end)
 
         jove.for_each_cursor(advance)
 
