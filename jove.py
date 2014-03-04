@@ -842,6 +842,33 @@ class JoveMoveWordCommand(JoveTextCommand):
         for c in range(count):
             jove.for_each_cursor(move_word0, first=(c == 0))
 
+#
+# Advance to the beginning (or end if going backward) word unless already positioned at a word
+# character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
+# the argument count.
+#
+class JoveToWordCommand(JoveTextCommand):
+    should_reset_target_column = True
+
+    def run_cmd(self, jove, direction=1):
+        view = self.view
+
+        settings = view.settings()
+        separators = settings.get("jove_word_separators", default_jove_word_separators)
+        forward = direction > 0
+
+        def to_word(cursor):
+            point = cursor.b
+            if forward:
+                if not jove.is_word_char(point, True, separators):
+                    point = view.find_by_class(point, True, sublime.CLASS_WORD_START, separators)
+            else:
+                if not jove.is_word_char(point, False, separators):
+                    point = view.find_by_class(point, False, sublime.CLASS_WORD_END, separators)
+            cursor.a = cursor.b = point
+            return cursor
+
+        jove.for_each_cursor(to_word)
 
 class JoveCaseRegion(JoveTextCommand):
 
