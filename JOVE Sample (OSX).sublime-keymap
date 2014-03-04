@@ -106,7 +106,7 @@
     //////////////////
 
 
-    {"keys": ["tab"], "command": "jove_indent",  "context": [
+    {"keys": ["tab"], "command": "jove_tab_cmd",  "context": [
         {"key": "panel_has_focus",  "operand": false },
         {"key": "auto_complete_visible", "operand": false },
         {"key": "has_next_field", "operand": false },

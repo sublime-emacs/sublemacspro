@@ -1168,7 +1168,11 @@ class JovePaneCmdCommand(JoveTextCommand):
 
         layout['rows'] = sizes_to_rows(sizes)
         window.set_layout(layout)
-        window.active_view_in_group(other).show(jove.get_point())
+
+        # make sure the current pos in the other window is still visible
+        other_view = window.active_view_in_group(other)
+        cm = CmdHelper(other_view)
+        cm.ensure_visible(cm.get_point())
 
     #
     # Split the current pane in half. Clone the current view into the new pane. Refuses to split if
@@ -1737,12 +1741,11 @@ class JoveIncSearchEscape(JoveTextCommand):
 # the cursor is within the indent, move to the start of the indent and call reindent. If the cursor
 # was already at the indent didn't change after calling reindent, indent one more level.
 #
-class JoveIndentCommand(JoveTextCommand):
+class JoveTabCmdCommand(JoveTextCommand):
     def run_cmd(self, jove):
         point = jove.get_point()
         indent,cursor = jove.get_line_indent(point)
-        jove.set_status("Indent at %s, within=%s, at=%s" % (indent, cursor <= indent, cursor == indent))
-        if cursor > indent:
+        if jove.state.active_mark or cursor > indent:
             jove.run_command("reindent", {})
         else:
             if cursor < indent:
