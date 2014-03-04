@@ -865,8 +865,8 @@ class JoveToWordCommand(JoveTextCommand):
             else:
                 if not jove.is_word_char(point, False, separators):
                     point = view.find_by_class(point, False, sublime.CLASS_WORD_END, separators)
-            cursor.a = cursor.b = point
-            return cursor
+
+            return sublime.Region(point, point)
 
         jove.for_each_cursor(to_word)
 
