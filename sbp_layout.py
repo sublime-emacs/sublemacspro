@@ -4,8 +4,8 @@ import unittest
 class LayoutManager:
   """ Manages the layout of a sublime window."""
 
-  MAX_COLS = 4
-  MAX_ROWS = 4
+  MAX_COLS = 20
+  MAX_ROWS = 20
 
   def _buildCoordCells(self):
     self.coord_cells = [ [self._col_val(x[0]), self._row_val(x[1]), self._col_val(x[2]), self._row_val(x[3])]  for x in self.grid["cells"]]

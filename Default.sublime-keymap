@@ -158,6 +158,8 @@
     {"keys": ["super+shift+]"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 
     { "keys": ["ctrl+x", "b"], "command": "next_view" },
+    { "keys": ["ctrl+x", "right"], "command": "next_view" },
+    { "keys": ["ctrl+x", "left"], "command": "prev_view" },
 
     //////////////////////////////////////////////////////////////////////////////
     // Other settings/bindings to complete the Emacs picture for me personally. //

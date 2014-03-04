@@ -264,6 +264,7 @@ class ViewState():
 
 class ViewWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
+        print("New ViewWathcer")
         super(ViewWatcher, self).__init__(*args, **kwargs)
         self.pending_dedups = 0
 
@@ -306,6 +307,11 @@ class ViewWatcher(sublime_plugin.EventListener):
         sublime.set_timeout(doit, 50)
 
 class CmdWatcher(sublime_plugin.EventListener):
+
+    def __init__(self, *args, **kwargs):
+        print("New CmdWatcher")
+        super(CmdWatcher, self).__init__(*args, **kwargs)
+
     def on_anything(self, view):
         view.erase_status(JOVE_STATUS)
 
@@ -1337,13 +1343,21 @@ class JovePaneCmdCommand(JoveTextCommand):
         layout = window.layout()
         current = window.active_group()
 
+        extent = view.viewport_extent()
+        if stype == "h" and extent[1] / 2 <= 4 * view.line_height():
+            return False
+
+        if stype == "v" and extent[0] / 2 <= 20 * view.em_width():
+            return False
+
+
         # Remember groups
         all_elements = [ list(window.get_view_index(v)) + [v] for v in window.views()]
 
         # Perform the layout
         lm = ll.LayoutManager(layout)
         if not lm.split(current, stype):
-            return
+            return False
             
         window.set_layout(lm.build())
 
@@ -1382,6 +1396,7 @@ class JovePaneCmdCommand(JoveTextCommand):
             view.show(point)
 
         sublime.set_timeout(setup_views, 10)
+        return True
 
     #
     # Destroy the specified pane=self|others.
