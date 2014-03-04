@@ -1366,8 +1366,8 @@ class JovePaneCmdCommand(JoveTextCommand):
             pos = element[0]
             if pos > current:
                 pos += 1
-
-            window.set_view_index(element[2], pos, element[1])
+                # only update the view index when needed
+                window.set_view_index(element[2], pos, element[1])
 
         # couldn't find an existing view so we have to clone the current one
         window.run_command("clone_file")
