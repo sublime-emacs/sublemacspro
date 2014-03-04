@@ -142,11 +142,14 @@
     // Begin emacs window cmds //
     /////////////////////////////
 
-    {"keys": ["ctrl+x", "2"], "command": "jove_pane_cmd", "args": {"cmd": "split"}},
-    {"keys": ["ctrl+x", "3"], "command": "jove_pane_cmd", "args": {"cmd": "splitv"}},
+    {"keys": ["ctrl+x", "2"], "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
+    {"keys": ["ctrl+x", "3"], "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
     {"keys": ["ctrl+x", "g"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
     {"keys": ["ctrl+x", "s"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
+
     {"keys": ["ctrl+x", "d"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
+    {"keys": ["ctrl+x", "0"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
+
     {"keys": ["ctrl+x", "1"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
     {"keys": ["ctrl+x", "n"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"keys": ["ctrl+x", "p"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
