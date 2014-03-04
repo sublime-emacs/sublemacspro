@@ -774,6 +774,38 @@ class JoveMoveWordCommand(JoveTextCommand):
     should_reset_target_column = True
     is_ensure_visible_cmd = True
 
+    def find_by_class_fallback(self, view, point, forward, classes, seperators):
+      if forward:
+        delta = 1
+        end_position = self.view.size()
+        if point > end_position:
+          point = end_position
+      else:
+        delta = -1
+        end_position = 0
+        if point < end_position:
+          point = end_position
+
+      while point != end_position:
+        if view.classify(point) & classes != 0:
+          return point
+        point += delta
+
+      return point
+
+    def find_by_class_native(self, view, point, forward, classes, separators):
+        return view.find_by_class(point, forward, classes, separators)
+
+    def call_find_by_class(self, view, point, forward, classes, separators):
+      '''
+      This is a small wrapper that maps to the right find_by_class call
+      depending on the version of ST2 installed
+      '''
+      if _ST3:
+        return self.find_by_class_native(view, point, forward, classes, separators)
+      else:
+        return self.find_by_class_fallback(view, point, forward, classes, separators)
+
     def run_cmd(self, jove, direction=1):
         view = self.view
 
@@ -784,19 +816,19 @@ class JoveMoveWordCommand(JoveTextCommand):
         count = jove.get_count() * direction
         forward = count > 0
         count = abs(count)
-
+ 
         def move_word0(cursor, first=False, **kwargs):
             point = cursor.b
             if forward:
                 if not first or not jove.is_word_char(point, True, separators):
-                    point = view.find_by_class(point, True, sublime.CLASS_WORD_START, separators)
-                point = view.find_by_class(point, True, sublime.CLASS_WORD_END, separators)
+                    point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_START, separators)
+                point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_END, separators)
             else:
                 if not first or not jove.is_word_char(point, False, separators):
-                    point = view.find_by_class(point, False, sublime.CLASS_WORD_END, separators)
-                point = view.find_by_class(point, False, sublime.CLASS_WORD_START, separators)
-            cursor.a = cursor.b = point
-            return cursor
+                    point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_END, separators)
+                point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_START, separators)
+
+            return sublime.Region(point, point)
 
         for c in range(count):
             jove.for_each_cursor(move_word0, first=(c == 0))
