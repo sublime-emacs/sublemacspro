@@ -70,5 +70,5 @@
     {"caption": "JOVE - Quit All Open Panels, Overlays and Selections", "command": "jove_quit"},
 
     {"caption": "JOVE - Convert PLIST to JSON", "command": "jove_convert_plist_to_json"},
-    {"caption": "JOVE - Convert JSON to PLIST", "command": "jove_convert_json_to_plist"},
+    {"caption": "JOVE - Convert JSON to PLIST", "command": "jove_convert_json_to_plist"}
 ]
