@@ -1,0 +1,252 @@
+//
+// This file is broken into two sections. The first is a set of bindings for new commands
+// implemented in the JOVE package. The second section is key bindings for commands already in
+// Sublime that make it work more like emacs.
+//
+// The Default (OSX).sublime-keymap file contains just the JOVE commands and default bindings. I
+// wish there were a way to set things up so you could choose whether to use the bindings of a
+// package or just have access to the commands and the ability to set up your own keymap.
+//
+[
+    //
+    // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
+    //
+    {"keys": ["alt+f"], "command": "jove_move_word", "args": {"direction": 1}},
+    {"keys": ["ctrl+alt+f"], "command": "jove_move_sexpr", "args": {"direction": 1}},
+    {"keys": ["alt+b"], "command": "jove_move_word", "args": {"direction": -1}},
+    {"keys": ["ctrl+alt+b"], "command": "jove_move_sexpr", "args": {"direction": -1}},
+    {"keys": ["alt+c"], "command": "jove_case_word", "args": {"direction": 1, "mode": "title"}},
+
+    {"keys": ["alt+u"], "command": "jove_case_word", "args": {"direction": 1, "mode": "upper"}},
+    {"keys": ["alt+l"], "command": "jove_case_word", "args": {"direction": 1, "mode": "lower"}},
+
+    {"keys": ["ctrl+x", "ctrl+u"], "command": "jove_case_region", "args": {"mode": "upper"}},
+    {"keys": ["ctrl+x", "ctrl+l"], "command": "jove_case_region", "args": {"mode": "lower"}},
+
+    { "keys": ["ctrl+alt+["], "command": "jove_move_to_paragraph", "args": {"direction": 1} },
+    { "keys": ["ctrl+alt+]"], "command": "jove_move_to_paragraph", "args": {"direction": -1} },
+
+
+    // commands that move and set the mark first
+    {"keys": ["alt+shift+."], "command": "jove_move_to", "args": {"to": "eof"}},
+    {"keys": ["alt+shift+,"], "command": "jove_move_to", "args": {"to": "bof"}},
+    { "keys": ["home"], "command": "jove_move_to", "args": {"to": "bof"}},
+    { "keys": ["end"], "command": "jove_move_to", "args": {"to": "eof"}},
+  
+    {"keys": ["alt+."], "command": "jove_move_to", "args": {"to": "eow"}},
+    {"keys": ["alt+,"], "command": "jove_move_to", "args": {"to": "bow"}},
+
+    //
+    // misc
+    //
+    {"keys": ["ctrl+o"], "command": "jove_open_line"},
+    {"keys": ["ctrl+l"], "command": "jove_center_view"},
+    {"keys": ["ctrl+x", "g"], "command": "jove_goto_line"},
+    {"keys": ["alt+g"], "command": "jove_goto_line"},
+
+    // Goto open file
+    {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
+    { "keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
+
+    // Goto Symbol
+    { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
+
+    //
+    // Mark and point, kill region, kill line, yank and yank pop, deletion commands.
+    //
+    {"keys": ["ctrl+space"], "command": "jove_set_mark"},
+    {"keys": ["ctrl+x", "ctrl+x"], "command": "jove_swap_point_and_mark"},
+    {"keys": ["ctrl+k"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_for_kill_line"}},
+    {"keys": ["ctrl+w"], "command": "jove_kill_region"},
+
+    {"keys": ["ctrl+y"], "command": "jove_yank"},
+    {"keys": ["super+v"], "command": "jove_yank"},
+    {"keys": ["alt+w"], "command": "jove_kill_region", "args": {"is_copy": true}},
+    {"keys": ["super+c"], "command": "jove_kill_region", "args": {"is_copy": true}},
+
+    {"keys": ["alt+y"], "command": "jove_yank", "args": {"pop": 1}},
+    {"keys": ["alt+shift+y"], "command": "jove_yank", "args": {"pop": -1}},
+
+    {"keys": ["alt+d"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": 1}},
+    {"keys": ["alt+backspace"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_word", "direction": -1}},
+
+    {"keys": ["ctrl+alt+k"], "command": "jove_move_then_delete", "args": {"move_cmd": "jove_move_sexpr", "direction": 1}},
+
+    {"keys": ["alt+\\"], "command": "jove_delete_white_space"},
+
+    {"keys": ["alt+z"], "command": "jove_zap_to_char"},
+
+    // emacs-style numeric argument handling
+    {"keys": ["ctrl+u"], "command": "jove_universal_argument", "args": {"value": "by_four"}},
+    {"keys": ["alt+-"], "command": "jove_universal_argument", "args": {"value": "negative"}},
+    {"keys": ["alt+1"], "command": "jove_universal_argument", "args": {"value": 1}},
+    {"keys": ["alt+2"], "command": "jove_universal_argument", "args": {"value": 2}},
+    {"keys": ["alt+3"], "command": "jove_universal_argument", "args": {"value": 3}},
+    {"keys": ["alt+4"], "command": "jove_universal_argument", "args": {"value": 4}},
+    {"keys": ["alt+5"], "command": "jove_universal_argument", "args": {"value": 5}},
+    {"keys": ["alt+6"], "command": "jove_universal_argument", "args": {"value": 6}},
+    {"keys": ["alt+7"], "command": "jove_universal_argument", "args": {"value": 7}},
+    {"keys": ["alt+8"], "command": "jove_universal_argument", "args": {"value": 8}},
+    {"keys": ["alt+9"], "command": "jove_universal_argument", "args": {"value": 9}},
+    {"keys": ["alt+0"], "command": "jove_universal_argument", "args": {"value": 0}},
+
+
+    {"keys": ["alt+["], "command": "jove_shift_region", "args": {"direction": -1}},
+    {"keys": ["alt+]"], "command": "jove_shift_region", "args": {"direction": 1}},
+
+    //////////////////////////////
+    // Begin I-search //
+    //////////////////////////////
+    {"keys": ["ctrl+s"], "command": "jove_inc_search", "args": {"forward": true, "regex": false}},
+    {"keys": ["ctrl+r"], "command": "jove_inc_search", "args": {"forward": false, "regex": false}},
+    {"keys": ["ctrl+w"], "command": "jove_inc_search", "args": {"cmd": "append_from_cursor"},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["super+d"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": true},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["alt+d"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": true},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["ctrl+s"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": false, "forward": true},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["ctrl+r"], "command": "jove_inc_search", "args": {"cmd": "next", "keep": false, "forward": false},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["backspace"], "command": "jove_inc_search", "args": {"cmd": "pop"},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["super+a"], "command": "jove_inc_search", "args": {"cmd": "keep_all"},
+        "context": [ {"key": "i_search_active"} ]
+    },
+    {"keys": ["alt+a"], "command": "jove_inc_search", "args": {"cmd": "keep_all"},
+        "context": [ {"key": "i_search_active"} ]
+    },
+
+    //////////////////
+    // End I-search //
+    //////////////////
+
+
+    {"keys": ["tab"], "command": "jove_tab_cmd",  "context": [
+        {"key": "panel_has_focus",  "operand": false },
+        {"key": "auto_complete_visible", "operand": false },
+        {"key": "has_next_field", "operand": false },
+        {"key": "overlay_visible", "operand": false }]
+    },
+
+    {"keys": ["ctrl+g"], "command": "jove_quit"},
+
+    /////////////////////////////
+    // Begin emacs window cmds //
+    /////////////////////////////
+
+    {"keys": ["ctrl+x", "2"], "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
+    {"keys": ["ctrl+x", "3"], "command": "jove_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
+    {"keys": ["ctrl+x", "g"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
+    {"keys": ["ctrl+x", "s"], "command": "jove_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
+
+    {"keys": ["ctrl+x", "d"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
+    {"keys": ["ctrl+x", "0"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
+
+    {"keys": ["ctrl+x", "1"], "command": "jove_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
+    {"keys": ["ctrl+x", "n"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
+    {"keys": ["ctrl+x", "p"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
+    {"keys": ["ctrl+x", "o"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
+    {"keys": ["super+shift+["], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
+    {"keys": ["super+shift+]"], "command": "jove_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
+
+    { "keys": ["ctrl+x", "b"], "command": "next_view" },
+    { "keys": ["ctrl+x", "right"], "command": "next_view" },
+    { "keys": ["ctrl+x", "left"], "command": "prev_view" },
+
+    //////////////////////////////////////////////////////////////////////////////
+    // Other settings/bindings to complete the Emacs picture for me personally. //
+    //////////////////////////////////////////////////////////////////////////////
+
+    {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
+    {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
+
+    {"keys": ["alt+a"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
+    {"keys": ["alt+m"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
+
+    {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
+    {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
+
+    {"keys": ["alt+n"], "command": "next_result"},
+    {"keys": ["alt+p"], "command": "prev_result"},
+
+    {"keys": ["alt+;"], "command": "toggle_comment"},
+    {"keys": ["ctrl+x", "k"], "command": "close"},
+
+    {"keys": ["ctrl+d"], "command": "right_delete"},
+
+    {"keys": ["ctrl+\\"], "command": "undo"},
+    {"keys": ["ctrl+shift+-"], "command": "undo"},
+    {"keys": ["ctrl+x", "u"], "command": "undo" },
+
+    {"keys": ["ctrl+shift+\\"], "command": "redo"},
+    {"keys": ["ctrl+shift+/"], "command": "redo"},
+
+    {"keys": ["alt+h"], "command": "auto_complete"},
+    {"keys": ["ctrl+x", "ctrl+s"], "command": "save"},
+    {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
+    {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
+
+    { "keys": ["ctrl+x","h"], "command": "select_all"},
+    
+    { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
+    { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
+    { "keys": ["ctrl+x", "e"], "command": "run_macro" },
+  
+    {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}},
+    {"keys": ["shift+super+-"], "command": "decrease_font_size"},
+
+    { "keys": ["ctrl+c", ">"], "command": "indent" },
+    { "keys": ["ctrl+c", "<"], "command": "unindent" },
+
+    // Completion
+    { "keys": ["alt+/"], "command": "auto_complete" },
+    { "keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
+        [
+          { "key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
+          { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+          { "key": "setting.tab_completion", "operator": "equal", "operand": true }
+        ]
+    },
+
+    // Integration with default find and replace from sublime
+    { "keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
+    { "keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
+
+    // { "keys": ["ctrl+s"], "command": "find_next",  "context": [
+    //         { "key": "panel_visible", "operator": "equal", "operand": true }
+    //     ]
+    // },
+    // { "keys": ["ctrl+r"], "command": "find_prev", "context": [
+    //     { "key": "panel_visible", "operator": "equal", "operand": true }
+    //     ]
+    // },
+
+
+    // Rectangles
+    // Rectangles
+    { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
+    { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
+
+    // Registers
+    { "keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
+    { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
+
+    { "keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
+    { "keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }  
+
+
+    // These override other commands
+    //{"keys": ["ctrl+z"], "command": "scroll_lines", "args": {"amount": -1 }},
+    //{"keys": ["alt+z"], "command": "scroll_lines", "args": {"amount": 1 }},
+    //{"keys": ["ctrl+x", "ctrl+f"], "command": "i_opener"},
+    //{"keys": ["alt+/"], "command": "toogle_comment"},
+
+]
