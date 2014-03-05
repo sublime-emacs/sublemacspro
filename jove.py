@@ -1508,7 +1508,7 @@ class SbpYankCommand(SbpTextCommand):
         data = kill_ring.get_current(pop)
         if data:
             point = util.get_point()
-            if util.get_region().size() > 0:
+            if util.get_region() and util.get_region().size() > 1:
                 view.replace(util.edit, util.get_region(), data)
             else:
                 view.insert(util.edit, point, data)
