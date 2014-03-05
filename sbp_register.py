@@ -71,7 +71,7 @@ class SbpPointToRegister(sublime_plugin.TextCommand):
 # For some reason switching windows does not work and we can only switch to files
 # in the current window
 class SbpPointFromRegister(sublime_plugin.TextCommand):
-    '''Restore the point from a register with a given command. This will focus the 
+    '''Restore the point from a register with a given command. This will focus the
     point even if it comes from another window and view'''
 
     panel = None
@@ -103,7 +103,7 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
             if not visible.contains(point):
                 point_data[0].run_command("jove_center_view")
 
-class SbpRegisterStore(jove.JoveTextCommand):
+class SbpRegisterStore(jove.SbpTextCommand):
     '''
     Emacs style command allowing to store a certain value
     inside a global register.
@@ -139,7 +139,7 @@ class SbpRegisterStore(jove.JoveTextCommand):
 
 
 
-class SbpRegisterDoInsert(jove.JoveTextCommand):
+class SbpRegisterDoInsert(jove.SbpTextCommand):
 
     def run_cmd(self, jove, content):
         sel = jove.get_point()
@@ -148,7 +148,7 @@ class SbpRegisterDoInsert(jove.JoveTextCommand):
         jove.view.sel().add(sublime.Region(sel + len(content), sel + len(content)))
         jove.view.window().focus_view(self.view)
 
-class SbpRegisterInsert(jove.JoveTextCommand):
+class SbpRegisterInsert(jove.SbpTextCommand):
     """
     Simple command to insert the value stored in the register
     at the point that is currently active

@@ -11,7 +11,7 @@ else:
     _ST3 = True
     from . import jove
 
-class SbpRectangleDelete(jove.JoveTextCommand):
+class SbpRectangleDelete(jove.SbpTextCommand):
   """
   Deletes the content of a given rectangle, content is not saved to kill ring
   and cannot be pasted
@@ -39,7 +39,7 @@ class SbpRectangleDelete(jove.JoveTextCommand):
     self.view.end_edit(jove.edit)
 
 
-class SbpRectangleInsertHandler(jove.JoveTextCommand):
+class SbpRectangleInsertHandler(jove.SbpTextCommand):
   """
   executes the actual insert from the rectangle
   """
@@ -68,7 +68,7 @@ class SbpRectangleInsertHandler(jove.JoveTextCommand):
     self.view.end_edit(jove.edit)
 
 
-class SbpRectangleInsert(jove.JoveTextCommand):
+class SbpRectangleInsert(jove.SbpTextCommand):
   """
   Given a rectangle insert the text at points
   """
