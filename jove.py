@@ -265,7 +265,6 @@ class ViewState():
 
 class ViewWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
-        print("New ViewWathcer")
         super(ViewWatcher, self).__init__(*args, **kwargs)
         self.pending_dedups = 0
 
@@ -310,7 +309,6 @@ class ViewWatcher(sublime_plugin.EventListener):
 class CmdWatcher(sublime_plugin.EventListener):
 
     def __init__(self, *args, **kwargs):
-        print("New CmdWatcher")
         super(CmdWatcher, self).__init__(*args, **kwargs)
 
     def on_anything(self, view):
@@ -581,8 +579,10 @@ class CmdUtil:
             self.set_status("No mark in this buffer")
 
     def set_selection(self, a=None, b=None):
-        if a is None or b is None:
-            a = b = self.get_point()
+        if a is None:
+            a = self.get_point()
+        if b is None:
+            b = a
         selection = self.view.sel()
         selection.clear()
 
@@ -1481,7 +1481,7 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
 
                 # check if line is blank from here to the end and if so, delete the \n as well
                 import re
-                if re.match(r'[ \t]*$', text[index:]):
+                if re.match(r'[ \t]*$', text[index:]) and end < util.view.size():
                     end += 1
 
             # ST2 / ST3 compatibility
@@ -1508,8 +1508,8 @@ class SbpYankCommand(SbpTextCommand):
         data = kill_ring.get_current(pop)
         if data:
             point = util.get_point()
-            if util.get_region() and util.get_region().size() > 1:
-                view.replace(util.edit, util.get_region(), data)
+            if util.view.sel()[0].size() > 0:
+                view.replace(util.edit, util.view.sel()[0], data)
             else:
                 view.insert(util.edit, point, data)
             util.state.mark_ring.set(point, True)
@@ -1858,7 +1858,7 @@ class ISearchInfo():
 class SbpIncSearchCommand(SbpTextCommand):
     def run_cmd(self, util, cmd=None, **kwargs):
         info = ViewState.isearch_info
-        if info is None:
+        if info is None or cmd is None:
             regex = kwargs.get('regex', False)
             if util.state.argument_supplied:
                 regex = not regex
