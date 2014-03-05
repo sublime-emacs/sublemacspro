@@ -35,11 +35,11 @@ else:
 
 JOVE_STATUS = "jove"
 
-ISEARCH_ESCAPE_CMDS = ('move_to', 'jove_center_view', 'move', 'jove_universal_argument',
-                       'jove_move_word', 'jove_move_to', 'scroll_lines')
+ISEARCH_ESCAPE_CMDS = ('move_to', 'sbp_center_view', 'move', 'sbp_universal_argument',
+                       'sbp_move_word', 'sbp_move_to', 'scroll_lines')
 
-default_jove_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
-default_jove_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
+default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
+default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
 
 # ensure_visible commands
 ensure_visible_cmds = set(['move', 'move_to'])
@@ -59,6 +59,7 @@ class KillRing:
     def __init__(self):
         self.buffers = [None] * self.KILL_RING_SIZE
         self.index = 0
+        print("CREATE KILLRING", self)
 
     #
     # Add some text to the kill ring. 'forward' indicates whether the editing command that produced
@@ -272,7 +273,7 @@ class ViewWatcher(sublime_plugin.EventListener):
         ViewState.on_view_closed(view)
 
     def on_modified(self, view):
-        CmdHelper(view).toggle_active_mark_mode(False)
+        CmdUtil(view).toggle_active_mark_mode(False)
 
     def on_deactivated(self, view):
         info = ViewState.isearch_info
@@ -321,7 +322,7 @@ class CmdWatcher(sublime_plugin.EventListener):
     def on_text_command(self, view, cmd, args):
         if view.settings().get('is_widget') and ViewState.isearch_info:
             if cmd in ISEARCH_ESCAPE_CMDS:
-                return ('jove_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
+                return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
             return
 
         vs = ViewState.get(view)
@@ -330,9 +331,9 @@ class CmdWatcher(sublime_plugin.EventListener):
         if args is None:
             args = {}
 
-        # first keep track of this_cmd and last_cmd (if command starts with "jove_" it's handled
+        # first keep track of this_cmd and last_cmd (if command starts with "sbp_" it's handled
         # elsewhere)
-        if not cmd.startswith("jove_"):
+        if not cmd.startswith("sbp_"):
             vs.this_cmd = cmd
 
         #
@@ -365,7 +366,7 @@ class CmdWatcher(sublime_plugin.EventListener):
             })
             if count < 0 and 'forward' in args:
                 args['forward'] = not args['forward']
-            return ("jove_do_times", args)
+            return ("sbp_do_times", args)
         elif cmd == 'scroll_lines':
             args['amount'] *= vs.get_count()
             return (cmd, args)
@@ -375,13 +376,13 @@ class CmdWatcher(sublime_plugin.EventListener):
     #
     def on_post_text_command(self, view, cmd, args):
         vs = ViewState.get(view)
-        cm = CmdHelper(view)
+        cm = CmdUtil(view)
         if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
             # if we just finished a mouse drag, make sure active mark mode is off
             cm.toggle_active_mark_mode(False)
 
-        # reset numeric argument (if command starts with "jove_" this is handled elsewhere)
-        if not cmd.startswith("jove_"):
+        # reset numeric argument (if command starts with "sbp_" this is handled elsewhere)
+        if not cmd.startswith("sbp_"):
             vs.argument_value = 0
             vs.argument_supplied = False
             vs.last_cmd = cmd
@@ -405,7 +406,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         selection = view.sel()
 
         if len(selection) == 1 and vs.this_cmd == 'drag_select':
-            cm = CmdHelper(view, vs);
+            cm = CmdUtil(view, vs);
             if vs.drag_count == 2:
                 # second event - enable active mark
                 region = view.sel()[0]
@@ -428,7 +429,7 @@ class CmdWatcher(sublime_plugin.EventListener):
 #
 # A helper class which provides a bunch of useful functionality on a view
 #
-class CmdHelper:
+class CmdUtil:
     def __init__(self, view, state=None, edit=None):
         self.view = view
         if state is None:
@@ -726,10 +727,10 @@ class CmdHelper:
         return self.get_point()
 
 #
-# The baseclass for JOVE commands. This sets up state, creates a helper, processes the universal
+# The baseclass for JOVE/SBP commands. This sets up state, creates a helper, processes the universal
 # argument, and then calls the run_cmd method, which subclasses should override.
 #
-class JoveTextCommand(sublime_plugin.TextCommand):
+class SbpTextCommand(sublime_plugin.TextCommand):
     should_reset_target_column = False
     is_kill_cmd = False
     is_ensure_visible_cmd = False
@@ -742,39 +743,39 @@ class JoveTextCommand(sublime_plugin.TextCommand):
         # first keep track of this_cmd and last_cmd but only if we're not called recursively
         cmd = self.jove_cmd_name
 
-        if vs.entered == 0 and (cmd != 'jove_universal_argument' or self.unregistered):
+        if vs.entered == 0 and (cmd != 'sbp_universal_argument' or self.unregistered):
             vs.this_cmd = cmd
         vs.entered += 1
-        jove = CmdHelper(self.view, state=vs, edit=edit)
+        util = CmdUtil(self.view, state=vs, edit=edit)
         try:
-            self.run_cmd(jove, **kwargs)
+            self.run_cmd(util, **kwargs)
         finally:
             vs.entered -= 1
-        if vs.entered == 0 and (cmd != 'jove_universal_argument' or self.unregistered):
+        if vs.entered == 0 and (cmd != 'sbp_universal_argument' or self.unregistered):
             vs.last_cmd = vs.this_cmd
             vs.argument_value = 0
             vs.argument_supplied = False
 
             # this no-op ensures the next/prev line target column is reset to the new locations
             if self.should_reset_target_column:
-                jove.reset_target_column()
+                util.reset_target_column()
 
 #
 # Calls run command a specified number of times.
 #
-class JoveDoTimesCommand(JoveTextCommand):
-    def run_cmd(self, jove, cmd, _times, **args):
+class SbpDoTimesCommand(SbpTextCommand):
+    def run_cmd(self, util, cmd, _times, **args):
         view = self.view
         visible = view.visible_region()
         for i in range(_times):
             view.run_command(cmd, args)
-        point = jove.get_point()
+        point = util.get_point()
         if not visible.contains(point):
-            jove.ensure_visible(point, True)
+            util.ensure_visible(point, True)
 
-class JoveShowScopeCommand(JoveTextCommand):
-    def run_cmd(self, jove, direction=1):
-        point = jove.get_point()
+class SbpShowScopeCommand(SbpTextCommand):
+    def run_cmd(self, util, direction=1):
+        point = util.get_point()
         name = self.view.scope_name(point)
         region = self.view.extract_scope(point)
         status = "%d bytes: %s" % (region.size(), name)
@@ -785,7 +786,8 @@ class JoveShowScopeCommand(JoveTextCommand):
 # Advance to the beginning (or end if going backward) word unless already positioned at a word
 # character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
 # the argument count.
-class JoveMoveWordCommand(JoveTextCommand):
+#
+class SbpMoveWordCommand(SbpTextCommand):
     should_reset_target_column = True
     is_ensure_visible_cmd = True
 
@@ -821,82 +823,82 @@ class JoveMoveWordCommand(JoveTextCommand):
       else:
         return self.find_by_class_fallback(view, point, forward, classes, separators)
 
-    def run_cmd(self, jove, direction=1):
+    def run_cmd(self, util, direction=1):
         view = self.view
 
         settings = view.settings()
-        separators = settings.get("jove_word_separators", default_jove_word_separators)
+        separators = settings.get("sbp_word_separators", default_sbp_word_separators)
 
         # determine the direction
-        count = jove.get_count() * direction
+        count = util.get_count() * direction
         forward = count > 0
         count = abs(count)
- 
+
         def move_word0(cursor, first=False, **kwargs):
             point = cursor.b
             if forward:
-                if not first or not jove.is_word_char(point, True, separators):
+                if not first or not util.is_word_char(point, True, separators):
                     point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_START, separators)
                 point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_END, separators)
             else:
-                if not first or not jove.is_word_char(point, False, separators):
+                if not first or not util.is_word_char(point, False, separators):
                     point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_END, separators)
                 point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_START, separators)
 
             return sublime.Region(point, point)
 
         for c in range(count):
-            jove.for_each_cursor(move_word0, first=(c == 0))
+            util.for_each_cursor(move_word0, first=(c == 0))
 
 #
 # Advance to the beginning (or end if going backward) word unless already positioned at a word
 # character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
 # the argument count.
 #
-class JoveToWordCommand(JoveTextCommand):
+class SbpToWordCommand(SbpTextCommand):
     should_reset_target_column = True
 
-    def run_cmd(self, jove, direction=1):
+    def run_cmd(self, util, direction=1):
         view = self.view
 
         settings = view.settings()
-        separators = settings.get("jove_word_separators", default_jove_word_separators)
+        separators = settings.get("sbp_word_separators", default_sbp_word_separators)
         forward = direction > 0
 
         def to_word(cursor):
             point = cursor.b
             if forward:
-                if not jove.is_word_char(point, True, separators):
+                if not util.is_word_char(point, True, separators):
                     point = view.find_by_class(point, True, sublime.CLASS_WORD_START, separators)
             else:
-                if not jove.is_word_char(point, False, separators):
+                if not util.is_word_char(point, False, separators):
                     point = view.find_by_class(point, False, sublime.CLASS_WORD_END, separators)
 
             return sublime.Region(point, point)
 
-        jove.for_each_cursor(to_word)
+        util.for_each_cursor(to_word)
 
-class JoveCaseRegion(JoveTextCommand):
+class SbpCaseRegion(SbpTextCommand):
 
-    def run_cmd(self, jove, mode):
-        region = jove.get_region()
-        text = jove.view.substr(region)
+    def run_cmd(self, util, mode):
+        region = util.get_region()
+        text = util.view.substr(region)
         if mode == "upper":
             text = text.upper()
         elif mode == "lower":
             text = text.lower()
         else:
-            jove.set_status("Unknown Mode")
+            util.set_status("Unknown Mode")
             return
 
-        jove.view.replace(jove.edit, region, text)        
+        util.view.replace(util.edit, region, text)
 
 
-class JoveCaseWordCommand(JoveTextCommand):
+class SbpCaseWordCommand(SbpTextCommand):
     should_reset_target_column = True
 
-    def run_cmd(self, jove, mode, direction=1):
-        count = jove.get_count() * direction
+    def run_cmd(self, util, mode, direction=1):
+        count = util.get_count() * direction
         direction = -1 if count < 0 else 1
         count = abs(count)
         args = {"direction": direction}
@@ -905,25 +907,25 @@ class JoveCaseWordCommand(JoveTextCommand):
             if direction < 0:
                 # modify the N words before point by going back N words first
                 orig_point = cursor.a
-                saved = jove.save_region("tmp")
+                saved = util.save_region("tmp")
                 for i in range(count):
-                    jove.run_command("jove_move_word", args)
+                    util.run_command("sbp_move_word", args)
                 args['direction'] = -args['direction']
 
             for i in range(count):
                 # go to beginning of word (or stay where we are)
-                jove.run_command('jove_to_word', args)
-                cursor.a = jove.get_point()
+                util.run_command('sbp_to_word', args)
+                cursor.a = util.get_point()
 
                 # stretch the selection to the end of the word, making sure we don't zip past our
                 # start if we were going backwards
-                jove.run_command('jove_move_word', args)
-                cursor.b = jove.get_point()
+                util.run_command('sbp_move_word', args)
+                cursor.b = util.get_point()
                 if direction < 0 and cursor.b > orig_point:
                     cursor.b = orig_point
 
                 # now convert the text in the selection
-                old_text = text = jove.view.substr(cursor)
+                old_text = text = util.view.substr(cursor)
                 if mode == "title":
                     text = text.title()
                 elif mode == 'lower':
@@ -933,55 +935,55 @@ class JoveCaseWordCommand(JoveTextCommand):
                 else:
                     print("Unknown mode", mode)
                 if old_text != text:
-                    jove.view.replace(jove.edit, cursor, text)                    
+                    util.view.replace(util.edit, cursor, text)
 
             if direction < 0:
                 cursor.a = cursor.b = orig_point
             else:
-                cursor.a = cursor.b = jove.get_point()
+                cursor.a = cursor.b = util.get_point()
             return cursor
-        jove.for_each_cursor(case_word)
+        util.for_each_cursor(case_word)
 
-class JoveMoveSexprCommand(JoveTextCommand):
+class SbpMoveSexprCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
     should_reset_target_column = True
 
-    def run_cmd(self, jove, direction=1):
+    def run_cmd(self, util, direction=1):
         view = self.view
 
         settings = view.settings()
-        separators = settings.get("jove_sexpr_separators", default_jove_sexpr_separators)
+        separators = settings.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 
         # determine the direction
-        count = jove.get_count() * direction
+        count = util.get_count() * direction
         forward = count > 0
         count = abs(count)
 
-        def advance(cursor, first=False, **kwargs):
+        def advance(cursor, first):
             point = cursor.b
             if forward:
                 limit = view.size()
                 while point < limit:
-                    if jove.is_word_char(point, True, separators):
+                    if util.is_word_char(point, True, separators):
                         point = view.find_by_class(point, True, sublime.CLASS_WORD_END, separators)
                         break
                     else:
                         ch = view.substr(point)
                         if ch in "({['\"":
-                            next_point = jove.to_other_end(point, direction)
+                            next_point = util.to_other_end(point, direction)
                             if next_point is not None:
                                 point = next_point
                                 break
                         point += 1
             else:
                 while point > 0:
-                    if jove.is_word_char(point, False, separators):
+                    if util.is_word_char(point, False, separators):
                         point = view.find_by_class(point, False, sublime.CLASS_WORD_START, separators)
                         break
                     else:
                         ch = view.substr(point - 1)
                         if ch in ")}]'\"":
-                            next_point = jove.to_other_end(point, direction)
+                            next_point = util.to_other_end(point, direction)
                             if next_point is not None:
                                 point = next_point
                                 break
@@ -991,13 +993,13 @@ class JoveMoveSexprCommand(JoveTextCommand):
             return cursor
 
         for c in range(count):
-            jove.for_each_cursor(advance, first=(c == 0))
+            util.for_each_cursor(advance, (c == 0))
 
 # Move to paragraph depends on the functionality provided by the default
-# plugin in ST. So for now we use this
-class JoveMoveToParagraphCommand(JoveTextCommand):
+# plugin in ST. So for now we use this.
+class SbpMoveToParagraphCommand(SbpTextCommand):
 
-    def run_cmd(self, jove, direction=1):
+    def run_cmd(self, util, direction=1):
         # Clear all selections
         s = self.view.sel()[0]
         if direction == 1:
@@ -1027,16 +1029,16 @@ class JoveMoveToParagraphCommand(JoveTextCommand):
 #
 # If there's only one selection, the deleted data is added to the kill ring appropriately.
 #
-class JoveMoveThenDeleteCommand(JoveTextCommand):
+class SbpMoveThenDeleteCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
     is_kill_cmd = True
 
-    def run_cmd(self, jove, move_cmd, **kwargs):
+    def run_cmd(self, util, move_cmd, **kwargs):
         view = self.view
         selection = view.sel()
 
         # peek at the count
-        count = jove.get_count(True)
+        count = util.get_count(True)
         if 'direction' in kwargs:
             count *= kwargs['direction']
 
@@ -1057,23 +1059,23 @@ class JoveMoveThenDeleteCommand(JoveTextCommand):
 
         # only append to kill ring if there's one selection
         if len(selection) == 1:
-            kill_ring.add(view.substr(selection[0]), forward=count > 0, join=jove.state.last_was_kill_cmd())
+            kill_ring.add(view.substr(selection[0]), forward=count > 0, join=util.state.last_was_kill_cmd())
 
         for region in selection:
-            view.erase(jove.edit, region)
+            view.erase(util.edit, region)
 
-class JoveGotoLineCommand(JoveTextCommand):
-    def run_cmd(self, jove):
-        if jove.has_prefix_arg():
-            jove.goto_line(jove.get_count())
+class SbpGotoLineCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        if util.has_prefix_arg():
+            util.goto_line(util.get_count())
         else:
-            jove.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
+            util.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
 
-class JoveDeleteWhiteSpaceCommand(JoveTextCommand):
-    def run_cmd(self, jove):
-        jove.for_each_cursor(self.delete_white_space, jove)
+class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        util.for_each_cursor(self.delete_white_space, util)
 
-    def delete_white_space(self, cursor, jove, **kwargs):
+    def delete_white_space(self, cursor, util, **kwargs):
         view = self.view
         line = view.line(cursor.a)
         data = view.substr(line)
@@ -1085,12 +1087,12 @@ class JoveDeleteWhiteSpaceCommand(JoveTextCommand):
         limit = len(data)
         while end + 1 < limit and data[end:end+1] in (" \t"):
             end += 1
-        view.erase(jove.edit, sublime.Region(line.begin() + start, line.begin() + end))
+        view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
         return None
 
-class JoveUniversalArgumentCommand(JoveTextCommand):
-    def run_cmd(self, jove, value):
-        state = jove.state
+class SbpUniversalArgumentCommand(SbpTextCommand):
+    def run_cmd(self, util, value):
+        state = util.state
         if not state.argument_supplied:
             state.argument_supplied = True
             if value == 'by_four':
@@ -1107,21 +1109,21 @@ class JoveUniversalArgumentCommand(JoveTextCommand):
         elif value == 'negative':
             state.argument_value = -state.argument_value
 
-class JoveShiftRegionCommand(JoveTextCommand):
+class SbpShiftRegionCommand(SbpTextCommand):
     """Shifts the emacs region left or right."""
 
-    def run_cmd(self, jove, direction):
+    def run_cmd(self, util, direction):
         view = self.view
-        state = jove.state
-        r = jove.save_region("shift")
+        state = util.state
+        r = util.save_region("shift")
         if r:
-            jove.toggle_active_mark_mode(False)
+            util.toggle_active_mark_mode(False)
             selection = self.view.sel()
             selection.clear()
 
             # figure out how far we're moving
             if state.argument_supplied:
-                cols = direction * jove.get_count()
+                cols = direction * util.get_count()
             else:
                 cols = direction * self.view.settings().get("tab_size")
 
@@ -1130,9 +1132,9 @@ class JoveShiftRegionCommand(JoveTextCommand):
             amount = abs(cols)
             count = 0
             shifted = 0
-            for line in jove.for_each_line(r):
+            for line in util.for_each_line(r):
                 count += 1
-                if cols < 0 and (line.size() < amount or not jove.is_blank(line.a, line.a + amount)):
+                if cols < 0 and (line.size() < amount or not util.is_blank(line.a, line.a + amount)):
                     continue
                 selection.add(sublime.Region(line.a, line.a))
                 shifted += 1
@@ -1146,16 +1148,16 @@ class JoveShiftRegionCommand(JoveTextCommand):
                     self.view.run_command("right_delete")
 
             # restore the region
-            jove.restore_region("shift")
-            sublime.set_timeout(lambda: jove.set_status("Shifted %d of %d lines in the region" % (shifted, count)), 100)
+            util.restore_region("shift")
+            sublime.set_timeout(lambda: util.set_status("Shifted %d of %d lines in the region" % (shifted, count)), 100)
 
 # Enum definition
 def enum(**enums):
     return type('Enum', (), enums)
 
-SCROLL_TYPES = enum(TOP=1, CENTER=0, BOTTOM=2)    
+SCROLL_TYPES = enum(TOP=1, CENTER=0, BOTTOM=2)
 
-class JoveCenterViewCommand(JoveTextCommand):
+class SbpCenterViewCommand(SbpTextCommand):
     '''
     Reposition the view so that the line containing the cursor is at the
     center of the viewport, if possible. Like the corresponding Emacs
@@ -1175,11 +1177,11 @@ class JoveCenterViewCommand(JoveTextCommand):
         r2,c2 = self.view.rowcol(end)
         return r2 - r1
 
-    def run_cmd(self, jove):
+    def run_cmd(self, util):
         view = self.view
-        point = jove.get_point()
-        if jove.has_prefix_arg():
-            lines = jove.get_count()
+        point = util.get_point()
+        if util.has_prefix_arg():
+            lines = util.get_count()
             line_height = view.line_height()
             ignore, point_offy = view.text_to_layout(point)
             offx, ignore = view.viewport_position()
@@ -1188,109 +1190,109 @@ class JoveCenterViewCommand(JoveTextCommand):
             self.cycle_center_view(view.sel()[0])
 
     def cycle_center_view(self, start):
-        if start != JoveCenterViewCommand.last_sel:
-            JoveCenterViewCommand.last_visible_region = None
-            JoveCenterViewCommand.last_scroll_type = SCROLL_TYPES.CENTER
-            JoveCenterViewCommand.last_sel = start
-            self.view.show_at_center(JoveCenterViewCommand.last_sel)
+        if start != SbpCenterViewCommand.last_sel:
+            SbpCenterViewCommand.last_visible_region = None
+            SbpCenterViewCommand.last_scroll_type = SCROLL_TYPES.CENTER
+            SbpCenterViewCommand.last_sel = start
+            self.view.show_at_center(SbpCenterViewCommand.last_sel)
             return
         else:
-            JoveCenterViewCommand.last_scroll_type = (JoveCenterViewCommand.last_scroll_type + 1) % 3
+            SbpCenterViewCommand.last_scroll_type = (SbpCenterViewCommand.last_scroll_type + 1) % 3
 
-        JoveCenterViewCommand.last_sel = start
-        if JoveCenterViewCommand.last_visible_region == None:
-            JoveCenterViewCommand.last_visible_region = self.view.visible_region()
+        SbpCenterViewCommand.last_sel = start
+        if SbpCenterViewCommand.last_visible_region == None:
+            SbpCenterViewCommand.last_visible_region = self.view.visible_region()
 
         # Now Scroll to position
-        if JoveCenterViewCommand.last_scroll_type == SCROLL_TYPES.CENTER:
-            self.view.show_at_center(JoveCenterViewCommand.last_sel)
-        elif JoveCenterViewCommand.last_scroll_type == SCROLL_TYPES.TOP:
-            row,col = self.view.rowcol(JoveCenterViewCommand.last_visible_region.end())
-            diff = self.rowdiff(JoveCenterViewCommand.last_visible_region.begin(), JoveCenterViewCommand.last_sel.begin())
+        if SbpCenterViewCommand.last_scroll_type == SCROLL_TYPES.CENTER:
+            self.view.show_at_center(SbpCenterViewCommand.last_sel)
+        elif SbpCenterViewCommand.last_scroll_type == SCROLL_TYPES.TOP:
+            row,col = self.view.rowcol(SbpCenterViewCommand.last_visible_region.end())
+            diff = self.rowdiff(SbpCenterViewCommand.last_visible_region.begin(), SbpCenterViewCommand.last_sel.begin())
             self.view.show(self.view.text_point(row + diff-2, 0), False)
-        elif JoveCenterViewCommand.last_scroll_type == SCROLL_TYPES.BOTTOM:
-            row, col = self.view.rowcol(JoveCenterViewCommand.last_visible_region.begin())
-            diff = self.rowdiff(JoveCenterViewCommand.last_sel.begin(), JoveCenterViewCommand.last_visible_region.end())
-            self.view.show(self.view.text_point(row - diff+2, 0), False)  
+        elif SbpCenterViewCommand.last_scroll_type == SCROLL_TYPES.BOTTOM:
+            row, col = self.view.rowcol(SbpCenterViewCommand.last_visible_region.begin())
+            diff = self.rowdiff(SbpCenterViewCommand.last_sel.begin(), SbpCenterViewCommand.last_visible_region.end())
+            self.view.show(self.view.text_point(row - diff+2, 0), False)
 
 
 
-class JoveSetMarkCommand(JoveTextCommand):
-    def run_cmd(self, jove):
-        state = jove.state
+class SbpSetMarkCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        state = util.state
         if state.argument_supplied:
             pos = state.mark_ring.pop()
             if pos:
-                jove.goto_position(pos)
+                util.goto_position(pos)
             else:
-                jove.set_status("No mark to pop!")
-            state.this_cmd = "jove_pop_mark"
+                util.set_status("No mark to pop!")
+            state.this_cmd = "sbp_pop_mark"
         elif state.this_cmd == state.last_cmd:
             # at least two set mark commands in a row: turn ON the highlight
-            jove.toggle_active_mark_mode()
+            util.toggle_active_mark_mode()
         else:
             # set the mark
             state.active_mark = False
-            jove.set_mark()
+            util.set_mark()
 
-class JoveSwapPointAndMarkCommand(JoveTextCommand):
-    def run_cmd(self, jove):
-        if jove.state.argument_supplied:
-            jove.toggle_active_mark_mode()
+class SbpSwapPointAndMarkCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        if util.state.argument_supplied:
+            util.toggle_active_mark_mode()
         else:
-            jove.swap_point_and_mark()
+            util.swap_point_and_mark()
 
-class JoveMoveToCommand(JoveTextCommand):
+class SbpMoveToCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
-    def run_cmd(self, jove, to):
+    def run_cmd(self, util, to):
         if to == 'bof':
-            jove.goto_position(0, set_mark=True)
+            util.goto_position(0, set_mark=True)
         elif to == 'eof':
-            jove.goto_position(self.view.size(), set_mark=True)
+            util.goto_position(self.view.size(), set_mark=True)
         elif to in ('eow', 'bow'):
             visible = self.view.visible_region()
-            jove.goto_position(visible.a if to == 'bow' else visible.b)
+            util.goto_position(visible.a if to == 'bow' else visible.b)
 
-class JoveOpenLineCommand(JoveTextCommand):
-    def run_cmd(self, jove):
+class SbpOpenLineCommand(SbpTextCommand):
+    def run_cmd(self, util):
         view = self.view
         for point in view.sel():
-            view.insert(jove.edit, point.b, "\n")
+            view.insert(util.edit, point.b, "\n")
         view.run_command("move", {"by": "characters", "forward": False})
 
-class JoveKillRegionCommand(JoveTextCommand):
+class SbpKillRegionCommand(SbpTextCommand):
     is_kill_cmd = True
-    def run_cmd(self, jove, is_copy=False):
+    def run_cmd(self, util, is_copy=False):
         view = self.view
-        region = jove.get_region()
+        region = util.get_region()
         if region:
             bytes = region.size()
             kill_ring.add(view.substr(region), True, False)
             if not is_copy:
-                view.erase(jove.edit, region)
+                view.erase(util.edit, region)
             else:
-                jove.set_status("Copied %d bytes" % (bytes,))
-            jove.toggle_active_mark_mode(False)
+                util.set_status("Copied %d bytes" % (bytes,))
+            util.toggle_active_mark_mode(False)
 
-class JovePaneCmdCommand(JoveTextCommand):
-    def run_cmd(self, jove, cmd, **kwargs):
+class SbpPaneCmdCommand(SbpTextCommand):
+    def run_cmd(self, util, cmd, **kwargs):
         view = self.view
         window = view.window()
         if cmd == 'split':
-            self.split(window, jove, **kwargs)
+            self.split(window, util, **kwargs)
         elif cmd == 'grow':
-            self.grow(window, jove, **kwargs)
+            self.grow(window, util, **kwargs)
         elif cmd == 'destroy':
-            self.destroy(window, jove, **kwargs)
+            self.destroy(window, util, **kwargs)
         elif cmd == 'move':
-            self.move(window, jove, **kwargs)
+            self.move(window, util, **kwargs)
         else:
             print("Unknown command")
 
     #
     # Grow the current selected window group (pane). Amount is usually 1 or -1 for grow and shrink.
     #
-    def grow(self, window, jove, amount):
+    def grow(self, window, util, amount):
         def rows_to_sizes(rows):
             sizes = []
             for i in range(len(rows) - 1):
@@ -1310,13 +1312,13 @@ class JovePaneCmdCommand(JoveTextCommand):
         layout = window.layout()
         sizes = rows_to_sizes(layout['rows'])
         current = window.active_group()
-        view = jove.view
+        view = util.view
 
         line_height = view.line_height()
 
         # calulcate the percentage for a single line: view_percentage * line_height/view_height
         one_line = sizes[current] * (line_height / view.viewport_extent()[1])
-        amnt = one_line * jove.get_count() * amount
+        amnt = one_line * util.get_count() * amount
 
         other = current - 1 if current == window.num_groups() - 1 else current + 1
         total = sizes[other] + sizes[current]
@@ -1331,15 +1333,15 @@ class JovePaneCmdCommand(JoveTextCommand):
 
         # make sure the current pos in the other window is still visible
         other_view = window.active_view_in_group(other)
-        cm = CmdHelper(other_view)
+        cm = CmdUtil(other_view)
         cm.ensure_visible(cm.get_point())
 
 
     #
     # Split the current pane in half. Clone the current view into the new pane. Refuses to split if
     # the resulting windows would be too small.
-    def split(self, window, jove, stype):
-        view = jove.view
+    def split(self, window, util, stype):
+        view = util.view
         layout = window.layout()
         current = window.active_group()
 
@@ -1358,7 +1360,7 @@ class JovePaneCmdCommand(JoveTextCommand):
         lm = ll.LayoutManager(layout)
         if not lm.split(current, stype):
             return False
-            
+
         window.set_layout(lm.build())
 
         # Apply posititiong
@@ -1374,7 +1376,7 @@ class JovePaneCmdCommand(JoveTextCommand):
 
         # the cloned view becomes the new active view
         new_view = window.active_view()
- 
+
         # move the new view into the new group (current + 1)
         window.set_view_index(new_view, current + 1, 0)
 
@@ -1391,7 +1393,7 @@ class JovePaneCmdCommand(JoveTextCommand):
             selection.add_all([r for r in view.sel()])
             new_view.set_viewport_position(view.viewport_position(), False)
 
-            point = jove.get_point()
+            point = util.get_point()
             new_view.show(point)
             view.show(point)
 
@@ -1401,10 +1403,10 @@ class JovePaneCmdCommand(JoveTextCommand):
     #
     # Destroy the specified pane=self|others.
     #
-    def destroy(self, window, jove, pane):
+    def destroy(self, window, util, pane):
         if window.num_groups() == 1:
             return
-        view = jove.view
+        view = util.view
         layout = window.layout()
 
         current = window.active_group()
@@ -1416,11 +1418,11 @@ class JovePaneCmdCommand(JoveTextCommand):
             lm.killSelf(current)
         else:
             lm.killOther(current)
-            views = [jove.view]
+            views = [util.view]
 
         window.set_layout(lm.build())
 
-        
+
         for i in range(window.num_groups()):
             view = views[i]
             window.focus_group(i)
@@ -1430,7 +1432,7 @@ class JovePaneCmdCommand(JoveTextCommand):
         dedup_views(window)
 
 
-    def move(self, window, jove, direction):
+    def move(self, window, util, direction):
         if direction in ("prev", "next"):
             direction = 1 if direction == "next" else -1
             current = window.active_group()
@@ -1442,7 +1444,7 @@ class JovePaneCmdCommand(JoveTextCommand):
                 current = 0
             window.focus_group(current)
         else:
-            group,index = window.get_view_index(jove.view)
+            group,index = window.get_view_index(util.view)
             views = window.views_in_group(group)
             direction = 1 if direction == "right" else -1
             index += direction
@@ -1455,35 +1457,35 @@ class JovePaneCmdCommand(JoveTextCommand):
 #
 # Exists only to support kill-line with multiple cursors.
 #
-class JoveMoveForKillLineCommand(JoveTextCommand):
-    def run_cmd(self, jove, **kwargs):
+class SbpMoveForKillLineCommand(SbpTextCommand):
+    def run_cmd(self, util, **kwargs):
         view = self.view
-        state = jove.state
+        state = util.state
 
         if state.argument_supplied:
             # we don't support negative arguments for kill-line
-            count = abs(jove.get_count())
+            count = abs(util.get_count())
             line_mode = True
         else:
             line_mode = False
 
         def advance(cursor):
             start = cursor.b
-            text,index,region = jove.get_line_info(start)
+            text,index,region = util.get_line_info(start)
 
             if line_mode:
                 # go down N lines
                 for i in range(abs(count)):
                     view.run_command("move", {"by": "lines", "forward": True})
 
-                end = jove.get_point()
+                end = util.get_point()
                 if region.contains(end):
                     # same line we started on - must be on the last line of the file
                     end = region.end()
                 else:
                     # beginning of the line we ended up on
-                    end = view.line(jove.get_point()).begin()
-                    jove.goto_position(end, set_mark=False)
+                    end = view.line(util.get_point()).begin()
+                    util.goto_position(end, set_mark=False)
             else:
                 end = region.end()
 
@@ -1491,36 +1493,36 @@ class JoveMoveForKillLineCommand(JoveTextCommand):
                 import re
                 if re.match(r'[ \t]*$', text[index:]):
                     end += 1
-            
+
             # ST2 / ST3 compatibility
             return sublime.Region(end,end)
 
-        jove.for_each_cursor(advance)
+        util.for_each_cursor(advance)
 
-class JoveYankCommand(JoveTextCommand):
-    def run_cmd(self, jove, pop=0):
+class SbpYankCommand(SbpTextCommand):
+    def run_cmd(self, util, pop=0):
         # for now only works with one cursor
         view = self.view
         selection = view.sel()
         if len(selection) != 1:
-            jove.set_status("Cannot yank with multiple cursors ... yet")
+            util.set_status("Cannot yank with multiple cursors ... yet")
             return
 
         if pop != 0:
             # we need to delete the existing data first
-            if jove.state.last_cmd != 'jove_yank':
-                jove.set_status("Previous command was not yank!")
+            if util.state.last_cmd != 'sbp_yank':
+                util.set_status("Previous command was not yank!")
                 return
-            view.erase(jove.edit, jove.get_region())
+            view.erase(util.edit, util.get_region())
 
         data = kill_ring.get_current(pop)
         if data:
-            point = jove.get_point()
-            view.insert(jove.edit, point, data)
-            jove.state.mark_ring.set(point, True)
-            jove.ensure_visible(jove.get_point())
+            point = util.get_point()
+            view.insert(util.edit, point, data)
+            util.state.mark_ring.set(point, True)
+            util.ensure_visible(util.get_point())
         else:
-            jove.set_status("Nothing to pop!")
+            util.set_status("Nothing to pop!")
 
 #####################################################
 #            Better incremental search              #
@@ -1580,9 +1582,9 @@ class ISearchInfo():
     def __init__(self, view, forward, regex):
         self.view = view
         self.current = ISearchInfo.StackItem("", [], [], -1, forward, False)
-        self.jove = CmdHelper(view)
+        self.util = CmdUtil(view)
         self.window = view.window()
-        self.point = self.jove.get_point()
+        self.point = self.util.get_point()
         self.update()
         self.input_view = None
         self.in_changes = 0
@@ -1698,7 +1700,7 @@ class ISearchInfo():
     def finish(self, abort=False):
         if self.current and self.current.search:
             ISearchInfo.last_search = self.current.search
-        self.jove.set_status("")
+        self.util.set_status("")
 
         point_set = False
         if not abort:
@@ -1711,10 +1713,10 @@ class ISearchInfo():
 
         if not point_set:
             # back whence we started
-            self.jove.set_selection(self.point)
-            self.jove.ensure_visible(self.point)
+            self.util.set_selection(self.point)
+            self.util.ensure_visible(self.point)
         else:
-            self.jove.set_mark(self.point, and_selection=False)
+            self.util.set_mark(self.point, and_selection=False)
 
         # erase our regions
         self.view.erase_regions("find")
@@ -1730,7 +1732,7 @@ class ISearchInfo():
         selected = si.selected or []
         self.view.add_regions("selected", selected, "string", "", 0)
         if selected:
-            self.jove.ensure_visible(selected[-1])
+            self.util.ensure_visible(selected[-1])
 
         status = ""
         if si != self.current:
@@ -1744,7 +1746,7 @@ class ISearchInfo():
         else:
             status += " %d matches, %d cursors" % (len(si.regions), len(si.selected))
 
-        self.jove.set_status(status)
+        self.util.set_status(status)
 
     #
     # Try to make progress with the current search string. Even if we're currently failing (in our
@@ -1792,17 +1794,17 @@ class ISearchInfo():
             return
 
         # now push new states for each character we append to the search string
-        helper = self.jove
+        helper = self.util
         search = si.search
-        separators = view.settings().get("jove_word_separators", default_jove_word_separators)
+        separators = view.settings().get("sbp_word_separators", default_sbp_word_separators)
         case_sensitive = re.search(r'[A-Z]', search) is not None
 
-        def append_one(ch):
+        def append_one(util):
             if not case_sensitive:
-                ch = ch.lower()
-            if self.regex and ch in "{}()[].*+":
-                return "\\" + ch
-            return ch
+                util = util.lower()
+            if self.regex and util in "{}()[].*+":
+                return "\\" + util
+            return util
 
         if point < limit:
             # append at least one character, word character or not
@@ -1812,8 +1814,8 @@ class ISearchInfo():
 
             # now insert word characters
             while point < limit and helper.is_word_char(point, True, separators):
-                ch = view.substr(point)
-                search += append_one(ch)
+                util = view.substr(point)
+                search += append_one(util)
                 self.on_change(search)
                 point += 1
         self.set_text(self.current.search)
@@ -1860,12 +1862,12 @@ class ISearchInfo():
                     return index - 1
             return len(regions) - 1
 
-class JoveIncSearchCommand(JoveTextCommand):
-    def run_cmd(self, jove, cmd=None, **kwargs):
+class SbpIncSearchCommand(SbpTextCommand):
+    def run_cmd(self, util, cmd=None, **kwargs):
         info = ViewState.isearch_info
         if info is None:
             regex = kwargs.get('regex', False)
-            if jove.state.argument_supplied:
+            if util.state.argument_supplied:
                 regex = not regex
             info = ViewState.isearch_info = ISearchInfo(self.view, kwargs['forward'], regex)
             info.open()
@@ -1891,9 +1893,9 @@ class JoveIncSearchCommand(JoveTextCommand):
         return False
 
 
-class JoveIncSearchEscape(JoveTextCommand):
+class SbpIncSearchEscape(SbpTextCommand):
     unregistered = True
-    def run_cmd(self, jove, next_cmd, next_args):
+    def run_cmd(self, util, next_cmd, next_args):
         info = ViewState.isearch_info
         info.done()
         info.view.run_command(next_cmd, next_args)
@@ -1903,26 +1905,26 @@ class JoveIncSearchEscape(JoveTextCommand):
 # the cursor is within the indent, move to the start of the indent and call reindent. If the cursor
 # was already at the indent didn't change after calling reindent, indent one more level.
 #
-class JoveTabCmdCommand(JoveTextCommand):
-    def run_cmd(self, jove):
-        point = jove.get_point()
-        indent,cursor = jove.get_line_indent(point)
-        if jove.state.active_mark or cursor > indent:
-            jove.run_command("reindent", {})
+class SbpTabCmdCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        point = util.get_point()
+        indent,cursor = util.get_line_indent(point)
+        if util.state.active_mark or cursor > indent:
+            util.run_command("reindent", {})
         else:
             if cursor < indent:
-                jove.run_command("move_to", {"to": "bol", "extend": False})
-            jove.run_command("reindent", {})
+                util.run_command("move_to", {"to": "bol", "extend": False})
+            util.run_command("reindent", {})
 
             # now check to see if we moved, and if not, indent one more level
             if indent == cursor:
-                new_indent,new_cursor = jove.get_line_indent(jove.get_point())
+                new_indent,new_cursor = util.get_line_indent(util.get_point())
                 if new_indent == indent:
                     # cursor was already at the indent
-                    jove.run_command("indent", {})
+                    util.run_command("indent", {})
 
-class JoveQuitCommand(JoveTextCommand):
-    def run_cmd(self, jove):
+class SbpQuitCommand(SbpTextCommand):
+    def run_cmd(self, util):
         window = self.view.window()
 
         if ViewState.isearch_info:
@@ -1936,9 +1938,9 @@ class JoveQuitCommand(JoveTextCommand):
         s = self.view.sel()
         s = s and s[0]
         if s:
-            if jove.is_visible(s.b):
+            if util.is_visible(s.b):
                 pos = s.b
-            elif jove.is_visible(s.a):
+            elif util.is_visible(s.a):
                 pos = s.a
             else:
                 # set point to the beginning of the line in the middle of the window
@@ -1946,9 +1948,9 @@ class JoveQuitCommand(JoveTextCommand):
                 top_line = self.view.rowcol(visible.begin())[0]
                 bottom_line = self.view.rowcol(visible.end())[0]
                 pos = self.view.text_point((top_line + bottom_line) / 2, 0)
-            jove.set_selection(pos, pos)
-        if jove.state.active_mark:
-            jove.toggle_active_mark_mode()
+            util.set_selection(pos, pos)
+        if util.state.active_mark:
+            util.toggle_active_mark_mode()
 
 
 # This is the actual editor of the zap command
@@ -1961,13 +1963,13 @@ class SbpZapToCharEdit(sublime_plugin.TextCommand):
 
 
 # This command handles the actual selecting of the zap char
-class JoveZapToCharCommand(JoveTextCommand):
+class SbpZapToCharCommand(SbpTextCommand):
 
     is_kill_cmd = True
     panel = None
 
-    def run_cmd(self, jove, **args):
-        self.jove = jove
+    def run_cmd(self, util, **args):
+        self.util = util
         self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
 
     def zap(self):
@@ -1982,7 +1984,7 @@ class JoveZapToCharCommand(JoveTextCommand):
 
         self.panel.window().run_command("hide_panel")
 
-        start = finish = self.jove.get_point()
+        start = finish = self.util.get_point()
         found = False
         while not found and finish < self.view.size():
             data = self.view.substr(finish)
@@ -1990,36 +1992,36 @@ class JoveZapToCharCommand(JoveTextCommand):
                 found = True
                 break
             finish += 1
-        
+
         # Zap to char
         if found:
             self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
         else:
             sublime.status_message("Character %s not found" % content)
 
-class JoveConvertPlistToJsonCommand(JoveTextCommand):
+class SbpConvertPlistToJsonCommand(SbpTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
     PLIST_SYNTAX = "Packages/XML/XML.tmLanguage"
 
-    def run_cmd(self, jove):
+    def run_cmd(self, util):
         import json
         from plistlib import readPlistFromBytes, writePlistToBytes
 
         data = self.view.substr(sublime.Region(0, self.view.size())).encode("utf-8")
-        self.view.replace(jove.edit, sublime.Region(0, self.view.size()),
+        self.view.replace(util.edit, sublime.Region(0, self.view.size()),
                           json.dumps(readPlistFromBytes(data), indent=4, separators=(',', ': ')))
         self.view.set_syntax_file(JSON_SYNTAX)
 
-class JoveConvertJsonToPlistCommand(JoveTextCommand):
+class SbpConvertJsonToPlistCommand(SbpTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
     PLIST_SYNTAX = "Packages/XML/XML.tmLanguage"
 
-    def run_cmd(self, jove):
+    def run_cmd(self, util):
         import json
         from plistlib import readPlistFromBytes, writePlistToBytes
 
         data = json.loads(self.view.substr(sublime.Region(0, self.view.size())))
-        self.view.replace(jove.edit, sublime.Region(0, self.view.size()), writePlistToBytes(data).decode("utf-8"))
+        self.view.replace(util.edit, sublime.Region(0, self.view.size()), writePlistToBytes(data).decode("utf-8"))
         self.view.set_syntax_file(PLIST_SYNTAX)
 
 #
@@ -2060,10 +2062,10 @@ def InitModule(module_name):
 
     module = sys.modules[module_name]
     for name in dir(module):
-        if name.startswith("Jove"):
+        if name.startswith("Sbp"):
             cls = getattr(module, name)
             try:
-                if not issubclass(cls, sublime_plugin.TextCommand):
+                if not issubclass(cls, SbpTextCommand):
                     continue
             except:
                 continue
