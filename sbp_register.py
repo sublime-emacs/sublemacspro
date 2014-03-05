@@ -103,14 +103,15 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
             if not visible.contains(point):
                 point_data[0].run_command("jove_center_view")
 
-class SbpRegisterStore(sublime_plugin.TextCommand):
+class SbpRegisterStore(jove.JoveTextCommand):
     '''
     Emacs style command allowing to store a certain value
     inside a global register.
     '''
     panel = None
 
-    def run(self, edit):
+    def run_cmd(self, jove):
+        self.jove = jove
         self.panel = self.view.window().show_input_panel("Store into register:", "", \
             self.on_done, \
             self.on_change,\
@@ -134,11 +135,20 @@ class SbpRegisterStore(sublime_plugin.TextCommand):
             return
 
         # Get the region
-        sbp_registers.store(register, self.view.substr(sel[0]))
-        self.view.run_command("sbp_cancel_mark")
+        sbp_registers.store(register, self.view.substr(self.jove.get_region()))
 
 
-class SbpRegisterInsert(sublime_plugin.TextCommand):
+
+class SbpRegisterDoInsert(jove.JoveTextCommand):
+
+    def run_cmd(self, jove, content):
+        sel = jove.get_point()
+        jove.view.replace(jove.edit, sublime.Region(sel,sel) , content)
+        jove.view.sel().clear()
+        jove.view.sel().add(sublime.Region(sel + len(content), sel + len(content)))
+        jove.view.window().focus_view(self.view)
+
+class SbpRegisterInsert(jove.JoveTextCommand):
     """
     Simple command to insert the value stored in the register
     at the point that is currently active
@@ -146,13 +156,13 @@ class SbpRegisterInsert(sublime_plugin.TextCommand):
 
     panel = None
 
-    def run(self, edit):
+    def run_cmd(self, jove):
         self.panel = self.view.window().show_input_panel("Insert from register:", "", \
             None, \
-            fu.partial(self.insert, edit),\
+            self.insert,\
             None)
 
-    def insert(self, edit, register):
+    def insert(self, register):
         if not self.panel:
             return
 
@@ -162,11 +172,4 @@ class SbpRegisterInsert(sublime_plugin.TextCommand):
         if (sel is None) or len(sel) != 1:
             return
 
-        begin = sel[0].begin()
-        if register in sbp_registers:
-
-            cnt = sbp_registers.get(register)
-            self.view.replace(edit, sel[0], cnt)
-
-            sel.clear()
-            self.view.sel().add(begin + len(cnt))
+        self.view.window().run_command("sbp_register_do_insert", {"content": sbp_registers.get(register)})

@@ -1344,6 +1344,7 @@ class SbpPaneCmdCommand(SbpTextCommand):
         view = util.view
         layout = window.layout()
         current = window.active_group()
+        group_count = window.num_groups()
 
         extent = view.viewport_extent()
         if stype == "h" and extent[1] / 2 <= 4 * view.line_height():
@@ -1353,9 +1354,6 @@ class SbpPaneCmdCommand(SbpTextCommand):
             return False
 
 
-        # Remember groups
-        all_elements = [ list(window.get_view_index(v)) + [v] for v in window.views()]
-
         # Perform the layout
         lm = ll.LayoutManager(layout)
         if not lm.split(current, stype):
@@ -1363,28 +1361,20 @@ class SbpPaneCmdCommand(SbpTextCommand):
 
         window.set_layout(lm.build())
 
-        # Apply posititiong
-        for element in all_elements:
-            pos = element[0]
-            if pos > current:
-                pos += 1
-                # only update the view index when needed
-                window.set_view_index(element[2], pos, element[1])
-
         # couldn't find an existing view so we have to clone the current one
         window.run_command("clone_file")
 
         # the cloned view becomes the new active view
         new_view = window.active_view()
 
-        # move the new view into the new group (current + 1)
-        window.set_view_index(new_view, current + 1, 0)
+        # move the new view into the new group (add the end of the list)
+        window.set_view_index(new_view, group_count, 0)
 
         # make sure the original view is the focus in the original pane
         window.focus_view(view)
 
         # switch to new pane
-        window.focus_group(current + 1)
+        window.focus_group(group_count + 1)
 
         # after a short delay make sure the two views are looking at the same area
         def setup_views():
@@ -1518,7 +1508,10 @@ class SbpYankCommand(SbpTextCommand):
         data = kill_ring.get_current(pop)
         if data:
             point = util.get_point()
-            view.insert(util.edit, point, data)
+            if util.get_region().size() > 0:
+                view.replace(util.edit, util.get_region(), data)
+            else:
+                view.insert(util.edit, point, data)
             util.state.mark_ring.set(point, True)
             util.ensure_visible(util.get_point())
         else:

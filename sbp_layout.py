@@ -24,7 +24,7 @@ class LayoutManager:
     the range given by result into the coord_cells
     """
     left, right = self.coord_cells[0:index], self.coord_cells[index+1:]
-    self.coord_cells = left + result + right
+    self.coord_cells = left + [result[0]] + right + [result[1]]
 
   def __init__(self, grid):
     self.grid = grid
@@ -39,7 +39,7 @@ class LayoutManager:
     return self.grid["rows"]
 
   def split(self, index, mode):
-    """Splits a cell identified by index into two. 
+    """Splits a cell identified by index into two.
 
     The split itself is described by the mode parameter and can be either
     horizontal or vertical
@@ -58,11 +58,11 @@ class LayoutManager:
     if mode == "v":
       self._col_count += 1
       delta = (current[2] - current[0]) / 2.0
-      result = [ [current[0], current[1], current[0] + delta, current[3]], [current[0]+delta, current[1], current[2], current[3]] ] 
+      result = [ [current[0], current[1], current[0] + delta, current[3]], [current[0]+delta, current[1], current[2], current[3]] ]
     else:
       self._row_count += 1
       delta = (current[3] - current[1]) / 2.0
-      result = [ [current[0], current[1], current[2], current[1] + delta], [current[0], current[1] + delta, current[2], current[3]] ]       
+      result = [ [current[0], current[1], current[2], current[1] + delta], [current[0], current[1] + delta, current[2], current[3]] ]
 
     self._replace(index, result)
     return True
@@ -81,7 +81,7 @@ class LayoutManager:
 
     # First check if there are neighbouring cells atop or below
     expand = []
-    
+
     # Shift top
     expand += [[i, 1] for i, x in enumerate(self.coord_cells) if x[1] == cell[3] and x[0] >= cell[0] and x[2] <= cell[2]]
     # Shift down
@@ -135,7 +135,7 @@ class TestLayoutManager(unittest.TestCase):
     lm.split(0, 'h')
     lm.killSelf(2)
     self.assertEqual(self.hbase, lm.build())
-    
+
     lm.killOther(0)
     lm.split(0, 'v')
     lm.split(1, 'h')
@@ -173,7 +173,7 @@ class TestLayoutManager(unittest.TestCase):
     lm = LayoutManager(self.base)
     self.assertEqual(2, len(lm.cols()))
     self.assertEqual(2, len(lm.rows()))
-    
+
   def testCreateMapping(self):
     lm = LayoutManager(self.hbase)
     self.assertEqual([[0.0, 0.0, 1.0, 0.5],[0.0, 0.5, 1.0, 1.0]], lm.coord_cells)
