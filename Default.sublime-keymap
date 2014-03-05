@@ -135,8 +135,12 @@
 
     {"keys": ["ctrl+x", "2"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
     {"keys": ["ctrl+x", "3"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
-    {"keys": ["ctrl+x", "g"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
-    {"keys": ["ctrl+x", "s"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
+
+    // Modifying the Pane Sies
+    {"keys": ["ctrl+shift+c+up"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
+    {"keys": ["ctrl+shift+c+down"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
+    {"keys": ["ctrl+shift+c+left"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
+    {"keys": ["ctrl+shift+c+right"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
 
     {"keys": ["ctrl+x", "d"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
     {"keys": ["ctrl+x", "0"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
@@ -144,7 +148,7 @@
     {"keys": ["ctrl+x", "1"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
     {"keys": ["ctrl+x", "n"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"keys": ["ctrl+x", "p"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
-    {"keys": ["ctrl+x", "o"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
+    {"keys": ["ctrl+x", "o"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"keys": ["super+shift+["], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
     {"keys": ["super+shift+]"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 

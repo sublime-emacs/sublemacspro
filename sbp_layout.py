@@ -1,4 +1,18 @@
 import unittest
+import functools
+
+def cmp_cells(ea,eb):
+  a = ea[1]
+  b = eb[1]
+  if a[1] < b[1]:
+    return -1
+  elif a[1] == b[1]:
+    if a[0] < b[0]:
+      return -1
+    else:
+      return 1
+  else:
+    return 1
 
 
 class LayoutManager:
@@ -27,10 +41,11 @@ class LayoutManager:
     self.coord_cells = left + [result[0]] + right + [result[1]]
 
   def __init__(self, grid):
-    self.grid = grid
-    self._buildCoordCells()
-    self._col_count = len(self.cols())
-    self._row_count = len(self.rows())
+    if grid:
+      self.grid = grid
+      self._buildCoordCells()
+      self._col_count = len(self.cols())
+      self._row_count = len(self.rows())
 
   def cols(self):
     return self.grid["cols"]
@@ -117,6 +132,52 @@ class LayoutManager:
       "cells" : [ [  cols[cell[0]], rows[cell[1]], cols[cell[2]], rows[cell[3]]  ] for cell in self.coord_cells ]
     }
     return result
+
+  def next(self, index, direction=1):
+    """
+    Find the visually next cell for the given index. This must not necessarily
+    be the adjacent cell in the list
+    """
+    cell = self.grid["cells"][index]
+    # Sort the cells
+    new_grid = sorted(enumerate(self.grid["cells"]), key=functools.cmp_to_key(cmp_cells), reverse=False)
+    new_pos = [i for i, x in enumerate(new_grid) if x[1] == cell].pop()
+
+    # find the position of the old cell and get the new index
+    return new_grid[(new_pos + direction) % len(self.grid["cells"])][0]
+
+  def extend(self, index, direction, amount):
+    """
+    Grows / shrinks the cell give the direction. It copies the emacs algorithm
+    to do that. Which does the following.
+
+      * growing horizontally goes right first, if not possible go left
+      * growing vertically goes down first, if not top
+    """
+    cell = self.grid["cells"][index]
+    if direction == 'g':
+      if cell[3] != len(self.grid["rows"]) - 1:
+        self.grid["rows"][cell[3]] += amount
+      elif cell[1] != 0:
+        self.grid["rows"][cell[0]] -= amount
+    elif direction == 's':
+      if cell[3] != len(self.grid["rows"]) - 1:
+        self.grid["rows"][cell[3]] -= amount
+      elif cell[1] != 0:
+        self.grid["rows"][cell[0]] += amount
+    elif direction == 'gh':
+      if cell[2] != len(self.grid["cols"]) - 1:
+        self.grid["cols"][cell[2]] -= amount
+      elif cell[0] != 0:
+        self.grid["cols"][cell[0]] += amount
+    else:
+      if cell[2] != len(self.grid["cols"]) - 1:
+        self.grid["cols"][cell[2]] += amount
+      elif cell[0] != 0:
+        self.grid["cols"][cell[0]] -= amount
+
+    return self.grid
+
 
 
 # Test Code below

@@ -268,6 +268,7 @@ class ViewWatcher(sublime_plugin.EventListener):
         super(ViewWatcher, self).__init__(*args, **kwargs)
         self.pending_dedups = 0
 
+
     def on_close(self, view):
         ViewState.on_view_closed(view)
 
@@ -314,10 +315,12 @@ class CmdWatcher(sublime_plugin.EventListener):
     def on_anything(self, view):
         view.erase_status(JOVE_STATUS)
 
+
     #
     # Override some commands to execute them N times if the numberic argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
+
         if view.settings().get('is_widget') and ViewState.isearch_info:
             if cmd in ISEARCH_ESCAPE_CMDS:
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
@@ -328,6 +331,7 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         if args is None:
             args = {}
+
 
         # first keep track of this_cmd and last_cmd (if command starts with "sbp_" it's handled
         # elsewhere)
@@ -354,7 +358,7 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         # now check for numeric argument and rewrite some commands as necessary
         if not vs.argument_supplied:
-            return
+            return None
 
         if cmd in repeatable_cmds:
             count = vs.get_count()
@@ -423,6 +427,26 @@ class CmdWatcher(sublime_plugin.EventListener):
         ViewState.get(view).this_cmd = None
         self.on_anything(view)
 
+
+class WindowCmdWatcher(sublime_plugin.EventListener):
+
+    def __init__(self, *args, **kwargs):
+        print("WindowCmdWatcher")
+        super(WindowCmdWatcher, self).__init__(*args, **kwargs)
+
+
+    def on_window_command(self, window, cmd, args):
+        # Check the move state of the Panes and make sure we stop recursion
+        print(cmd, args)
+        if cmd == "sbp_pane_cmd" and args and args['cmd'] == 'move' and 'next_pane' not in args:
+            lm = ll.LayoutManager(window.layout())
+            if args["direction"] == 'next':
+                pos = lm.next(window.active_group())
+            else:
+                pos = lm.next(window.active_group(), -1)
+
+            args["next_pane"] = pos
+            return cmd, args
 
 #
 # A helper class which provides a bunch of useful functionality on a view
@@ -751,6 +775,7 @@ class SbpTextCommand(sublime_plugin.TextCommand):
             self.run_cmd(util, **kwargs)
         finally:
             vs.entered -= 1
+
         if vs.entered == 0 and (cmd != 'sbp_universal_argument' or self.unregistered):
             vs.last_cmd = vs.this_cmd
             vs.argument_value = 0
@@ -759,6 +784,12 @@ class SbpTextCommand(sublime_plugin.TextCommand):
             # this no-op ensures the next/prev line target column is reset to the new locations
             if self.should_reset_target_column:
                 util.reset_target_column()
+
+class SbpWindowCommand(sublime_plugin.WindowCommand):
+
+    def run(self, **kwargs):
+        self.util = CmdUtil(self.window.active_view(), state=ViewState.get(self.window.active_view()))
+        self.run_cmd(self.util, **kwargs)
 
 #
 # Calls run command a specified number of times.
@@ -1274,78 +1305,64 @@ class SbpKillRegionCommand(SbpTextCommand):
                 util.set_status("Copied %d bytes" % (bytes,))
             util.toggle_active_mark_mode(False)
 
-class SbpPaneCmdCommand(SbpTextCommand):
+class SbpPaneCmdCommand(SbpWindowCommand):
+
     def run_cmd(self, util, cmd, **kwargs):
-        view = self.view
-        window = view.window()
         if cmd == 'split':
-            self.split(window, util, **kwargs)
+            self.split(self.window, util, **kwargs)
         elif cmd == 'grow':
-            self.grow(window, util, **kwargs)
+            self.grow(self.window, util, **kwargs)
         elif cmd == 'destroy':
-            self.destroy(window, util, **kwargs)
+            self.destroy(self.window, **kwargs)
         elif cmd == 'move':
-            self.move(window, util, **kwargs)
+            self.move(self.window, **kwargs)
         else:
             print("Unknown command")
 
     #
     # Grow the current selected window group (pane). Amount is usually 1 or -1 for grow and shrink.
     #
-    def grow(self, window, util, amount):
+    def grow(self, window, util, direction):
         def rows_to_sizes(rows):
             sizes = []
             for i in range(len(rows) - 1):
                 sizes.append(rows[i + 1] - rows[i])
             return sizes
 
-        def sizes_to_rows(sizes):
-            rows = [0]
-            off = 0
-            for s in sizes:
-                off += s
-                rows.append(off)
-            return rows
-
         if window.num_groups() == 1:
             return
+
+        # Prepare the layout
         layout = window.layout()
-        sizes = rows_to_sizes(layout['rows'])
+        lm = ll.LayoutManager(layout)
+
         current = window.active_group()
         view = util.view
 
-        line_height = view.line_height()
+        # Handle vertical moves
+        if direction in ('g', 's'):
+            line_height = view.line_height()
+            sizes = rows_to_sizes(layout['rows'])
+            one_line = sizes[current] * (line_height / view.viewport_extent()[1])
+            amnt = one_line * util.get_count()
+        else:
+            char_width = view.em_width() / view.viewport_extent()[0]
+            amnt = char_width * util.get_count();
 
-        # calulcate the percentage for a single line: view_percentage * line_height/view_height
-        one_line = sizes[current] * (line_height / view.viewport_extent()[1])
-        amnt = one_line * util.get_count() * amount
-
-        other = current - 1 if current == window.num_groups() - 1 else current + 1
-        total = sizes[other] + sizes[current]
-        sizes[other] -= amnt
-        sizes[current] += amnt
-        if sizes[other] < .1:
-            sizes[other] = .1
-            sizes[current] = total - .1
-
-        layout['rows'] = sizes_to_rows(sizes)
-        window.set_layout(layout)
-
-        # make sure the current pos in the other window is still visible
-        other_view = window.active_view_in_group(other)
-        cm = CmdUtil(other_view)
-        cm.ensure_visible(cm.get_point())
+        window.set_layout(lm.extend(current, direction, amnt))
+        #cm = CmdUtil(other_view)
+        #cm.ensure_visible(cm.get_point())
 
 
     #
     # Split the current pane in half. Clone the current view into the new pane. Refuses to split if
     # the resulting windows would be too small.
     def split(self, window, util, stype):
-        view = util.view
         layout = window.layout()
         current = window.active_group()
         group_count = window.num_groups()
 
+        view = window.active_view()
         extent = view.viewport_extent()
         if stype == "h" and extent[1] / 2 <= 4 * view.line_height():
             return False
@@ -1393,10 +1410,10 @@ class SbpPaneCmdCommand(SbpTextCommand):
     #
     # Destroy the specified pane=self|others.
     #
-    def destroy(self, window, util, pane):
+    def destroy(self, window, pane):
         if window.num_groups() == 1:
             return
-        view = util.view
+        view = window.active_view()
         layout = window.layout()
 
         current = window.active_group()
@@ -1408,7 +1425,7 @@ class SbpPaneCmdCommand(SbpTextCommand):
             lm.killSelf(current)
         else:
             lm.killOther(current)
-            views = [util.view]
+            views = [window.active_view()]
 
         window.set_layout(lm.build())
 
@@ -1422,7 +1439,12 @@ class SbpPaneCmdCommand(SbpTextCommand):
         dedup_views(window)
 
 
-    def move(self, window, util, direction):
+    def move(self, window, **kwargs):
+        if 'next_pane' in kwargs:
+            window.focus_group(kwargs["next_pane"])
+            return
+
+        direction = kwargs['direction']
         if direction in ("prev", "next"):
             direction = 1 if direction == "next" else -1
             current = window.active_group()
