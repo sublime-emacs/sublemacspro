@@ -59,7 +59,6 @@ class KillRing:
     def __init__(self):
         self.buffers = [None] * self.KILL_RING_SIZE
         self.index = 0
-        print("CREATE KILLRING", self)
 
     #
     # Add some text to the kill ring. 'forward' indicates whether the editing command that produced
@@ -437,7 +436,6 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
     def on_window_command(self, window, cmd, args):
         # Check the move state of the Panes and make sure we stop recursion
-        print(cmd, args)
         if cmd == "sbp_pane_cmd" and args and args['cmd'] == 'move' and 'next_pane' not in args:
             lm = ll.LayoutManager(window.layout())
             if args["direction"] == 'next':
@@ -1323,36 +1321,35 @@ class SbpPaneCmdCommand(SbpWindowCommand):
     # Grow the current selected window group (pane). Amount is usually 1 or -1 for grow and shrink.
     #
     def grow(self, window, util, direction):
-        def rows_to_sizes(rows):
-            sizes = []
-            for i in range(len(rows) - 1):
-                sizes.append(rows[i + 1] - rows[i])
-            return sizes
-
         if window.num_groups() == 1:
             return
 
         # Prepare the layout
         layout = window.layout()
         lm = ll.LayoutManager(layout)
+        rows = lm.rows()
+        cols = lm.cols()
 
         current = window.active_group()
         view = util.view
 
         # Handle vertical moves
+        count = util.get_count()
         if direction in ('g', 's'):
             line_height = view.line_height()
-            sizes = rows_to_sizes(layout['rows'])
-            one_line = sizes[current] * (line_height / view.viewport_extent()[1])
-            amnt = one_line * util.get_count()
+            unit = (rows[current + 1] - rows[current]) * (line_height / view.viewport_extent()[1])
         else:
-            char_width = view.em_width() / view.viewport_extent()[0]
-            amnt = char_width * util.get_count();
+            unit = (cols[current + 1] - cols[current]) * view.em_width() / view.viewport_extent()[0]
 
-        window.set_layout(lm.extend(current, direction, amnt))
-        #cm = CmdUtil(other_view)
-        #cm.ensure_visible(cm.get_point())
+        window.set_layout(lm.extend(current, direction, unit, count))
 
+        # make sure point doesn't disappear in any active view - a delay is needed for this to work
+        def ensure_visible():
+            for g in range(window.num_groups()):
+                view = window.active_view_in_group(g)
+                util = CmdUtil(view)
+                util.ensure_visible(util.get_point())
+        sublime.set_timeout(ensure_visible, 50)
 
     #
     # Split the current pane in half. Clone the current view into the new pane. Refuses to split if

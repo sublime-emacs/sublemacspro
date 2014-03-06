@@ -146,7 +146,7 @@ class LayoutManager:
     # find the position of the old cell and get the new index
     return new_grid[(new_pos + direction) % len(self.grid["cells"])][0]
 
-  def extend(self, index, direction, amount):
+  def extend(self, index, direction, unit, count):
     """
     Grows / shrinks the cell give the direction. It copies the emacs algorithm
     to do that. Which does the following.
@@ -154,27 +154,42 @@ class LayoutManager:
       * growing horizontally goes right first, if not possible go left
       * growing vertically goes down first, if not top
     """
+
+    # figure out which row or col entry we're going to adjust and make sure not to allow any
+    # adjascent rows/cols to get too close to each other
     cell = self.grid["cells"][index]
-    if direction == 'g':
-      if cell[3] != len(self.grid["rows"]) - 1:
-        self.grid["rows"][cell[3]] += amount
-      elif cell[1] != 0:
-        self.grid["rows"][cell[0]] -= amount
-    elif direction == 's':
-      if cell[3] != len(self.grid["rows"]) - 1:
-        self.grid["rows"][cell[3]] -= amount
-      elif cell[1] != 0:
-        self.grid["rows"][cell[0]] += amount
-    elif direction == 'gh':
-      if cell[2] != len(self.grid["cols"]) - 1:
-        self.grid["cols"][cell[2]] -= amount
-      elif cell[0] != 0:
-        self.grid["cols"][cell[0]] += amount
-    else:
-      if cell[2] != len(self.grid["cols"]) - 1:
-        self.grid["cols"][cell[2]] += amount
-      elif cell[0] != 0:
-        self.grid["cols"][cell[0]] -= amount
+    rows = self.rows()
+    cols = self.cols()
+    amount = unit * count
+
+    if "s" in direction:
+      amount = -amount
+    if direction in ('g', 's') and len(rows) > 2:
+      y2 = cell[3]
+      if y2 == len(rows) - 1 or y2 == 0:
+        # Never adjust top or bottom: they should be 0 and 1.0 always, so when at the top or the
+        # bottom move inward.
+        y2 = abs(y2 - 1)
+        amount = -amount
+
+      # check for too small height
+      new_pos = rows[y2] + amount
+      min_height = 3 * unit
+      if new_pos - rows[y2 - 1] >= min_height and rows[y2 + 1] - new_pos >= min_height:
+        rows[y2] = new_pos
+    elif direction in ('gh', 'gs') and len(cols) > 2:
+      x2 = cell[2]
+      if x2 == len(self.grid['cols']) - 1 or x2 == 0:
+        # Never adjust left or right: they should be 0 and 1.0 always, so when at the left or the
+        # right move inward.
+        x2 = abs(x2 - 1)
+        amount = -amount
+
+      # check for too small width
+      min_width = 20 * unit
+      new_pos = cols[x2] + amount
+      if new_pos - cols[x2 - 1] >= min_width and cols[x2 + 1] - new_pos >= min_width:
+        cols[x2] = new_pos
 
     return self.grid
 
