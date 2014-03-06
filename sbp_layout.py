@@ -164,9 +164,10 @@ class LayoutManager:
 
     if "s" in direction:
       amount = -amount
-    if direction in ('g', 's') and len(rows) > 2:
-      y2 = cell[3]
-      if y2 == len(rows) - 1 or y2 == 0:
+    x1,y1,x2,y2 = cell
+    if direction in ('g', 's') and (y1 > 0 or y2 < self._row_count - 1):
+      # adjust heights
+      if y2 == len(rows) - 1:
         # Never adjust top or bottom: they should be 0 and 1.0 always, so when at the top or the
         # bottom move inward.
         y2 = abs(y2 - 1)
@@ -177,8 +178,8 @@ class LayoutManager:
       min_height = 5 * unit
       if new_pos - rows[y2 - 1] >= min_height and rows[y2 + 1] - new_pos >= min_height:
         rows[y2] = new_pos
-    elif direction in ('gh', 'gs') and len(cols) > 2:
-      x2 = cell[2]
+    elif direction in ('gh', 'sh') and (x1 > 0 or x2 < self._col_count - 1):
+      # adjust widths
       if x2 == len(self.grid['cols']) - 1 or x2 == 0:
         # Never adjust left or right: they should be 0 and 1.0 always, so when at the left or the
         # right move inward.
