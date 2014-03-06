@@ -1329,6 +1329,20 @@ class SbpPaneCmdCommand(SbpWindowCommand):
         lm = ll.LayoutManager(layout)
         rows = lm.rows()
         cols = lm.cols()
+        cells = layout['cells']
+
+        # calculate the width and height in pixels of all the views
+        width = height = dx = dy = 0
+
+        for g,cell in enumerate(cells):
+            view = window.active_view_in_group(g)
+            w,h = view.viewport_extent()
+            width += w
+            height += h
+            dx += cols[cell[2]] - cols[cell[0]]
+            dy += rows[cell[3]] - rows[cell[1]]
+        width /= dx
+        height /= dy
 
         current = window.active_group()
         view = util.view
@@ -1336,10 +1350,9 @@ class SbpPaneCmdCommand(SbpWindowCommand):
         # Handle vertical moves
         count = util.get_count()
         if direction in ('g', 's'):
-            line_height = view.line_height()
-            unit = (rows[current + 1] - rows[current]) * (line_height / view.viewport_extent()[1])
+            unit = view.line_height() / height
         else:
-            unit = (cols[current + 1] - cols[current]) * view.em_width() / view.viewport_extent()[0]
+            unit = view.em_width() / width
 
         window.set_layout(lm.extend(current, direction, unit, count))
 

@@ -174,7 +174,7 @@ class LayoutManager:
 
       # check for too small height
       new_pos = rows[y2] + amount
-      min_height = 3 * unit
+      min_height = 5 * unit
       if new_pos - rows[y2 - 1] >= min_height and rows[y2 + 1] - new_pos >= min_height:
         rows[y2] = new_pos
     elif direction in ('gh', 'gs') and len(cols) > 2:
