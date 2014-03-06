@@ -1,20 +1,3 @@
-# IMPLEMENT
-# - C-x C-o
-#
-# - implement a build command which lets me specify the make command I want to run
-# - implement forward/backward "defun" via scope selectors
-# - implement forward/backward class definition via scope selectors
-# - make fill paragraph smart about bulleted (i.e., ones that start with "-" or "*")
-# - add support for "set mark automatically" commands
-#   - move_to brackets but not necessarily other move_to's
-#   - maybe get rid of your own move to eof and bof if you can get this working
-#   - goto symbol stuff will be harder...
-# - add an up-arrow (or meta-P meta-N) history mechanism for incremental search
-
-# FIX
-#
-# fix comments so you can comment in the right column if no region is selected
-
 import re, sys
 import functools as fu
 import sublime, sublime_plugin
@@ -1206,7 +1189,7 @@ class SbpCenterViewCommand(SbpTextCommand):
         r2,c2 = self.view.rowcol(end)
         return r2 - r1
 
-    def run_cmd(self, util):
+    def run_cmd(self, util, center_only=False):
         view = self.view
         point = util.get_point()
         if util.has_prefix_arg():
@@ -1215,6 +1198,8 @@ class SbpCenterViewCommand(SbpTextCommand):
             ignore, point_offy = view.text_to_layout(point)
             offx, ignore = view.viewport_position()
             view.set_viewport_position((offx, point_offy - line_height * lines))
+        elif center_only:
+            self.view.show_at_center(util.get_point())
         else:
             self.cycle_center_view(view.sel()[0])
 
