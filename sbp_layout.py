@@ -167,7 +167,7 @@ class LayoutManager:
     x1,y1,x2,y2 = cell
     if direction in ('g', 's') and (y1 > 0 or y2 < self._row_count - 1):
       # adjust heights
-      if y2 == len(rows) - 1:
+      if y2 == self._row_count - 1:
         # Never adjust top or bottom: they should be 0 and 1.0 always, so when at the top or the
         # bottom move inward.
         y2 = abs(y2 - 1)
@@ -180,7 +180,7 @@ class LayoutManager:
         rows[y2] = new_pos
     elif direction in ('gh', 'sh') and (x1 > 0 or x2 < self._col_count - 1):
       # adjust widths
-      if x2 == len(self.grid['cols']) - 1 or x2 == 0:
+      if x2 == self._col_count - 1:
         # Never adjust left or right: they should be 0 and 1.0 always, so when at the left or the
         # right move inward.
         x2 = abs(x2 - 1)
