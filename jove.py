@@ -418,6 +418,8 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
 
     def on_window_command(self, window, cmd, args):
+        # REMIND - JP: Why is this code here? Can't this be done in the SbpPaneCmd class?
+
         # Check the move state of the Panes and make sure we stop recursion
         if cmd == "sbp_pane_cmd" and args and args['cmd'] == 'move' and 'next_pane' not in args:
             lm = ll.LayoutManager(window.layout())
@@ -1297,7 +1299,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             self.grow(self.window, util, **kwargs)
         elif cmd == 'destroy':
             self.destroy(self.window, **kwargs)
-        elif cmd == 'move':
+        elif cmd in ('move', 'switch_tab'):
             self.move(self.window, **kwargs)
         else:
             print("Unknown command")
@@ -1451,7 +1453,8 @@ class SbpPaneCmdCommand(SbpWindowCommand):
                 current = 0
             window.focus_group(current)
         else:
-            group,index = window.get_view_index(util.view)
+            view = window.active_view()
+            group,index = window.get_view_index(view)
             views = window.views_in_group(group)
             direction = 1 if direction == "right" else -1
             index += direction
