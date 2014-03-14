@@ -1919,22 +1919,23 @@ class SbpIncSearchEscape(SbpTextCommand):
 # was already at the indent didn't change after calling reindent, indent one more level.
 #
 class SbpTabCmdCommand(SbpTextCommand):
-    def run_cmd(self, util):
+    def run_cmd(self, util, indent_on_repeat=False):
         point = util.get_point()
         indent,cursor = util.get_line_indent(point)
+        tab_size = self.view.settings().get("tab_size")
+        # sublime gets screwy with indent if you're not currently a multiple of tab size
         if util.state.active_mark or cursor > indent:
             util.run_command("reindent", {})
         else:
-            if cursor < indent:
-                util.run_command("move_to", {"to": "bol", "extend": False})
-            util.run_command("reindent", {})
-
-            # now check to see if we moved, and if not, indent one more level
-            if indent == cursor:
-                new_indent,new_cursor = util.get_line_indent(util.get_point())
-                if new_indent == indent:
-                    # cursor was already at the indent
-                    util.run_command("indent", {})
+            if indent_on_repeat and util.state.last_cmd == util.state.this_cmd:
+                util.run_command("indent", {})
+            else:
+                if (indent % tab_size) != 0:
+                    delta = tab_size - (indent % tab_size)
+                    self.view.run_command("insert", {"characters": " " * delta})
+                if cursor < indent:
+                    util.run_command("move_to", {"to": "bol", "extend": False})
+                util.run_command("reindent", {})
 
 class SbpQuitCommand(SbpTextCommand):
     def run_cmd(self, util):
