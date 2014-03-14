@@ -176,6 +176,20 @@ class MarkRing:
         self.display()
         return val
 
+isearch_info = dict()
+def isearch_info_for(view):
+    window = view.window()
+    if window:
+        return isearch_info.get(window.id(), None)
+    return None
+def set_isearch_info_for(view, info):
+    window = view.window()
+    isearch_info[window.id()] = info
+    return info
+def clear_isearch_info_for(view):
+    window = view.window()
+    del(isearch_info[window.id()])
+
 #
 # We store state about each view.
 #
@@ -185,9 +199,6 @@ class ViewState():
 
     # currently active view
     current = None
-
-    # current in-progress i-search instance
-    isearch_info = None
 
     def __init__(self, view):
         self.view = view
@@ -257,27 +268,20 @@ class ViewWatcher(sublime_plugin.EventListener):
     def on_modified(self, view):
         CmdUtil(view).toggle_active_mark_mode(False)
 
-    def on_deactivated(self, view):
-        info = ViewState.isearch_info
-        if info and info.input_view == view:
-            # deactivate immediately or else overlays will malfunction (we'll eat their keys)
-            # we cannot dismiss the input panel because an overlay (if present) will lose focus
-            info.deactivate()
-
     # ST2 is not as nice as ST3, so we have to hook into the synchronous pipeline
     def on_activated(self, view):
       if not _ST3:
         self.on_activated_async(view)
 
     def on_activated_async(self, view):
-        info = ViewState.isearch_info
+        info = isearch_info_for(view)
         if info and not view.settings().get("is_widget"):
-            # now we can dismiss the input panel
+            # stop the search if we activated a new view in this window
             info.done()
 
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "i_search_active":
-            return ViewState.isearch_info and ViewState.isearch_info.is_active
+            return isearch_info_for(view) is not None
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -302,8 +306,7 @@ class CmdWatcher(sublime_plugin.EventListener):
     # Override some commands to execute them N times if the numberic argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
-
-        if view.settings().get('is_widget') and ViewState.isearch_info:
+        if view.settings().get('is_widget') and isearch_info_for(view) is not None:
             if cmd in ISEARCH_ESCAPE_CMDS:
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
             return
@@ -324,8 +327,9 @@ class CmdWatcher(sublime_plugin.EventListener):
         #  Process events that create a selection. The hard part is making it work with the emacs region.
         #
         if cmd == 'drag_select':
-            if ViewState.isearch_info:
-                ViewState.isearch_info.done()
+            info = isearch_info_for(view)
+            if info:
+                info.done()
 
             # Set drag_count to 0 when drag_select command occurs. BUT, if the 'by' parameter is
             # present, that means a double or triple click occurred. When that happens we have a
@@ -1602,7 +1606,6 @@ class ISearchInfo():
         self.input_view = None
         self.in_changes = 0
         self.forward = forward
-        self.is_active = True
         self.regex = regex
 
     def open(self):
@@ -1610,20 +1613,14 @@ class ISearchInfo():
         self.input_view = window.show_input_panel("%sI-Search:" % ("Regexp " if self.regex else "", ),
                                                   "", self.on_done, self.on_change, self.on_cancel)
 
-    def is_active(self):
-        return ViewState.isearch_info == self
-
     def on_done(self, val):
+        print("ON DONE")
         # on_done: stop the search, keep the cursors intact
-        ViewState.isearch_info = None
-        if self.is_active:
-            self.finish(abort=False)
+        self.finish(abort=False)
 
     def on_cancel(self):
-        # on_cancel: stop the search, go back to start
-        ViewState.isearch_info = None
-        if self.is_active:
-            self.finish(abort=True)
+        # on_done: stop the search, return cursor to starting point
+        self.finish(abort=True)
 
     def on_change(self, val):
         if self.in_changes > 0:
@@ -1684,13 +1681,19 @@ class ISearchInfo():
         else:
             print("Nothing to pop so not updating!")
 
-    def deactivate(self):
-        self.is_active = False
-        self.finish(abort=False)
+    # def deactivate(self):
+    #     print("DEACTIVATE CALLED")
+    #     self.is_active = False
+    #     self.finish()
+
+    def hide_panel(self):
+        # close the panel which should trigger an on_done
+        window = self.view.window()
+        if window:
+            window.run_command("hide_panel")
 
     def done(self):
-        # close the panel which should trigger an on_done
-        self.view.window().run_command("hide_panel")
+        self.finish()
 
     #
     # Set the text of the search to a particular value. If is_pop is True it means we're restoring
@@ -1705,12 +1708,18 @@ class ISearchInfo():
 
     def not_in_error(self):
         si = self.current
-        #while si and not si.regions and si.search:
         while si and not si.selected and si.search:
             si = si.prev
         return si
 
+    def is_active(self):
+        return
+
     def finish(self, abort=False):
+        if isearch_info_for(self.view) != self:
+            print("FINISH", abort, "ignored")
+            return
+        print("FINISH", abort)
         if self.current and self.current.search:
             ISearchInfo.last_search = self.current.search
         self.util.set_status("")
@@ -1734,6 +1743,8 @@ class ISearchInfo():
         # erase our regions
         self.view.erase_regions("find")
         self.view.erase_regions("selected")
+        clear_isearch_info_for(self.view)
+        self.hide_panel()
 
     def update(self):
         si = self.not_in_error()
@@ -1833,10 +1844,6 @@ class ISearchInfo():
                 point += 1
         self.set_text(self.current.search)
 
-    def cancel(self):
-        self.view.window().run_command("hide_panel")
-        self.finish(abort=True)
-
     def quit(self):
         close = False
 
@@ -1851,10 +1858,9 @@ class ISearchInfo():
             if self.current.prev is None:
                 close = True
         if close:
-            self.cancel()
+            self.finish(abort=True)
         else:
             self.pop()
-
 
     def find_closest(self, regions, pos, forward):
         #
@@ -1877,12 +1883,12 @@ class ISearchInfo():
 
 class SbpIncSearchCommand(SbpTextCommand):
     def run_cmd(self, util, cmd=None, **kwargs):
-        info = ViewState.isearch_info
+        info = isearch_info_for(self.view)
         if info is None or cmd is None:
             regex = kwargs.get('regex', False)
             if util.state.argument_supplied:
                 regex = not regex
-            info = ViewState.isearch_info = ISearchInfo(self.view, kwargs['forward'], regex)
+            info = set_isearch_info_for(self.view, ISearchInfo(self.view, kwargs['forward'], regex))
             info.open()
 
         else:
@@ -1894,6 +1900,8 @@ class SbpIncSearchCommand(SbpTextCommand):
                 info.append_from_cursor()
             elif cmd == "keep_all":
                 info.keep_all()
+            elif cmd == "done":
+                info.done()
             else:
                 print("Not handling cmd", cmd, kwargs)
 
@@ -1901,15 +1909,13 @@ class SbpIncSearchCommand(SbpTextCommand):
         # REMIND: is it not possible to invoke isearch from the menu for some reason. I think the
         # problem is that a focus thing is happening and we're dismissing ourselves as a result. So
         # for now we hide it.
-        if ViewState.isearch_info:
-            return False
         return False
 
 
 class SbpIncSearchEscape(SbpTextCommand):
     unregistered = True
     def run_cmd(self, util, next_cmd, next_args):
-        info = ViewState.isearch_info
+        info = isearch_info_for(self.view)
         info.done()
         info.view.run_command(next_cmd, next_args)
 
@@ -1941,8 +1947,9 @@ class SbpQuitCommand(SbpTextCommand):
     def run_cmd(self, util):
         window = self.view.window()
 
-        if ViewState.isearch_info:
-            ViewState.isearch_info.quit()
+        info = isearch_info_for(self.view)
+        if info:
+            info.quit()
             return
 
         for cmd in ['clear_fields', 'hide_overlay', 'hide_auto_complete', 'hide_panel']:

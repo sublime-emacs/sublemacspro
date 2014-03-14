@@ -114,6 +114,9 @@
     {"keys": ["alt+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
         "context": [ {"key": "i_search_active"} ]
     },
+    { "keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
+        "context": [ {"key": "i_search_active"} ]
+    },
 
     //////////////////
     // End I-search //
