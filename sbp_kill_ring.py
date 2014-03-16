@@ -120,7 +120,7 @@ class SbpInsertTextCommand(sublime_plugin.TextCommand):
             region = sublime.Region(long(begin), long(end))
         except NameError:
             region = sublime.Region(int(begin), int(end))
-            
+
         num = self.view.insert(edit, region.begin(), text)
         self.view.erase(edit, sublime.Region(region.begin() + num,
                 region.end() + num))
@@ -139,7 +139,8 @@ class SbpYankChoiceCommand(sublime_plugin.TextCommand):
             self.view.run_command("sbp_insert_text", {"text":text, "begin":s.a, "end":s.b})
 
     def run(self, edit):
-        names = [sbp_kill_ring.get(idx) for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
+        # Only get the first 30 characters otherwise this goes bad in the UI
+        names = [sbp_kill_ring.get(idx)[0:30] for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
         self.edit = edit
         if len(names) > 0:
             self.view.window().show_quick_panel(names, self.insert)
