@@ -104,8 +104,16 @@ class SbpKillRing:
         self.kill_points = begin_points
         self.kill_id = view_id
 
-    def get(self, index):
-        return self.buffer[index % self.limit]
+    # Only return a substring if necessary
+    def get(self, index, limit = -1, elipsis="..."):
+        if limit == -1 :
+            return self.buffer[index % self.limit]
+        else:
+            element = self.buffer[index % self.limit]
+            if len(element) > limit:
+                return element[0:limit] + elipsis
+            else:
+                return element
 
     def __len__(self):
         return len(self.buffer)
@@ -138,9 +146,10 @@ class SbpYankChoiceCommand(sublime_plugin.TextCommand):
         for s in regions:
             self.view.run_command("sbp_insert_text", {"text":text, "begin":s.a, "end":s.b})
 
+
     def run(self, edit):
         # Only get the first 30 characters otherwise this goes bad in the UI
-        names = [sbp_kill_ring.get(idx)[0:30] for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
+        names = [sbp_kill_ring.get(idx, 30) for idx in range(len(sbp_kill_ring)) if sbp_kill_ring.get(idx) != None]
         self.edit = edit
         if len(names) > 0:
             self.view.window().show_quick_panel(names, self.insert)
