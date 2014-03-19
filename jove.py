@@ -276,9 +276,7 @@ class ViewWatcher(sublime_plugin.EventListener):
 
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "i_search_active":
-            if isearch_info_for(view) is not None:
-                return self.on_query_context(view, "panel_has_focus", sublime.OP_EQUAL, False, False)
-            return False
+            return isearch_info_for(view) is not None
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're

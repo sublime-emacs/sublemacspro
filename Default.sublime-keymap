@@ -14,15 +14,15 @@
     {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_case_region", "args": {"mode": "upper"}},
     {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_case_region", "args": {"mode": "lower"}},
 
-    { "keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} },
-    { "keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} },
+    {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} },
+    {"keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} },
 
 
     // commands that move and set the mark first
     {"keys": ["alt+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}},
     {"keys": ["alt+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}},
-    { "keys": ["home"], "command": "sbp_move_to", "args": {"to": "bof"}},
-    { "keys": ["end"], "command": "sbp_move_to", "args": {"to": "eof"}},
+    {"keys": ["home"], "command": "sbp_move_to", "args": {"to": "bof"}},
+    {"keys": ["end"], "command": "sbp_move_to", "args": {"to": "eof"}},
 
     {"keys": ["alt+."], "command": "sbp_move_to", "args": {"to": "eow"}},
     {"keys": ["alt+,"], "command": "sbp_move_to", "args": {"to": "bow"}},
@@ -37,10 +37,10 @@
 
     // Goto open file
     {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
-    { "keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
+    {"keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
 
     // Goto Symbol
-    { "keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
+    {"keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
 
     //
     // Mark and point, kill region, kill line, yank and yank pop, deletion commands.
@@ -91,31 +91,32 @@
     {"keys": ["ctrl+s"], "command": "sbp_inc_search", "args": {"forward": true, "regex": false}},
     {"keys": ["ctrl+r"], "command": "sbp_inc_search", "args": {"forward": false, "regex": false}},
     {"keys": ["ctrl+w"], "command": "sbp_inc_search", "args": {"cmd": "append_from_cursor"},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["super+d"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["alt+d"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["ctrl+s"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": true},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["ctrl+r"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": false},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["backspace"], "command": "sbp_inc_search", "args": {"cmd": "pop"},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["super+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["alt+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
-        "context": [ {"key": "i_search_active"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
-    { "keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
-        "context": [ {"key": "i_search_active"} ]
+
+    {"keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
 
     //////////////////
@@ -155,9 +156,9 @@
     {"keys": ["super+shift+["], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
     {"keys": ["super+shift+]"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 
-    { "keys": ["ctrl+x", "b"], "command": "next_view" },
-    { "keys": ["ctrl+x", "right"], "command": "next_view" },
-    { "keys": ["ctrl+x", "left"], "command": "prev_view" },
+    {"keys": ["ctrl+x", "b"], "command": "next_view" },
+    {"keys": ["ctrl+x", "right"], "command": "next_view" },
+    {"keys": ["ctrl+x", "left"], "command": "prev_view" },
 
     //////////////////////////////////////////////////////////////////////////////
     // Other settings/bindings to complete the Emacs picture for me personally. //
@@ -166,8 +167,8 @@
     {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
 
-    {"keys": ["alt+a"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
-    {"keys": ["alt+m"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
+    {"keys": ["alt+a"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
+    {"keys": ["alt+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
 
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
     {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
@@ -192,53 +193,52 @@
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
     {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
 
-    { "keys": ["ctrl+x","h"], "command": "select_all"},
+    {"keys": ["ctrl+x","h"], "command": "select_all"},
 
-    { "keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
-    { "keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
-    { "keys": ["ctrl+x", "e"], "command": "run_macro" },
+    {"keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
+    {"keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
+    {"keys": ["ctrl+x", "e"], "command": "run_macro" },
 
     {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}},
     {"keys": ["shift+super+-"], "command": "decrease_font_size"},
 
-    { "keys": ["ctrl+c", ">"], "command": "indent" },
-    { "keys": ["ctrl+c", "<"], "command": "unindent" },
+    {"keys": ["ctrl+c", ">"], "command": "indent" },
+    {"keys": ["ctrl+c", "<"], "command": "unindent" },
 
     // Completion
-    { "keys": ["alt+/"], "command": "auto_complete" },
-    { "keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
+    {"keys": ["alt+/"], "command": "auto_complete" },
+    {"keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
         [
-          { "key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
-          { "key": "auto_complete_visible", "operator": "equal", "operand": false },
-          { "key": "setting.tab_completion", "operator": "equal", "operand": true }
+          {"key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
+          {"key": "auto_complete_visible", "operator": "equal", "operand": false },
+          {"key": "setting.tab_completion", "operator": "equal", "operand": true }
         ]
     },
 
     // Integration with default find and replace from sublime
-    { "keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
-    { "keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
+    {"keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
+    {"keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
 
-    // { "keys": ["ctrl+s"], "command": "find_next",  "context": [
-    //         { "key": "panel_visible", "operator": "equal", "operand": true }
+    // {"keys": ["ctrl+s"], "command": "find_next",  "context": [
+    //         {"key": "panel_visible", "operator": "equal", "operand": true }
     //     ]
     // },
-    // { "keys": ["ctrl+r"], "command": "find_prev", "context": [
-    //     { "key": "panel_visible", "operator": "equal", "operand": true }
+    // {"keys": ["ctrl+r"], "command": "find_prev", "context": [
+    //     {"key": "panel_visible", "operator": "equal", "operand": true }
     //     ]
     // },
 
 
     // Rectangles
-    // Rectangles
-    { "keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
-    { "keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
+    {"keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
+    {"keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
 
     // Registers
-    { "keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
-    { "keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
+    {"keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
+    {"keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
 
-    { "keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
-    { "keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }
+    {"keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
+    {"keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }
 
 
     // These override other commands
