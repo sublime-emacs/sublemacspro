@@ -268,11 +268,6 @@ class ViewWatcher(sublime_plugin.EventListener):
     def on_modified(self, view):
         CmdUtil(view).toggle_active_mark_mode(False)
 
-    # ST2 is not as nice as ST3, so we have to hook into the synchronous pipeline
-    def on_activated(self, view):
-      if not _ST3:
-        self.on_activated_async(view)
-
     def on_activated_async(self, view):
         info = isearch_info_for(view)
         if info and not view.settings().get("is_widget"):
@@ -281,7 +276,9 @@ class ViewWatcher(sublime_plugin.EventListener):
 
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "i_search_active":
-            return isearch_info_for(view) is not None
+            if isearch_info_for(view) is not None:
+                return self.on_query_context(view, "panel_has_focus", sublime.OP_EQUAL, False, False)
+            return False
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -417,7 +414,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 class WindowCmdWatcher(sublime_plugin.EventListener):
 
     def __init__(self, *args, **kwargs):
-        print("WindowCmdWatcher")
         super(WindowCmdWatcher, self).__init__(*args, **kwargs)
 
 
@@ -1614,7 +1610,6 @@ class ISearchInfo():
                                                   "", self.on_done, self.on_change, self.on_cancel)
 
     def on_done(self, val):
-        print("ON DONE")
         # on_done: stop the search, keep the cursors intact
         self.finish(abort=False)
 
@@ -1681,11 +1676,6 @@ class ISearchInfo():
         else:
             print("Nothing to pop so not updating!")
 
-    # def deactivate(self):
-    #     print("DEACTIVATE CALLED")
-    #     self.is_active = False
-    #     self.finish()
-
     def hide_panel(self):
         # close the panel which should trigger an on_done
         window = self.view.window()
@@ -1717,9 +1707,7 @@ class ISearchInfo():
 
     def finish(self, abort=False):
         if isearch_info_for(self.view) != self:
-            print("FINISH", abort, "ignored")
             return
-        print("FINISH", abort)
         if self.current and self.current.search:
             ISearchInfo.last_search = self.current.search
         self.util.set_status("")
