@@ -1,4 +1,6 @@
 [
+    {"keys": ["ctrl+g"], "command": "sbp_quit"},
+
     //
     // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
     //
@@ -114,8 +116,10 @@
     {"keys": ["alt+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
-
     {"keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    { "keys": ["ctrl+g"], "command": "sbp_inc_search", "args": {"cmd": "quit"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
 
@@ -130,8 +134,6 @@
         {"key": "has_next_field", "operand": false },
         {"key": "overlay_visible", "operand": false }]
     },
-
-    {"keys": ["ctrl+g"], "command": "sbp_quit"},
 
     /////////////////////////////
     // Begin emacs window cmds //

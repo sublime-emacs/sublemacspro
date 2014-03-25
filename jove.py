@@ -18,9 +18,6 @@ else:
 
 JOVE_STATUS = "jove"
 
-ISEARCH_ESCAPE_CMDS = ('move_to', 'sbp_center_view', 'move', 'sbp_universal_argument',
-                       'sbp_move_word', 'sbp_move_to', 'scroll_lines')
-
 default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
 default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
 
@@ -178,7 +175,10 @@ class MarkRing:
 
 isearch_info = dict()
 def isearch_info_for(view):
-    window = view.window()
+    if isinstance(view, sublime.Window):
+        window = view
+    else:
+        window = view.window()
     if window:
         return isearch_info.get(window.id(), None)
     return None
@@ -297,12 +297,21 @@ class CmdWatcher(sublime_plugin.EventListener):
         view.erase_status(JOVE_STATUS)
 
 
+    def on_window_command(self, window, cmd, args):
+        # Some window commands take us to new view. Here's where we abort the isearch if that happens.
+        info = isearch_info_for(window)
+        def check():
+            if info is not None and window.active_view() != info.view:
+                info.done()
+        if info is not None:
+            sublime.set_timeout(check, 0)
+
     #
     # Override some commands to execute them N times if the numberic argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
-        if view.settings().get('is_widget') and isearch_info_for(view) is not None:
-            if cmd in ISEARCH_ESCAPE_CMDS:
+        if isearch_info_for(view) is not None:
+            if cmd not in ('sbp_inc_search', 'sbp_inc_search_escape'):
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
             return
 
@@ -1888,6 +1897,8 @@ class SbpIncSearchCommand(SbpTextCommand):
                 info.keep_all()
             elif cmd == "done":
                 info.done()
+            elif cmd == "quit":
+                info.quit()
             else:
                 print("Not handling cmd", cmd, kwargs)
 
