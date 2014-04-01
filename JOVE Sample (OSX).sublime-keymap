@@ -1,6 +1,4 @@
 [
-    {"keys": ["ctrl+g"], "command": "sbp_quit"},
-
     //
     // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
     //
@@ -9,23 +7,13 @@
     {"keys": ["alt+b"], "command": "sbp_move_word", "args": {"direction": -1}},
     {"keys": ["ctrl+alt+b"], "command": "sbp_move_sexpr", "args": {"direction": -1}},
     {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}},
-
     {"keys": ["alt+u"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "upper"}},
     {"keys": ["alt+l"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "lower"}},
-
-    {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_case_region", "args": {"mode": "upper"}},
-    {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_case_region", "args": {"mode": "lower"}},
-
-    {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} },
-    {"keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} },
 
 
     // commands that move and set the mark first
     {"keys": ["alt+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}},
     {"keys": ["alt+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}},
-    {"keys": ["home"], "command": "sbp_move_to", "args": {"to": "bof"}},
-    {"keys": ["end"], "command": "sbp_move_to", "args": {"to": "eof"}},
-
     {"keys": ["alt+."], "command": "sbp_move_to", "args": {"to": "eow"}},
     {"keys": ["alt+,"], "command": "sbp_move_to", "args": {"to": "bow"}},
 
@@ -37,13 +25,6 @@
     {"keys": ["ctrl+x", "g"], "command": "sbp_goto_line"},
     {"keys": ["alt+g"], "command": "sbp_goto_line"},
 
-    // Goto open file
-    {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
-    {"keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
-
-    // Goto Symbol
-    {"keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
-
     //
     // Mark and point, kill region, kill line, yank and yank pop, deletion commands.
     //
@@ -51,12 +32,8 @@
     {"keys": ["ctrl+x", "ctrl+x"], "command": "sbp_swap_point_and_mark"},
     {"keys": ["ctrl+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_for_kill_line"}},
     {"keys": ["ctrl+w"], "command": "sbp_kill_region"},
-
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
-    {"keys": ["super+v"], "command": "sbp_yank"},
     {"keys": ["alt+w"], "command": "sbp_kill_region", "args": {"is_copy": true}},
-    {"keys": ["super+c"], "command": "sbp_kill_region", "args": {"is_copy": true}},
-
     {"keys": ["alt+y"], "command": "sbp_yank", "args": {"pop": 1}},
     {"keys": ["alt+shift+y"], "command": "sbp_yank", "args": {"pop": -1}},
 
@@ -66,8 +43,6 @@
     {"keys": ["ctrl+alt+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}},
 
     {"keys": ["alt+\\"], "command": "sbp_delete_white_space"},
-
-    {"keys": ["alt+z"], "command": "sbp_zap_to_char"},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
@@ -93,34 +68,28 @@
     {"keys": ["ctrl+s"], "command": "sbp_inc_search", "args": {"forward": true, "regex": false}},
     {"keys": ["ctrl+r"], "command": "sbp_inc_search", "args": {"forward": false, "regex": false}},
     {"keys": ["ctrl+w"], "command": "sbp_inc_search", "args": {"cmd": "append_from_cursor"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["super+d"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["alt+d"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["ctrl+s"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": true},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["ctrl+r"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": false},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["backspace"], "command": "sbp_inc_search", "args": {"cmd": "pop"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["super+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
     {"keys": ["alt+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
-    },
-    {"keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
-    },
-    { "keys": ["ctrl+g"], "command": "sbp_inc_search", "args": {"cmd": "quit"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"} ]
     },
 
     //////////////////
@@ -135,32 +104,23 @@
         {"key": "overlay_visible", "operand": false }]
     },
 
+    {"keys": ["ctrl+g"], "command": "sbp_quit"},
+
     /////////////////////////////
     // Begin emacs window cmds //
     /////////////////////////////
 
-    {"keys": ["ctrl+x", "2"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
-    {"keys": ["ctrl+x", "3"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
-
-    // Modifying the Pane Sies
-    {"keys": ["ctrl+shift+c+i"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
-    {"keys": ["ctrl+shift+c+k"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
-    {"keys": ["ctrl+shift+c+j"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
-    {"keys": ["ctrl+shift+c+l"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
-
+    {"keys": ["ctrl+x", "2"], "command": "sbp_pane_cmd", "args": {"cmd": "split"}},
+    {"keys": ["ctrl+x", "g"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
+    {"keys": ["ctrl+x", "s"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
     {"keys": ["ctrl+x", "d"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
-    {"keys": ["ctrl+x", "0"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
-
     {"keys": ["ctrl+x", "1"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
     {"keys": ["ctrl+x", "n"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"keys": ["ctrl+x", "p"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
-    {"keys": ["ctrl+x", "o"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
+    {"keys": ["ctrl+x", "o"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
     {"keys": ["super+shift+["], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
     {"keys": ["super+shift+]"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 
-    {"keys": ["ctrl+x", "b"], "command": "next_view" },
-    {"keys": ["ctrl+x", "right"], "command": "next_view" },
-    {"keys": ["ctrl+x", "left"], "command": "prev_view" },
 
     //////////////////////////////////////////////////////////////////////////////
     // Other settings/bindings to complete the Emacs picture for me personally. //
@@ -168,85 +128,29 @@
 
     {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
-
-    {"keys": ["alt+a"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
-    {"keys": ["alt+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
-
+    {"keys": ["alt+m"],  "command": "move_to",  "args": {  "to": "bol",  "extend": false }},
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
     {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
 
     {"keys": ["alt+n"], "command": "next_result"},
     {"keys": ["alt+p"], "command": "prev_result"},
 
-    {"keys": ["alt+;"], "command": "toggle_comment"},
+    {"keys": ["alt+/"], "command": "toggle_comment"},
     {"keys": ["ctrl+x", "k"], "command": "close"},
 
     {"keys": ["ctrl+d"], "command": "right_delete"},
 
     {"keys": ["ctrl+\\"], "command": "undo"},
-    {"keys": ["ctrl+shift+-"], "command": "undo"},
-    {"keys": ["ctrl+x", "u"], "command": "undo" },
-
     {"keys": ["ctrl+shift+\\"], "command": "redo"},
-    {"keys": ["ctrl+shift+/"], "command": "redo"},
 
     {"keys": ["alt+h"], "command": "auto_complete"},
     {"keys": ["ctrl+x", "ctrl+s"], "command": "save"},
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
-    {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
+    {"keys": ["ctrl+x", "ctrl+f"], "command": "i_opener"},
+    {"keys": ["ctrl+z"], "command": "scroll_lines", "args": {"amount": -1 }},
 
-    {"keys": ["ctrl+x","h"], "command": "select_all"},
-
-    {"keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
-    {"keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
-    {"keys": ["ctrl+x", "e"], "command": "run_macro" },
+    {"keys": ["alt+z"], "command": "scroll_lines", "args": {"amount": 1 }},
 
     {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}},
     {"keys": ["shift+super+-"], "command": "decrease_font_size"},
-
-    {"keys": ["ctrl+c", ">"], "command": "indent" },
-    {"keys": ["ctrl+c", "<"], "command": "unindent" },
-
-    // Completion
-    {"keys": ["alt+/"], "command": "auto_complete" },
-    {"keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
-        [
-          {"key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
-          {"key": "auto_complete_visible", "operator": "equal", "operand": false },
-          {"key": "setting.tab_completion", "operator": "equal", "operand": true }
-        ]
-    },
-
-    // Integration with default find and replace from sublime
-    {"keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
-    {"keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
-
-    // {"keys": ["ctrl+s"], "command": "find_next",  "context": [
-    //         {"key": "panel_visible", "operator": "equal", "operand": true }
-    //     ]
-    // },
-    // {"keys": ["ctrl+r"], "command": "find_prev", "context": [
-    //     {"key": "panel_visible", "operator": "equal", "operand": true }
-    //     ]
-    // },
-
-
-    // Rectangles
-    {"keys": ["ctrl+x", "r", "t"], "command": "sbp_rectangle_insert" },
-    {"keys": ["ctrl+x", "r", "d"], "command": "sbp_rectangle_delete" },
-
-    // Registers
-    {"keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
-    {"keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
-
-    {"keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
-    {"keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }
-
-
-    // These override other commands
-    //{"keys": ["ctrl+z"], "command": "scroll_lines", "args": {"amount": -1 }},
-    //{"keys": ["alt+z"], "command": "scroll_lines", "args": {"amount": 1 }},
-    //{"keys": ["ctrl+x", "ctrl+f"], "command": "i_opener"},
-    //{"keys": ["alt+/"], "command": "toogle_comment"},
-
 ]

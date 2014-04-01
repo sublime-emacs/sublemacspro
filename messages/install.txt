@@ -1,0 +1,17 @@
+Thank you for installing Sublemacs Pro
+======================================
+
+Sublemacspro is an Emacs-like integration into Sublime and as a consequence
+CHANGES A LOT OF KEYBOARD SHORTCUTS or even OVERWRITES shortcuts of other
+plugins.
+
+To learn more about the features of Sublemcas, go to the Github page
+
+https://github.com/grundprinzip/sublemacspro
+
+and checkout the README file.
+
+If you find bugs or request features, do not hesitate to drop us a line or
+leave an issue request at Github.
+
+Thanks for using Sublemacs!

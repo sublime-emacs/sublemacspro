@@ -1,0 +1,15 @@
+[
+	{
+		"details": "https://github.com/grundprinzip/sublemacspro",
+		"releases": [
+			{
+				"sublime_text": "<3000",
+				"details": "https://github.com/grundprinzip/sublemacspro/tree/st2"
+			},
+			{
+				"sublime_text": "<=3000",
+				"details": "https://github.com/grundprinzip/sublemacspro/tags"
+			}
+	  ]
+	}
+]
