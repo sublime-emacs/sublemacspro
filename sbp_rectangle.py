@@ -17,7 +17,6 @@ class SbpRectangleDelete(jove.SbpTextCommand):
   and cannot be pasted
   """
   def run_cmd(self, jove, **args):
-    print("hall")
     sel = jove.get_region()
 
     b_row, b_col = self.view.rowcol(sel.begin())
