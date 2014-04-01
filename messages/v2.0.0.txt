@@ -1,0 +1,18 @@
+Sublemacs Pro v2 has landed
+===========================
+
+Sublemacs got a new core contributor, @canoeberry, who rewrote essential parts
+of sublemacs to improve performance and add more features. This new version is
+a Sublime Text 3 only version as the old APIs do not allow us to add all the
+features we want. Sublemacs for ST2 will go into maintenance only mode.
+
+Here are the awesome new features:
+
+  * Real emacs like incremental search using C-S, including repeating the last search
+  * Better and improved kill ring and mark ring handling
+  * Numeric arguments to movement commands: `meta+2` `meta+3` `ctrl+F` means go forward 23 characters.
+  * And many more...
+
+If you are looking for all the glory details please go to:
+
+https://github.com/grundprinzip/sublemacspro
