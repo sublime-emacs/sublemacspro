@@ -23,12 +23,15 @@ hit ``S-Shift P`` to open up the command palette and type ``install``. Now
 select "Package Control: Install Package". This will load all packages from the
 remote repository and you can select ``sublemacspro`` from the drop-down list.
 
-## Sublime Text 3 Support
+## Sublime Text 2 and 3 Support
 
-Currently, we are working on Sublime Text 3 support. Most of the features should
-work and some bugs with regard to Python 3 are already fixed. So feel free to
-try the Package Control Beta for ST3 and install sublemacspro. If there are any
-issues feel free to report them.
+The main development for Sublemacs is now Sublime Text 3 only. However, there
+is still the branch using the earlier codebase for ST2.
+
+https://github.com/grundprinzip/sublemacspro/tree/st2
+
+If you encounter bugs or issues in the ST2 version, please report them, and
+we'll be happy to fix them.
 
 ## Features
 
@@ -114,7 +117,7 @@ Sublime Text and make this my fast and beautiful Emacs replacement.
 * @phildopus - for goto-open-file
 * @aflc - toggle comment improvements
 * @jinschoi - ST3 bugfix
-* @mcdonc - inspiration for more Emacs key bindings 
+* @mcdonc - inspiration for more Emacs key bindings
 
 
 [ot]: https://github.com/stiang/EmacsifySublimeText
