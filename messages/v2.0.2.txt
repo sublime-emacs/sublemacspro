@@ -1,0 +1,5 @@
+Sublemacs Pro v2.0.2 Updates:
+=============================
+
+  * Adding keybindings for "Save All" and "Save as..." to `C-x s` and `C-x C-w`
+  * Fixing bug that removed standard movement keybindings for other platforms than Mac (#74)

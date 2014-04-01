@@ -19,6 +19,10 @@
     {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} },
     {"keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} },
 
+    {"keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
+    {"keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
+    {"keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
+    {"keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
 
     // commands that move and set the mark first
     {"keys": ["alt+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}},
