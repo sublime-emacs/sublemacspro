@@ -159,8 +159,8 @@
     {"keys": ["ctrl+x", "n"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"keys": ["ctrl+x", "p"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
     {"keys": ["ctrl+x", "o"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
-    {"keys": ["super+shift+["], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
-    {"keys": ["super+shift+]"], "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
+    {"keys": ["super+shift+["], "command": "sbp_pane_cmd", "args": {"cmd": "switch_tab", "direction": "left"}},
+    {"keys": ["super+shift+]"], "command": "sbp_pane_cmd", "args": {"cmd": "switch_tab", "direction": "right"}},
 
     {"keys": ["ctrl+x", "b"], "command": "next_view" },
     {"keys": ["ctrl+x", "right"], "command": "next_view" },
