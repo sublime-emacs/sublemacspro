@@ -123,6 +123,13 @@ class MarkRing:
         if r:
             return r[0].a
 
+    def clear(self):
+        self.view.erase_regions("jove_mark")
+
+
+    def has_visible_mark(self):
+        return self.view.get_regions("jove_mark") != None and len(self.view.get_regions("jove_mark")) > 0
+
     #
     # Update the display to show the current mark.
     #
@@ -277,6 +284,9 @@ class ViewWatcher(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "i_search_active":
             return isearch_info_for(view) is not None
+        if key == "sbp_has_visible_mark":
+            return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
+
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -1257,6 +1267,10 @@ class SbpSetMarkCommand(SbpTextCommand):
             # set the mark
             state.active_mark = False
             util.set_mark()
+
+class SbpCancelMarkCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        util.state.mark_ring.clear()
 
 class SbpSwapPointAndMarkCommand(SbpTextCommand):
     def run_cmd(self, util):
