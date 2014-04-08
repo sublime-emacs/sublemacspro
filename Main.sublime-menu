@@ -1,0 +1,52 @@
+[
+  {
+    "id": "preferences",
+    "children":
+    [
+      {
+        "caption": "Package Settings",
+        "mnemomic": "P",
+        "id": "package-settings",
+        "children":
+        [
+          {
+            "caption": "Sublemacs",
+            "children":
+            [
+              {
+                "command": "open_file", "args":
+                {
+                  "file": "${packages}/sublemacspro/sublemacspro.sublime-settings"
+                },
+                "caption": "Settings - Default"
+              },
+              {
+                "command": "open_file", "args":
+                {
+                  "file": "${packages}/User/sublemacspro.sublime-settings"
+                },
+                "caption": "Settings - User"
+              },
+              { "caption": "-" },
+              {
+                "command": "open_file", "args":
+                {
+                  "file": "${packages}/sublemacspro/Default.sublime-keymap",
+                },
+                "caption": "Key Bindings - Default"
+              },
+              {
+                "command": "open_file", "args":
+                {
+                  "file": "${packages}/User/Default (OSX).sublime-keymap",
+                  "platform": "OSX"
+                },
+                "caption": "Key Bindings - User"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

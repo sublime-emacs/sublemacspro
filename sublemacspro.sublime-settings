@@ -1,0 +1,8 @@
+{
+  /* Allows to always switch to active mark mode */
+  "sbp_active_mark_mode" : false,
+
+  "sbp_word_separators" : "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?",
+
+  "sbp_sexpr_separators" : "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+}

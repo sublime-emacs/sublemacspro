@@ -30,6 +30,15 @@ kill_cmds = set()
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete'])
 
+
+class SettingsManager:
+
+    def get(key, default = None):
+        global_settings = sublime.load_settings('sublemacspro.sublime-settings')
+        settings  = sublime.active_window().active_view().settings()
+        return settings.get(key, global_settings.get(key, default))
+
+
 #
 # Classic emacs kill ring.
 #
@@ -577,6 +586,14 @@ class CmdUtil:
         if update_status:
             self.set_status("Mark Saved")
 
+    # Allows to always set the active mark mode
+    def set_active_mark_mode(self):
+        point = self.get_point()
+        mark = self.get_mark()
+
+        self.set_selection(mark, point)
+        self.state.active_mark = True
+
     #
     # Enabling active mark means highlight the current emacs region.
     #
@@ -857,8 +874,7 @@ class SbpMoveWordCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         view = self.view
 
-        settings = view.settings()
-        separators = settings.get("sbp_word_separators", default_sbp_word_separators)
+        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
 
         # determine the direction
         count = util.get_count() * direction
@@ -892,8 +908,7 @@ class SbpToWordCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         view = self.view
 
-        settings = view.settings()
-        separators = settings.get("sbp_word_separators", default_sbp_word_separators)
+        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
         forward = direction > 0
 
         def to_word(cursor):
@@ -982,8 +997,8 @@ class SbpMoveSexprCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         view = self.view
 
-        settings = view.settings()
-        separators = settings.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
+
+        separators = SettingsManager.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 
         # determine the direction
         count = util.get_count() * direction
@@ -1268,8 +1283,13 @@ class SbpSetMarkCommand(SbpTextCommand):
             state.active_mark = False
             util.set_mark()
 
+        if SettingsManager.get("sbp_active_mark_mode", False):
+            util.set_active_mark_mode()
+
 class SbpCancelMarkCommand(SbpTextCommand):
     def run_cmd(self, util):
+        if util.state.active_mark:
+            util.toggle_active_mark_mode()
         util.state.mark_ring.clear()
 
 class SbpSwapPointAndMarkCommand(SbpTextCommand):
@@ -1763,7 +1783,7 @@ class ISearchInfo():
         flags = sublime.DRAW_NO_FILL if _ST3 else sublime.DRAW_OUTLINED
         self.view.add_regions("find", si.regions, "text", "", flags)
         selected = si.selected or []
-        self.view.add_regions("selected", selected, "string", "", 0)
+        self.view.add_regions("selected", selected, "string", "", sublime.DRAW_NO_OUTLINE)
         if selected:
             self.util.ensure_visible(selected[-1])
 
@@ -1829,7 +1849,7 @@ class ISearchInfo():
         # now push new states for each character we append to the search string
         helper = self.util
         search = si.search
-        separators = view.settings().get("sbp_word_separators", default_sbp_word_separators)
+        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
         case_sensitive = re.search(r'[A-Z]', search) is not None
 
         def append_one(util):
@@ -1981,6 +2001,7 @@ class SbpQuitCommand(SbpTextCommand):
                 bottom_line = self.view.rowcol(visible.end())[0]
                 pos = self.view.text_point((top_line + bottom_line) / 2, 0)
             util.set_selection(pos, pos)
+
         if util.state.active_mark:
             util.toggle_active_mark_mode()
 

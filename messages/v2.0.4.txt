@@ -1,0 +1,11 @@
+Sublemacs Pro v2.0.4 Updates:
+=============================
+
+  * Adding the key-mapping `Alt+i` to add indentation #78
+  * Clear mark using `C-g` and `Esc` #77
+  * Sublemacs now supports customization via settings. You can have a look at
+    the default settings in the Preferences - Packages - Sublemacs - Default
+    Settings menu entry
+      * `sbp_active_mark_mode` if set to `true` will always switch to visible mark mode
+      * `sbp_word_separators` regular expression used for word navigation
+      * `sbp_sexpr_separators` regular expression used for sexp navigation
