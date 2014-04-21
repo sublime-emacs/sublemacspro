@@ -130,6 +130,9 @@
     { "keys": ["ctrl+g"], "command": "sbp_inc_search", "args": {"cmd": "quit"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
+    { "keys": ["ctrl+y"], "command": "sbp_inc_search", "args": {"cmd": "yank"},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
 
     //////////////////
     // End I-search //
