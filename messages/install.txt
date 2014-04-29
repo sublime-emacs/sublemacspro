@@ -5,7 +5,7 @@ Sublemacspro is an Emacs-like integration into Sublime and as a consequence
 CHANGES A LOT OF KEYBOARD SHORTCUTS or even OVERWRITES shortcuts of other
 plugins.
 
-To learn more about the features of Sublemcas, go to the Github page
+To learn more about the features of Sublemacs, go to the Github page
 
 https://github.com/grundprinzip/sublemacspro
 
