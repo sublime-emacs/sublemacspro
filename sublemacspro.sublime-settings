@@ -6,5 +6,8 @@
   "sbp_word_separators" : "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?",
 
   /* Regular expression for sexp navigation */
-  "sbp_sexpr_separators" : "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+  "sbp_sexpr_separators" : "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?",
+
+  /* if true, sbp_cancel_mark command will is enabled */
+  "sbp_cancel_mark_enabled": true,
 }

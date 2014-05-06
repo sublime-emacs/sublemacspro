@@ -294,6 +294,8 @@ class ViewWatcher(sublime_plugin.EventListener):
         if key == "i_search_active":
             return isearch_info_for(view) is not None
         if key == "sbp_has_visible_mark":
+            if not SettingsManager.get("sbp_cancel_mark_enabled", False):
+                return False
             return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
 
 
