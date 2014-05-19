@@ -168,7 +168,7 @@ class MarkRing:
     def exchange(self, pos):
         val = self.get()
         if val is not None:
-            self.set(pos, False)
+            self.set(pos, True)
             return val
 
     #

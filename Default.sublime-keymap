@@ -183,9 +183,6 @@
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
     {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
 
-    {"keys": ["alt+n"], "command": "next_result"},
-    {"keys": ["alt+p"], "command": "prev_result"},
-
     {"keys": ["alt+;"], "command": "toggle_comment"},
     {"keys": ["ctrl+x", "k"], "command": "close"},
 
