@@ -1669,6 +1669,10 @@ class ISearchInfo():
             self.in_changes -= 1
             return
 
+        if self.current and self.current.search == val:
+            # sometimes sublime calls us when nothing has changed
+            return
+
         self.find(val)
 
     def find(self, val):

@@ -1,0 +1,9 @@
+Sublemacs Pro v2.0.5 Updates:
+=============================
+
+  * allow `ctrl+y` to yank a search string into i-search
+  * fixed a bug with the mark ring where `ctrl+x ctrl+x` would push new entries onto the ring rather
+    than just exchanging the point with mark
+  * removed `alt+n` and `alt+p` non-standard bindings
+  * added new settings `sbp_cancel_mark_enabled` which when false disables the cancel mark command
+  * fixed problem which caused i-search not to wrap-around sometimes even with multiple attempts
