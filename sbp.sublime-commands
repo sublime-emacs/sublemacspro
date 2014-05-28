@@ -17,6 +17,7 @@
     {"caption": "Sublemacs - Go to Line", "command": "sbp_goto_line"},
 
     {"caption": "Sublemacs - Open line", "command": "sbp_open_line"},
+    {"caption": "Sublemacs - Join Lines", "command": "sbp_join_lines"},
     {"caption": "Sublemacs - Center View Around Point", "command": "sbp_center_view"},
 
     //

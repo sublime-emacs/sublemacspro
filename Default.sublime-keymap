@@ -40,6 +40,7 @@
     {"keys": ["ctrl+l"], "command": "sbp_center_view"},
     {"keys": ["ctrl+x", "g"], "command": "sbp_goto_line"},
     {"keys": ["alt+g"], "command": "sbp_goto_line"},
+    {"keys": ["super+shift+6"], "command": "sbp_join_lines"},
 
     // Goto open file
     {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
