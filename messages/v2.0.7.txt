@@ -1,0 +1,4 @@
+Sublemacs Pro v2.0.7 Updates:
+=============================
+
+  * fix issue which prevents multi-cursor from working

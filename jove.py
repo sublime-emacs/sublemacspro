@@ -30,9 +30,7 @@ kill_cmds = set()
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete'])
 
-
 class SettingsManager:
-
     def get(key, default = None):
         global_settings = sublime.load_settings('sublemacspro.sublime-settings')
         settings  = sublime.active_window().active_view().settings()
@@ -277,7 +275,6 @@ class ViewWatcher(sublime_plugin.EventListener):
         super(ViewWatcher, self).__init__(*args, **kwargs)
         self.pending_dedups = 0
 
-
     def on_close(self, view):
         ViewState.on_view_closed(view)
 
@@ -291,13 +288,21 @@ class ViewWatcher(sublime_plugin.EventListener):
             info.done()
 
     def on_query_context(self, view, key, operator, operand, match_all):
+        def test(a, operator, b):
+            if operator == sublime.OP_EQUAL:
+                return a == b
+            if operator == sublime.OP_NOT_EQUAL:
+                return a != b
+            return False
+
         if key == "i_search_active":
             return isearch_info_for(view) is not None
         if key == "sbp_has_visible_mark":
             if not SettingsManager.get("sbp_cancel_mark_enabled", False):
                 return False
             return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
-
+        if key == 'sbp_has_prefix_argument':
+            return test(CmdUtil(view).has_prefix_arg(), operator, operand)
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -609,7 +614,7 @@ class CmdUtil:
             mark = self.get_mark()
             self.set_selection(mark, point)
             self.state.active_mark = True
-        else:
+        elif len(self.view.sel()) <= 1:
             self.set_selection(point, point)
 
     def swap_point_and_mark(self):
@@ -1968,13 +1973,13 @@ class SbpTabCmdCommand(SbpTextCommand):
         point = util.get_point()
         indent,cursor = util.get_line_indent(point)
         tab_size = self.view.settings().get("tab_size")
-        # sublime gets screwy with indent if you're not currently a multiple of tab size
         if util.state.active_mark or cursor > indent:
             util.run_command("reindent", {})
         else:
             if indent_on_repeat and util.state.last_cmd == util.state.this_cmd:
                 util.run_command("indent", {})
             else:
+                # sublime gets screwy with indent if you're not currently a multiple of tab size
                 if (indent % tab_size) != 0:
                     delta = tab_size - (indent % tab_size)
                     self.view.run_command("insert", {"characters": " " * delta})
@@ -1996,12 +2001,14 @@ class SbpQuitCommand(SbpTextCommand):
 
         # If there is a selection, set point to the end of it that is visible.
         s = self.view.sel()
-        s = s and s[0]
         if s:
-            if util.is_visible(s.b):
-                pos = s.b
-            elif util.is_visible(s.a):
-                pos = s.a
+            start = s[0].a
+            end = s[-1].b
+
+            if util.is_visible(end):
+                pos = end
+            elif util.is_visible(start):
+                pos = start
             else:
                 # set point to the beginning of the line in the middle of the window
                 visible = self.view.visible_region()
