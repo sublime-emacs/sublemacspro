@@ -1324,6 +1324,31 @@ class SbpOpenLineCommand(SbpTextCommand):
             view.insert(util.edit, point.b, "\n")
         view.run_command("move", {"by": "characters", "forward": False})
 
+class SbpJoinLinesCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        if util.state.argument_supplied:
+            forward = True
+        else:
+            forward = False
+        view = self.view
+
+        def join(cursor):
+            if not forward:
+                current_line = view.line(cursor)
+                view.run_command("move", {"by": "lines", "forward": False})
+                cursor = view.sel()[0]
+                if view.line(cursor) == current_line:
+                    # must be on the first line; do nothing
+                    return None
+            else:
+                # Move to end-of-line
+                current_line = view.line(cursor)
+                cursor = sublime.Region(current_line.b, current_line.b)
+            view.run_command("join_lines")
+            return view.sel()[0]
+
+        util.for_each_cursor(join)
+
 class SbpKillRegionCommand(SbpTextCommand):
     is_kill_cmd = True
     def run_cmd(self, util, is_copy=False):
