@@ -868,16 +868,6 @@ class SbpMoveWordCommand(SbpTextCommand):
     def find_by_class_native(self, view, point, forward, classes, separators):
         return view.find_by_class(point, forward, classes, separators)
 
-    def call_find_by_class(self, view, point, forward, classes, separators):
-      '''
-      This is a small wrapper that maps to the right find_by_class call
-      depending on the version of ST installed
-      '''
-      if _ST3:
-        return self.find_by_class_native(view, point, forward, classes, separators)
-      else:
-        return self.find_by_class_fallback(view, point, forward, classes, separators)
-
     def run_cmd(self, util, direction=1):
         view = self.view
 
@@ -888,16 +878,26 @@ class SbpMoveWordCommand(SbpTextCommand):
         forward = count > 0
         count = abs(count)
 
+        def call_find_by_class(point, classes, separators):
+          '''
+          This is a small wrapper that maps to the right find_by_class call
+          depending on the version of ST installed
+          '''
+          if _ST3:
+            return self.find_by_class_native(view, point, forward, classes, separators)
+          else:
+            return self.find_by_class_fallback(view, point, forward, classes, separators)
+
         def move_word0(cursor, first=False, **kwargs):
             point = cursor.b
             if forward:
                 if not first or not util.is_word_char(point, True, separators):
-                    point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_START, separators)
-                point = self.call_find_by_class(view, point, True, sublime.CLASS_WORD_END, separators)
+                    point = call_find_by_class(point, sublime.CLASS_WORD_START, separators)
+                point = call_find_by_class(point, sublime.CLASS_WORD_END, separators)
             else:
                 if not first or not util.is_word_char(point, False, separators):
-                    point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_END, separators)
-                point = self.call_find_by_class(view, point, False, sublime.CLASS_WORD_START, separators)
+                    point = call_find_by_class(point, sublime.CLASS_WORD_END, separators)
+                point = call_find_by_class(point, sublime.CLASS_WORD_START, separators)
 
             return sublime.Region(point, point)
 
@@ -1955,8 +1955,7 @@ class SbpIncSearchCommand(SbpTextCommand):
         # for now we hide it.
         return False
 
-
-class SbpIncSearchEscape(SbpTextCommand):
+class SbpIncSearchEscapeCommand(SbpTextCommand):
     unregistered = True
     def run_cmd(self, util, next_cmd, next_args):
         info = isearch_info_for(self.view)

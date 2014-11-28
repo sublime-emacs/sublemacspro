@@ -134,6 +134,22 @@
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
 
+    //
+    // keys to escape isearch
+    //
+    {"keys": ["ctrl+f"], "command": "sbp_inc_search_escape", "args": {"next_cmd": "move", "next_args": {"by": "characters", "forward": true}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    {"keys": ["ctrl+b"], "command": "sbp_inc_search_escape", "args": {"next_cmd": "move", "next_args": {"by": "characters", "forward": false}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    {"keys": ["ctrl+n"], "command": "sbp_inc_search_escape", "args": {"next_cmd": "move", "next_args": {"by": "lines", "forward": true}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    {"keys": ["ctrl+p"], "command": "sbp_inc_search_escape", "args": {"next_cmd": "move", "next_args": {"by": "lines", "forward": false}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+
     //////////////////
     // End I-search //
     //////////////////
