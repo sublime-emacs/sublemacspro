@@ -4,20 +4,20 @@
     //
     // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
     //
-    {"keys": ["alt+f"], "command": "sbp_move_word", "args": {"direction": 1}},
-    {"keys": ["ctrl+alt+f"], "command": "sbp_move_sexpr", "args": {"direction": 1}},
-    {"keys": ["alt+b"], "command": "sbp_move_word", "args": {"direction": -1}},
-    {"keys": ["ctrl+alt+b"], "command": "sbp_move_sexpr", "args": {"direction": -1}},
-    {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}},
+    {"keys": ["alt+f"], "command": "sbp_move_word", "args": {"direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["ctrl+alt+f"], "command": "sbp_move_sexpr", "args": {"direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+b"], "command": "sbp_move_word", "args": {"direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["ctrl+alt+b"], "command": "sbp_move_sexpr", "args": {"direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+u"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "upper"}},
-    {"keys": ["alt+l"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "lower"}},
+    {"keys": ["alt+u"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "upper"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+l"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "lower"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_case_region", "args": {"mode": "upper"}},
     {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_case_region", "args": {"mode": "lower"}},
 
-    {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} },
-    {"keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} },
+    {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} , "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["ctrl+alt+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} , "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     {"keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
     {"keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
@@ -25,13 +25,13 @@
     {"keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
 
     // commands that move and set the mark first
-    {"keys": ["alt+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}},
-    {"keys": ["alt+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}},
+    {"keys": ["alt+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["home"], "command": "sbp_move_to", "args": {"to": "bof"}},
     {"keys": ["end"], "command": "sbp_move_to", "args": {"to": "eof"}},
 
-    {"keys": ["alt+."], "command": "sbp_move_to", "args": {"to": "eow"}},
-    {"keys": ["alt+,"], "command": "sbp_move_to", "args": {"to": "bow"}},
+    {"keys": ["alt+."], "command": "sbp_move_to", "args": {"to": "eow"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+,"], "command": "sbp_move_to", "args": {"to": "bow"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     //
     // misc
@@ -39,7 +39,7 @@
     {"keys": ["ctrl+o"], "command": "sbp_open_line"},
     {"keys": ["ctrl+l"], "command": "sbp_center_view"},
     {"keys": ["ctrl+x", "g"], "command": "sbp_goto_line"},
-    {"keys": ["alt+g"], "command": "sbp_goto_line"},
+    {"keys": ["alt+g"], "command": "sbp_goto_line", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     // Goto open file
     {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
@@ -62,38 +62,38 @@
 
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
     {"keys": ["super+v"], "command": "sbp_yank"},
-    {"keys": ["alt+w"], "command": "sbp_kill_region", "args": {"is_copy": true}},
+    {"keys": ["alt+w"], "command": "sbp_kill_region", "args": {"is_copy": true}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["super+c"], "command": "sbp_kill_region", "args": {"is_copy": true}},
 
-    {"keys": ["alt+y"], "command": "sbp_yank", "args": {"pop": 1}},
-    {"keys": ["alt+shift+y"], "command": "sbp_yank", "args": {"pop": -1}},
+    {"keys": ["alt+y"], "command": "sbp_yank", "args": {"pop": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+shift+y"], "command": "sbp_yank", "args": {"pop": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+d"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": 1}},
-    {"keys": ["alt+backspace"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": -1}},
+    {"keys": ["alt+d"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+backspace"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["ctrl+alt+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}},
+    {"keys": ["ctrl+alt+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+\\"], "command": "sbp_delete_white_space"},
+    {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+z"], "command": "sbp_zap_to_char"},
+    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
-    {"keys": ["alt+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}},
-    {"keys": ["alt+1"], "command": "sbp_universal_argument", "args": {"value": 1}},
-    {"keys": ["alt+2"], "command": "sbp_universal_argument", "args": {"value": 2}},
-    {"keys": ["alt+3"], "command": "sbp_universal_argument", "args": {"value": 3}},
-    {"keys": ["alt+4"], "command": "sbp_universal_argument", "args": {"value": 4}},
-    {"keys": ["alt+5"], "command": "sbp_universal_argument", "args": {"value": 5}},
-    {"keys": ["alt+6"], "command": "sbp_universal_argument", "args": {"value": 6}},
-    {"keys": ["alt+7"], "command": "sbp_universal_argument", "args": {"value": 7}},
-    {"keys": ["alt+8"], "command": "sbp_universal_argument", "args": {"value": 8}},
-    {"keys": ["alt+9"], "command": "sbp_universal_argument", "args": {"value": 9}},
-    {"keys": ["alt+0"], "command": "sbp_universal_argument", "args": {"value": 0}},
+    {"keys": ["alt+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}, "context": [ {"key": "sbp_alt+digit_inserts"}]},
+    {"keys": ["alt+1"], "command": "sbp_universal_argument", "args": {"value": 1}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+2"], "command": "sbp_universal_argument", "args": {"value": 2}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+3"], "command": "sbp_universal_argument", "args": {"value": 3}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+4"], "command": "sbp_universal_argument", "args": {"value": 4}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+5"], "command": "sbp_universal_argument", "args": {"value": 5}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+6"], "command": "sbp_universal_argument", "args": {"value": 6}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+7"], "command": "sbp_universal_argument", "args": {"value": 7}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+8"], "command": "sbp_universal_argument", "args": {"value": 8}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+9"], "command": "sbp_universal_argument", "args": {"value": 9}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
+    {"keys": ["alt+0"], "command": "sbp_universal_argument", "args": {"value": 0}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
 
 
-    {"keys": ["alt+["], "command": "sbp_shift_region", "args": {"direction": -1}},
-    {"keys": ["alt+]"], "command": "sbp_shift_region", "args": {"direction": 1}},
+    {"keys": ["alt+["], "command": "sbp_shift_region", "args": {"direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+]"], "command": "sbp_shift_region", "args": {"direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     //////////////////////////////
     // Begin I-search //
@@ -107,7 +107,7 @@
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["alt+d"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"}, {"key": "sbp_use_alt_bindings"}]
     },
     {"keys": ["ctrl+s"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": true},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
@@ -122,7 +122,7 @@
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["alt+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},
-        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"}, {"key": "sbp_use_alt_bindings"} ]
     },
     {"keys": ["escape"], "command": "sbp_inc_search", "args": {"cmd": "done"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
@@ -196,13 +196,13 @@
     {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
 
-    {"keys": ["alt+a"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
-    {"keys": ["alt+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }},
+    {"keys": ["alt+a"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
-    {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }},
+    {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+;"], "command": "toggle_comment"},
+    {"keys": ["alt+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "k"], "command": "close"},
 
     {"keys": ["ctrl+d"], "command": "right_delete"},
@@ -214,7 +214,7 @@
     {"keys": ["ctrl+shift+\\"], "command": "redo"},
     {"keys": ["ctrl+shift+/"], "command": "redo"},
 
-    {"keys": ["alt+h"], "command": "auto_complete"},
+    {"keys": ["alt+h"], "command": "auto_complete", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "ctrl+s"], "command": "save"},
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
     {"keys": ["ctrl+x", "s"], "command": "save_all"},
@@ -227,15 +227,15 @@
     {"keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },
     {"keys": ["ctrl+x", "e"], "command": "run_macro" },
 
-    {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}},
+    {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["shift+super+-"], "command": "decrease_font_size"},
 
     {"keys": ["ctrl+c", ">"], "command": "indent" },
     {"keys": ["ctrl+c", "<"], "command": "unindent" },
-    { "keys": ["alt+i"], "command": "insert", "args": {"characters": "\t" } },
+    { "keys": ["alt+i"], "command": "insert", "args": {"characters": "\t" } , "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     // Completion
-    {"keys": ["alt+/"], "command": "auto_complete" },
+    {"keys": ["alt+/"], "command": "auto_complete" , "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["alt+/"], "command": "replace_completion_with_auto_complete", "context":
         [
           {"key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
@@ -245,8 +245,7 @@
     },
 
     // Integration with default find and replace from sublime
-    {"keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} },
-    {"keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} },
+    {"keys": ["alt+r"], "command": "show_panel", "args": {"panel": "replace"} , "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     // {"keys": ["ctrl+s"], "command": "find_next",  "context": [
     //         {"key": "panel_visible", "operator": "equal", "operand": true }
@@ -267,13 +266,91 @@
     {"keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
 
     {"keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
-    {"keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" }
+    {"keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" },
 
 
-    // These override other commands
-    //{"keys": ["ctrl+z"], "command": "scroll_lines", "args": {"amount": -1 }},
-    //{"keys": ["alt+z"], "command": "scroll_lines", "args": {"amount": 1 }},
-    //{"keys": ["ctrl+x", "ctrl+f"], "command": "i_opener"},
-    //{"keys": ["alt+/"], "command": "toogle_comment"},
+    //
+    // SUPER bindinsgs for when the sbp_use_super_bindings setting is true
+    //
+
+    //
+    // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
+    //
+    {"keys": ["super+f"], "command": "sbp_move_word", "args": {"direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["ctrl+super+f"], "command": "sbp_move_sexpr", "args": {"direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+b"], "command": "sbp_move_word", "args": {"direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["ctrl+super+b"], "command": "sbp_move_sexpr", "args": {"direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+u"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "upper"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+l"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "lower"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["ctrl+super+["], "command": "sbp_move_to_paragraph", "args": {"direction": 1} , "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["ctrl+super+]"], "command": "sbp_move_to_paragraph", "args": {"direction": -1} , "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
+    {"keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
+    {"keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
+    {"keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
+
+    // commands that move and set the mark first
+    {"keys": ["super+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+."], "command": "sbp_move_to", "args": {"to": "eow"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+,"], "command": "sbp_move_to", "args": {"to": "bow"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+g"], "command": "sbp_goto_line", "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    // Goto Symbol
+    {"keys": ["ctrl+super+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
+
+    {"keys": ["super+w"], "command": "sbp_kill_region", "args": {"is_copy": true}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+y"], "command": "sbp_yank", "args": {"pop": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+shift+y"], "command": "sbp_yank", "args": {"pop": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+d"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": 1},
+        "context": [ {"key": "sbp_use_super_bindings"}, {"key": "i_search_active", "operand": false}]
+    },
+    {"keys": ["super+backspace"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["ctrl+super+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    // emacs-style numeric argument handling
+    {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
+    {"keys": ["super+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+1"], "command": "sbp_universal_argument", "args": {"value": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+2"], "command": "sbp_universal_argument", "args": {"value": 2}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+3"], "command": "sbp_universal_argument", "args": {"value": 3}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+4"], "command": "sbp_universal_argument", "args": {"value": 4}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+5"], "command": "sbp_universal_argument", "args": {"value": 5}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+6"], "command": "sbp_universal_argument", "args": {"value": 6}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+7"], "command": "sbp_universal_argument", "args": {"value": 7}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+8"], "command": "sbp_universal_argument", "args": {"value": 8}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+9"], "command": "sbp_universal_argument", "args": {"value": 9}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+0"], "command": "sbp_universal_argument", "args": {"value": 0}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+
+    {"keys": ["super+["], "command": "sbp_shift_region", "args": {"direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+]"], "command": "sbp_shift_region", "args": {"direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+v"], "command": "move", "args": {"by": "pages", "forward": false }, "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    {"keys": ["super+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+h"], "command": "auto_complete", "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+j"], "command": "wrap_lines", "args": {"width": 100}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["shift+super+-"], "command": "decrease_font_size"},
+
+    { "keys": ["super+i"], "command": "insert", "args": {"characters": "\t" } , "context": [ {"key": "sbp_use_super_bindings"}]},
+
+    // Integration with default find and replace from sublime
+    {"keys": ["super+r"], "command": "show_panel", "args": {"panel": "replace"} , "context": [ {"key": "sbp_use_super_bindings"}]},
 
 ]

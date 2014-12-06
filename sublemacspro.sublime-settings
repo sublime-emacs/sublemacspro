@@ -10,4 +10,13 @@
 
   /* if true, sbp_cancel_mark command will is enabled */
   "sbp_cancel_mark_enabled": true,
+
+  /* if true, this plugin uses the alt key for most of the emacs bindings */
+  "sbp_use_alt_bindings": true,
+
+  /* if true, alt+digit keys will insert as their normal characters */
+  "sbp_alt+digit_inserts": false,
+
+  /* if true, this plugin uses the super key for most of the emacs bindings */
+  "sbp_use_super_bindings": false,
 }

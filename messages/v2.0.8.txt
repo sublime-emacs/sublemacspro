@@ -1,0 +1,11 @@
+Sublemacs Pro v2.0.8 Updates:
+=============================
+
+  * made it possible to escape from i-search with C-f, C-b, C-n, C-p
+  * added support for new variables to control bindings
+    * sbp_use_alt_bindings: when true uses the alt key for emacs's meta key
+    * sbp_use_super_bindings: when true uses the super key for emacs's meta key
+    * sbp_alt+digit_inserts: when true, the alt+digit bindings will insert rather than to the emacs
+      universal argument command
+    * by default alt bindings are enabled and alt+digit does not insert
+  * incremental search now scrolls horizontally if necessary like the built in Find command

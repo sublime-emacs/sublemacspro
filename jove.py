@@ -296,11 +296,17 @@ class ViewWatcher(sublime_plugin.EventListener):
             return False
 
         if key == "i_search_active":
-            return isearch_info_for(view) is not None
+            return test(isearch_info_for(view) is not None, operator, operand)
         if key == "sbp_has_visible_mark":
             if not SettingsManager.get("sbp_cancel_mark_enabled", False):
                 return False
             return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
+        if key == "sbp_use_alt_bindings":
+            return test(SettingsManager.get("sbp_use_alt_bindings"), operator, operand)
+        if key == "sbp_use_super_bindings":
+            return test(SettingsManager.get("sbp_use_super_bindings"), operator, operand)
+        if key == "sbp_alt+digit_inserts":
+            return test(SettingsManager.get("sbp_alt+digit_inserts") or not SettingsManager.get("sbp_use_alt_bindings"), operator, operand)
         if key == 'sbp_has_prefix_argument':
             return test(CmdUtil(view).has_prefix_arg(), operator, operand)
 
@@ -814,6 +820,16 @@ class SbpWindowCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
         self.util = CmdUtil(self.window.active_view(), state=ViewState.get(self.window.active_view()))
         self.run_cmd(self.util, **kwargs)
+
+class SbpChainCommand(SbpTextCommand):
+    """A command that easily runs a sequence of other commands."""
+
+    def run_cmd(self, util, commands, use_window=False):
+        for c in commands:
+            if 'window_command' in c:
+                util.run_window_command(c['window_command'], c['args'])
+            elif 'command' in c:
+                util.run_command(c['command'], c['args'])
 
 #
 # Calls run command a specified number of times.
@@ -1796,7 +1812,7 @@ class ISearchInfo():
         selected = si.selected or []
         self.view.add_regions("selected", selected, "string", "", sublime.DRAW_NO_OUTLINE)
         if selected:
-            self.util.ensure_visible(selected[-1])
+            self.view.show(selected[-1])
 
         status = ""
         if si != self.current:
