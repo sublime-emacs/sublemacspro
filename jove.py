@@ -2107,6 +2107,26 @@ class SbpConvertJsonToPlistCommand(SbpTextCommand):
         self.view.replace(util.edit, sublime.Region(0, self.view.size()), writePlistToBytes(data).decode("utf-8"))
         self.view.set_syntax_file(PLIST_SYNTAX)
 
+class SbpTrimTrailingWhiteSpaceAndEnsureNewlineAtEofCommand(sublime_plugin.TextCommand):
+    def run(self, edit, trim_whitespace, ensure_newline):
+        # make sure you trim trailing whitespace FIRST and THEN check for Newline
+        if trim_whitespace:
+            trailing_white_space = self.view.find_all("[\t ]+$")
+            trailing_white_space.reverse()
+            for r in trailing_white_space:
+                self.view.erase(edit, r)
+        if ensure_newline:
+            if self.view.size() > 0 and self.view.substr(self.view.size() - 1) != '\n':
+                self.view.insert(edit, self.view.size(), "\n")
+
+class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
+    def on_pre_save(self, view):
+        trim = SettingsManager.get("sbp_trim_trailing_white_space_on_save") == True
+        ensure = SettingsManager.get("sbp_ensure_newline_at_eof_on_save") == True
+        if trim or ensure:
+            view.run_command("sbp_trim_trailing_white_space_and_ensure_newline_at_eof",
+                             {"trim_whitespace": trim, "ensure_newline": ensure})
+
 #
 # Function to dedup views in all the groups of the specified window. This does not close views that
 # have changes because that causes a warning to popup. So we have a monitor which dedups views

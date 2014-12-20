@@ -19,4 +19,8 @@
 
   /* if true, this plugin uses the super key for most of the emacs bindings */
   "sbp_use_super_bindings": false,
+
+  /* a fixed version of trim trailing white space and ensure newline */
+  "sbp_ensure_newline_at_eof_on_save": false,
+  "sbp_trim_trailing_white_space_on_save": false,
 }
