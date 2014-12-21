@@ -663,50 +663,50 @@ class CmdUtil:
         return self.state.get_count(peek)
 
     #
-    # This provides a way to run a function on all the cursors, one after another. This maintains
-    # all the cursors and then calls the function with one cursor at a time, with the view's
-    # selection state set to just that one cursor. So any calls to run_command within the function
-    # will operate on only that one cursor.
-    #
-    # The called function is supposed to return a new cursor position or None, in which case value
-    # is taken from the view itself.
-    #
-    # REMIND: This isn't how it currently works!
-    #
-    # After the function is run on all the cursors, the view's multi-cursor state is restored with
-    # new values for the cursor.
+    # A helper function that runs the specified callback with args/kwargs on each cursor one after
+    # another. It does this one cursor at a time from the end of the buffer towards the front of the
+    # buffer in case any edits occur. This tries to watch out for overlapping cursors but that's
+    # always problematic anyway.
     #
     def for_each_cursor(self, function, *args, **kwargs):
         view = self.view
         selection = view.sel()
-
-        # copy cursors into proper regions which sublime will manage while we potentially edit the
-        # buffer and cause things to move around
-        key = "tmp_cursors"
-        cursors = [c for c in selection]
-        view.add_regions(key, cursors, "tmp", "", sublime.HIDDEN)
-
-        # run the command passing in each cursor and collecting the returned cursor
-        for i in range(len(cursors)):
-            selection.clear()
-            regions = view.get_regions(key)
-            if i >= len(regions):
-                # we've deleted some cursors along the way - we're done
-                break
-            cursor = regions[i]
-            selection.add(cursor)
-            cursor = function(cursor, *args, **kwargs)
-            if cursor is not None:
-                # update the cursor in its slot
-                regions[i] = cursor
-                view.add_regions(key, regions, "tmp", "", sublime.HIDDEN)
-
-        # restore the cursors
+        regions = list(selection)
         selection.clear()
-        for r in view.get_regions(key):
-            selection.add(r)
 
-        view.erase_regions(key)
+        # REMIND: for delete-white-space and other commands that change the size of the
+        # buffer, you need to keep the cursors in a named set of cursors (like the mark
+        # ring) so that they are adjusted properly. Also if the function returns None,
+        # grab the cursor from the selection.
+        can_modify = kwargs.pop('can_modify', False)
+
+        if can_modify:
+            key = "tmp_cursors"
+            view.add_regions(key, regions, "tmp", "", sublime.HIDDEN)
+            for i in range(len(regions)):
+                # Grab the region (whose position has been maintained/adjusted by
+                # sublime). Unfortunately we need to assume one region might merge into
+                # another at any time, and reload all regions to check.
+                regions = view.get_regions(key)
+                if i >= len(regions):
+                    # we've deleted some cursors along the way - we're done
+                    break
+                selection.add(regions[i])
+                cursor = function(regions[i], *args, **kwargs)
+                selection.clear()
+            cursors = view.get_regions(key)
+            view.erase_regions(key)
+        else:
+            # run the command passing in each cursor and collecting the returned cursor
+            cursors = []
+            for i,cursor in enumerate(regions):
+                selection.add(cursor)
+                cursor = function(cursor, *args, **kwargs)
+                selection.clear()
+                cursors.append(cursor)
+
+        # add them all back when we're done
+        selection.add_all(cursors)
 
     def goto_line(self, line):
         if line >= 0:
@@ -904,7 +904,7 @@ class SbpMoveWordCommand(SbpTextCommand):
           else:
             return self.find_by_class_fallback(view, point, forward, classes, separators)
 
-        def move_word0(cursor, first=False, **kwargs):
+        def move_word0(cursor, first=False):
             point = cursor.b
             if forward:
                 if not first or not util.is_word_char(point, True, separators):
@@ -967,51 +967,54 @@ class SbpCaseWordCommand(SbpTextCommand):
     should_reset_target_column = True
 
     def run_cmd(self, util, mode, direction=1):
-        count = util.get_count() * direction
-        direction = -1 if count < 0 else 1
-        count = abs(count)
-        args = {"direction": direction}
+        # This works first by finding the bounds of the operation by executing a
+        # forward-word command. Then it performs the case command. This never changes the
+        # length of the buffer.
+        count = util.get_count(True)
 
-        def case_word(cursor):
-            if direction < 0:
-                # modify the N words before point by going back N words first
-                orig_point = cursor.a
-                saved = util.save_region("tmp")
-                for i in range(count):
-                    util.run_command("sbp_move_word", args)
-                args['direction'] = -args['direction']
+        # copy the cursors
+        selection = self.view.sel()
+        regions = list(selection)
 
-            for i in range(count):
-                # go to beginning of word (or stay where we are)
-                util.run_command('sbp_to_word', args)
-                cursor.a = util.get_point()
+        # If the regions are all empty, we just move from where we are to where we're
+        # going. If there are regions, I am thinking we USE the regions and just do the
+        # cap, lower, upper within that region. That's different from Emacs but that might
+        # be OK.
+        empty = True
+        for r in regions:
+            if not r.empty():
+                empty = False
+                break
 
-                # stretch the selection to the end of the word, making sure we don't zip past our
-                # start if we were going backwards
-                util.run_command('sbp_move_word', args)
-                cursor.b = util.get_point()
-                if direction < 0 and cursor.b > orig_point:
-                    cursor.b = orig_point
+        if empty:
+            # run the move-word command so we can create a region
+            direction = -1 if count < 0 else 1
+            util.run_command("sbp_move_word", {"direction": 1})
 
-                # now convert the text in the selection
-                old_text = text = util.view.substr(cursor)
-                if mode == "title":
-                    text = text.title()
-                elif mode == 'lower':
-                    text = text.lower()
-                elif mode == 'upper':
-                    text= text.upper()
-                else:
-                    print("Unknown mode", mode)
-                if old_text != text:
-                    util.view.replace(util.edit, cursor, text)
+            # now the selection is at the "other end" and so we create regions out of all the
+            # cursors
+            new_regions = []
+            for r, s in zip(regions, selection):
+                new_regions.append(r.cover(s))
+            selection.clear()
+            selection.add_all(new_regions)
 
-            if direction < 0:
-                cursor.a = cursor.b = orig_point
+        # perform the operation
+        util.run_command(mode + "_case", {})
+
+        if empty:
+            if count < 0:
+                # restore cursors to original state if direction was backward
+                selection.clear()
+                selection.add_all(regions)
             else:
-                cursor.a = cursor.b = util.get_point()
-            return cursor
-        util.for_each_cursor(case_word)
+                # otherwise we leave the cursors at the end of the regions
+                for r in new_regions:
+                    r.a = r.b = r.end()
+                selection.clear()
+                selection.add_all(new_regions)
+            
+
 
 class SbpMoveSexprCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
@@ -1142,7 +1145,7 @@ class SbpGotoLineCommand(SbpTextCommand):
 
 class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
     def run_cmd(self, util):
-        util.for_each_cursor(self.delete_white_space, util)
+        util.for_each_cursor(self.delete_white_space, util, can_modify=True)
 
     def delete_white_space(self, cursor, util, **kwargs):
         view = self.view
