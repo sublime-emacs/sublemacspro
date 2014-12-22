@@ -1,5 +1,8 @@
 [
     {"keys": ["ctrl+g"], "command": "sbp_quit"},
+    {"keys": ["escape"], "command": "sbp_quit",
+        "context": [ {"key": "i_search_active", "operand": false} ]
+    },
 
     //
     // Motion commands: forward/backward word, identifiers (sexpression), beginning/end of file/window
