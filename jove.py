@@ -61,8 +61,7 @@ class KillRing:
             return True
 
         def set_clipboard_if_possible(self):
-            if self.n_regions == 1:
-                sublime.set_clipboard(self.regions[0])
+            sublime.set_clipboard(self.regions[0])
 
     def __init__(self):
         self.entries = [None] * self.KILL_RING_SIZE
@@ -113,26 +112,29 @@ class KillRing:
                 # check the clipboard
                 clipboard = sublime.get_clipboard()
             if clipboard and (entry is None or entry.n_regions != 1 or entry.regions[0] != clipboard):
-                # we switched to another app and cut or copied something there, so add that to our
-                # kill ring
+                # We switched to another app and cut or copied something there, so add the clipboard
+                # to our kill ring.
                 result = [clipboard]
                 self.add(result, True, False)
-            else:
+            elif entries[index]:
                 result = entries[index].regions
         else:
-            incr = self.KILL_RING_SIZE - 1 if pop == 1 else 1
+            incr = 1 if pop > 0 else -1
             index = (index + incr) % self.KILL_RING_SIZE
-            while entries[index] is None and index != self.index:
-                index = (incr + index) % self.KILL_RING_SIZE
+            while entries[index] is None:
+                if index == self.index:
+                    return None
+                index = (index + incr) % self.KILL_RING_SIZE
 
             # don't do it unless the number of regions matches
-            if entries[index].n_regions != n_regions:
-                return None
             self.index = index
             result = entries[index].regions
             entries[index].set_clipboard_if_possible()
 
-        return result
+        # make sure we have enough data for the specified number of regions
+        while len(result) < n_regions:
+            result *= 2
+        return result[0:n_regions]
 
 # kill ring shared across all buffers
 kill_ring = KillRing()
@@ -323,27 +325,27 @@ class ViewWatcher(sublime_plugin.EventListener):
             info.done()
 
     def on_query_context(self, view, key, operator, operand, match_all):
-        def test(a, operator, b):
+        def test(a):
             if operator == sublime.OP_EQUAL:
-                return a == b
+                return a == operand
             if operator == sublime.OP_NOT_EQUAL:
-                return a != b
+                return a != operand
             return False
 
         if key == "i_search_active":
-            return test(isearch_info_for(view) is not None, operator, operand)
+            return test(isearch_info_for(view) is not None)
         if key == "sbp_has_visible_mark":
             if not SettingsManager.get("sbp_cancel_mark_enabled", False):
                 return False
             return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
         if key == "sbp_use_alt_bindings":
-            return test(SettingsManager.get("sbp_use_alt_bindings"), operator, operand)
+            return test(SettingsManager.get("sbp_use_alt_bindings"))
         if key == "sbp_use_super_bindings":
-            return test(SettingsManager.get("sbp_use_super_bindings"), operator, operand)
+            return test(SettingsManager.get("sbp_use_super_bindings"))
         if key == "sbp_alt+digit_inserts":
-            return test(SettingsManager.get("sbp_alt+digit_inserts") or not SettingsManager.get("sbp_use_alt_bindings"), operator, operand)
+            return test(SettingsManager.get("sbp_alt+digit_inserts") or not SettingsManager.get("sbp_use_alt_bindings"))
         if key == 'sbp_has_prefix_argument':
-            return test(CmdUtil(view).has_prefix_arg(), operator, operand)
+            return test(CmdUtil(view).has_prefix_arg())
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -678,8 +680,11 @@ class CmdUtil:
         self.state.active_mark = value if value is not None else (not self.state.active_mark)
         if self.state.active_mark:
             self.set_cursors(self.get_regions())
-        elif len(self.view.sel()) <= 1:
+        else:
             self.make_cursors_empty()
+
+        # elif len(self.view.sel()) <= 1:
+        #     self.make_cursors_empty()
 
     def swap_point_and_mark(self):
         view = self.view
@@ -696,6 +701,9 @@ class CmdUtil:
 
     def get_cursors(self, begin=False):
         return [sublime.Region(c.a if begin else c.b) if not c.empty() else c for c in self.view.sel()]
+
+    def count_cursors(self):
+        return len(self.view.sel())
 
     def get_last_cursor(self):
         cursors = list(self.view.sel())
@@ -2088,7 +2096,7 @@ class SbpIncSearchCommand(SbpTextCommand):
         return False
 
 class SbpIncSearchEscapeCommand(SbpTextCommand):
-    unregistered = True
+    # unregistered = True
     def run_cmd(self, util, next_cmd, next_args):
         info = isearch_info_for(self.view)
         info.done()
@@ -2130,6 +2138,10 @@ class SbpQuitCommand(SbpTextCommand):
         for cmd in ['clear_fields', 'hide_overlay', 'hide_auto_complete', 'hide_panel']:
             window.run_command(cmd)
 
+        if util.state.active_mark:
+            util.toggle_active_mark_mode()
+            return
+
         # If there is a selection, set point to the end of it that is visible.
         s = list(self.view.sel())
         if s:
@@ -2147,10 +2159,6 @@ class SbpQuitCommand(SbpTextCommand):
                 bottom_line = self.view.rowcol(visible.end())[0]
                 pos = self.view.text_point((top_line + bottom_line) / 2, 0)
             util.set_selection(sublime.Region(pos))
-
-        if util.state.active_mark:
-            util.toggle_active_mark_mode()
-
 
 # This is the actual editor of the zap command
 class SbpZapToCharEdit(sublime_plugin.TextCommand):

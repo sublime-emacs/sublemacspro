@@ -1,0 +1,26 @@
+Sublemacs Pro v2.1.0 Updates:
+=============================
+
+This is a pretty substantial update with two main changes and one small feature.
+
+The first change is a huge jump in performance with multi-cursor movement commands. If you have 100
+cursors or more and run the forward word command you will see that the performance is comparable to
+the built-in sublime performance now. Same with forward s-expression, etc.
+
+The other major change is proper multi-cursor support for the kill and mark rings. When you have
+multiple cursors and you delete words, s-expressions or lines, the corresponding kill ring entry
+will keep track of the individual cursors. This means you can now copy, kill and yank with multiple
+cursors and the right thing happens. This basically means you can now do things which you used to
+require keyboard macros for (which I have never been able to get working reliably in Sublime).
+
+Just a note: if the number of cursors doesn't match the number of entries in the kill ring, the
+regions in the kill ring are duplicated until there are enough. Also, if you're doing multiple kills
+and the number of regions chagnes because cursors have been joined with other cursors, a new entry
+in the kill ring is created. These scenarios can be confusing but they are not the norm.
+
+It is also possible to set multiple marks and exchange a single point with multiple marks. I think
+if you experiment with this you will see it works well.
+
+The one last change is that I have made it possible to supply a numeric argument to the undo command.
+
+Cheers!
