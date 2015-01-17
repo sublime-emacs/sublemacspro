@@ -60,12 +60,21 @@ class KillRing:
                     self.regions[i] = regions[i] + self.regions[i]
             return True
 
-        def set_clipboard_if_possible(self):
+        def set_clipboard(self):
             sublime.set_clipboard(self.regions[0])
+
+        def same_as(self, regions):
+            if len(regions) != self.n_regions:
+                return False
+            for me, him in zip(regions, self.regions):
+                if me != him:
+                    return False
+            return True
 
     def __init__(self):
         self.entries = [None] * self.KILL_RING_SIZE
         self.index = 0
+        self.pop_index = None
 
     #
     # Add some text to the kill ring. 'forward' indicates whether the editing command that produced
@@ -79,18 +88,22 @@ class KillRing:
         if total_bytes == 0:
             return
         index = self.index
-        if not join:
-            index += 1
-            if index >= len(self.entries):
-                index = 0
-            self.index = index
-            self.entries[index] = KillRing.Kill(regions)
-        else:
-            # try to join
-            if self.entries[index] is None or not self.entries[index].join_if_possible(regions, forward):
-                self.entries[index] = KillRing.Kill(regions)
+        try:
+            if not join:
+                # if the current item is the same as what we're trying to kill, don't bother
+                if self.entries[index] and self.entries[index].same_as(regions):
+                    return
+            else:
+                # try to join
+                if self.entries[index] and self.entries[index].join_if_possible(regions, forward):
+                    return
 
-        self.entries[index].set_clipboard_if_possible()
+            # create the new entry
+            index = (index + 1) % self.KILL_RING_SIZE
+            self.entries[index] = KillRing.Kill(regions)
+        finally:
+            self.index = index
+            self.entries[index].set_clipboard()
 
     #
     # Returns the current entry in the kill ring for the purposes of yanking. If pop is
@@ -101,11 +114,12 @@ class KillRing:
     #
     def get_current(self, n_regions, pop):
         entries = self.entries
-        index = self.index
-        entry = entries[index]
 
         clipboard = result = None
         if pop == 0:
+            index = self.index
+            entry = entries[index]
+
             # First check to see whether we bring in the clipboard. We do that if the
             # specified number of regions is 1.
             if n_regions == 1:
@@ -118,18 +132,22 @@ class KillRing:
                 self.add(result, True, False)
             elif entries[index]:
                 result = entries[index].regions
+            self.pop_index = None
         else:
-            incr = 1 if pop > 0 else -1
-            index = (index + incr) % self.KILL_RING_SIZE
+            if self.pop_index is None:
+                self.pop_index = self.index
+
+            incr = -1 if pop > 0 else 1
+            index = (self.pop_index + incr) % self.KILL_RING_SIZE
             while entries[index] is None:
-                if index == self.index:
+                if index == self.pop_index:
                     return None
                 index = (index + incr) % self.KILL_RING_SIZE
 
             # don't do it unless the number of regions matches
-            self.index = index
+            self.pop_index = index
             result = entries[index].regions
-            entries[index].set_clipboard_if_possible()
+            entries[index].set_clipboard()
 
         # make sure we have enough data for the specified number of regions
         while len(result) < n_regions:
@@ -190,7 +208,6 @@ class MarkRing:
     def set(self, regions, reuse_index=False):
         if self.get() == regions:
             # don't set another mark in the same place
-            print("Regions same!")
             return
         if not reuse_index:
             self.index = (self.index + 1) % self.MARK_RING_SIZE
@@ -706,8 +723,7 @@ class CmdUtil:
         return len(self.view.sel())
 
     def get_last_cursor(self):
-        cursors = list(self.view.sel())
-        return cursors[-1]
+        return self.view.sel()[-1]
 
     def set_cursors(self, regions, ensure_visible=True):
         if not regions:
@@ -941,7 +957,7 @@ class SbpDoTimesCommand(SbpTextCommand):
         else:
             doit()
             cursor = util.get_last_cursor()
-            if not visible.contains(cursor):
+            if not visible.contains(cursor.b):
                 util.ensure_visible(cursor, True)
 
 class SbpShowScopeCommand(SbpTextCommand):
