@@ -201,7 +201,7 @@
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
 
     {"keys": ["alt+a"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
-    {"keys": ["alt+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+m"],  "command": "sbp_move_back_to_indentation", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
     {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
@@ -338,7 +338,7 @@
     {"keys": ["super+["], "command": "sbp_shift_region", "args": {"direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
     {"keys": ["super+]"], "command": "sbp_shift_region", "args": {"direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
 
-    {"keys": ["super+m"],  "command": "move_to",  "args": {"to": "bol",  "extend": false }, "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+m"],  "command": "sbp_move_back_to_indentation", "context": [ {"key": "sbp_use_super_bindings"}]},
 
     {"keys": ["super+v"], "command": "move", "args": {"by": "pages", "forward": false }, "context": [ {"key": "sbp_use_super_bindings"}]},
 

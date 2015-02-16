@@ -1,3 +1,7 @@
+# REMIND: should_reset_target_column should be implemented as state in the view, which is set to
+# true until the first time next-line and prev-line are called (assuming we can trap that). That way
+# we don't do it after each command but only just before we issue a next/prev line command.
+
 import re, sys
 import functools as fu
 import sublime, sublime_plugin
@@ -846,6 +850,9 @@ class CmdUtil:
         char = self.view.substr(pos)
         return not (char in " \t\r\n" or char in separators)
 
+    def is_one_of(self, pos, chars):
+        return self.view.substr(pos) in chars
+
     #
     # Goes to the other end of the scope at the specified position. The specified position should be
     # around brackets or quotes.
@@ -1035,6 +1042,26 @@ class SbpMoveWordCommand(SbpTextCommand):
 
         for c in range(count):
             util.for_each_cursor(move_word0, first=(c == 0))
+
+#
+# Advance to the beginning (or end if going backward) word unless already positioned at a word
+# character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
+# the argument count.
+#
+class SbpMoveBackToIndentation(SbpTextCommand):
+    should_reset_target_column = True
+
+    def run_cmd(self, util, direction=1):
+        view = self.view
+
+        def to_indentation(cursor):
+            start = cursor.begin()
+            while util.is_one_of(start, " \t"):
+                start += 1
+            return start
+
+        util.run_command("move_to", {"to": "hardbol", "extend": False})
+        util.for_each_cursor(to_indentation)
 
 #
 # Advance to the beginning (or end if going backward) word unless already positioned at a word
