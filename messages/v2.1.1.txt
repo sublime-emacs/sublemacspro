@@ -1,0 +1,5 @@
+Sublemacs Pro v2.1.1 Updates:
+=============================
+
+  * Fix broken rectangle and register commands caused by recent multi-cursor changes.
+  * Fix crasher in sbp_tab_cmd. Use default value of 8 for tab_size if auto detect returns None.
