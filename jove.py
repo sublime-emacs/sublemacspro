@@ -569,7 +569,7 @@ class CmdUtil:
             self.run_command("move", {"by": "characters", "forward": False})
 
     def get_tab_size(self):
-        tab_size = self.view.settings().get("tab_size", 8)
+        return self.view.settings().get("tab_size", 8)
 
     #
     # Returns the mark position.
