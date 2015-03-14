@@ -17,10 +17,14 @@ class SbpRectangleDelete(jove.SbpTextCommand):
   and cannot be pasted
   """
   def run_cmd(self, jove, **args):
-    sel = jove.get_region()
+    region = jove.get_encompassing_region()
 
-    b_row, b_col = self.view.rowcol(sel.begin())
-    e_row, e_col = self.view.rowcol(sel.end())
+    if not region:
+        return
+
+    # get the beginning and end of the region
+    b_row, b_col = self.view.rowcol(region.begin())
+    e_row, e_col = self.view.rowcol(region.end())
 
     # Create rectangle
     top = b_row
@@ -44,10 +48,13 @@ class SbpRectangleInsertHandler(jove.SbpTextCommand):
   """
 
   def run_cmd(self, jove, content):
-    print(content)
-    sel = jove.get_region()
-    b_row, b_col = self.view.rowcol(sel.begin())
-    e_row, e_col = self.view.rowcol(sel.end())
+    region = jove.get_encompassing_region()
+    if not region:
+        return
+
+    # get the beginning and end of the region
+    b_row, b_col = self.view.rowcol(region.begin())
+    e_row, e_col = self.view.rowcol(region.end())
 
     # Create rectangle
     top = b_row

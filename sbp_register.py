@@ -135,7 +135,7 @@ class SbpRegisterStore(jove.SbpTextCommand):
             return
 
         # Get the region
-        sbp_registers.store(register, self.view.substr(self.jove.get_region()))
+        sbp_registers.store(register, self.view.substr(self.jove.get_encompassing_region()))
 
 
 
@@ -143,7 +143,7 @@ class SbpRegisterDoInsert(jove.SbpTextCommand):
 
     def run_cmd(self, jove, content):
         sel = jove.get_point()
-        jove.view.replace(jove.edit, sublime.Region(sel,sel) , content)
+        jove.view.replace(jove.edit, sublime.Region(sel, sel), content)
         jove.view.sel().clear()
         jove.view.sel().add(sublime.Region(sel + len(content), sel + len(content)))
         jove.view.window().focus_view(self.view)

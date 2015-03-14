@@ -599,7 +599,7 @@ class CmdUtil:
         return True
 
     #
-    # Get_region() returns the current selection as regions (if the cursors are not
+    # Get_regions() returns the current selection as regions (if the cursors are not
     # empty).  If the cursors are empty but the number of cursors matches the number of
     # marks, and the marks are not overlapping, we return a region for each cursor.
     # Otherwise, we display an error.
@@ -617,6 +617,12 @@ class CmdUtil:
                     self.set_status("Overlapping regions unpredictable outcome!")
             return regions
         self.set_status("Mark/Cursor mismatch: {} marks, {} cursors".format(len(marks), len(cursors)))
+
+    def get_encompassing_region(self):
+        regions = self.get_regions()
+        if regions:
+            return sublime.Region(regions[0].begin(), regions[-1].end())
+        return None
 
     #
     # Save all the current cursors because we're about to do something that could cause
