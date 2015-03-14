@@ -568,6 +568,9 @@ class CmdUtil:
             self.run_command("move", {"by": "characters", "forward": True})
             self.run_command("move", {"by": "characters", "forward": False})
 
+    def get_tab_size(self):
+        tab_size = self.view.settings().get("tab_size", 8)
+
     #
     # Returns the mark position.
     #
@@ -1358,7 +1361,7 @@ class SbpShiftRegionCommand(SbpTextCommand):
             if state.argument_supplied:
                 cols = direction * util.get_count()
             else:
-                cols = direction * self.view.settings().get("tab_size")
+                cols = direction * util.get_tab_size()
 
             # now we know which way and how far we're shifting, create a cursor for each line we
             # want to shift
@@ -2154,7 +2157,7 @@ class SbpTabCmdCommand(SbpTextCommand):
     def run_cmd(self, util, indent_on_repeat=False):
         point = util.get_point()
         indent,cursor = util.get_line_indent(point)
-        tab_size = self.view.settings().get("tab_size")
+        tab_size = util.get_tab_size()
         if util.state.active_mark or cursor > indent:
             util.run_command("reindent", {})
         else:
