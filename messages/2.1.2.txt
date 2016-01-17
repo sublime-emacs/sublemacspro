@@ -1,0 +1,5 @@
+Sublemacs Pro v2.1.2 Update
+=============================
+
+Fix for Linux context menu. If you click the context menu with a visible selection, the selection is
+no longer errorneously cleared.

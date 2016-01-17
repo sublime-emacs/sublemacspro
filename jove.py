@@ -463,7 +463,8 @@ class CmdWatcher(sublime_plugin.EventListener):
         cm = CmdUtil(view)
         if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
             # if we just finished a mouse drag, make sure active mark mode is off
-            cm.toggle_active_mark_mode(False)
+            if cmd != "context_menu":
+                cm.toggle_active_mark_mode(False)
 
         # reset numeric argument (if command starts with "sbp_" this is handled elsewhere)
         if not cmd.startswith("sbp_"):
