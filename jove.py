@@ -1488,22 +1488,26 @@ class SbpCancelMarkCommand(SbpTextCommand):
         util.state.mark_ring.clear()
 
 class SbpSwapPointAndMarkCommand(SbpTextCommand):
-    def run_cmd(self, util):
-        if util.state.argument_supplied:
+    def run_cmd(self, util, toggle_active_mark_mode=False):
+        if util.state.argument_supplied or toggle_active_mark_mode:
             util.toggle_active_mark_mode()
         else:
             util.swap_point_and_mark()
 
 class SbpMoveToCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
-    def run_cmd(self, util, to):
+    def run_cmd(self, util, to, always_push_mark=False):
         if to == 'bof':
             util.push_mark_and_goto_position(0)
         elif to == 'eof':
             util.push_mark_and_goto_position(self.view.size())
         elif to in ('eow', 'bow'):
             visible = self.view.visible_region()
-            util.set_cursors([sublime.Region(visible.a if to == 'bow' else visible.b)])
+            pos = visible.a if to == 'bow' else visible.b
+            if always_push_mark:
+                util.push_mark_and_goto_position(pos)
+            else:
+                util.set_cursors([sublime.Region(pos)])
 
 class SbpOpenLineCommand(SbpTextCommand):
     def run_cmd(self, util):
