@@ -19,6 +19,10 @@ else:
     import Default.paragraph as paragraph
     from . import sbp_layout as ll
 
+# Region names we use for i-search. Using our own names means that there is no interference from
+# Sublime in terms of messages it displays regarding regions and matches, etc.
+REGION_FIND = "rf"
+REGION_SELECTED = "rs"
 
 JOVE_STATUS = "jove"
 
@@ -33,6 +37,12 @@ kill_cmds = set()
 
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete', 'undo', 'redo'])
+
+def pluralize(string, count, es="s"):
+    if count == 1:
+        return "%d %s" % (count, string)
+    else:
+        return "%d %s%s" % (count, string, es)
 
 class SettingsManager:
     def get(key, default = None):
@@ -1808,11 +1818,15 @@ class ISearchInfo():
                 return r.begin() if self.forward else r.end()
             return None
 
+        #
+        # Clone is called when we want to make progress with the same search string as before.
+        #
         def clone(self):
             return copy.copy(self)
 
         #
-        # Clone is called when we want to make progress with the same search string as before.
+        # Go to the next match of the current string. Keep means "keep the current location as a
+        # future cursor" and forward is True if we're moving forward.
         #
         def step(self, forward, keep):
             index = self.current_index
@@ -1945,14 +1959,14 @@ class ISearchInfo():
         self.input_view.run_command("left_delete")
         self.input_view.run_command("insert", {"characters": text})
 
+    #
+    # Find the most recent stack item where we were not in the error state.
+    #
     def not_in_error(self):
         si = self.current
         while si and not si.selected and si.search:
             si = si.prev
         return si
-
-    def is_active(self):
-        return
 
     def finish(self, abort=False):
         util = self.util
@@ -1968,7 +1982,12 @@ class ISearchInfo():
             selection.clear()
             current = self.not_in_error()
             if current and current.selected:
-                selection.add_all(current.selected)
+                if not current.forward:
+                    # put the cursor at the front of the each region
+                    selected = (sublime.Region(s.b, s.a) for s in current.selected)
+                else:
+                    selected = current.selected
+                selection.add_all(selected)
                 point_set = True
 
         if not point_set:
@@ -1978,34 +1997,36 @@ class ISearchInfo():
             util.set_mark(self.point, and_selection=False)
 
         # erase our regions
-        self.view.erase_regions("find")
-        self.view.erase_regions("selected")
+        self.view.erase_regions(REGION_FIND)
+        self.view.erase_regions(REGION_SELECTED)
         clear_isearch_info_for(self.view)
         self.hide_panel()
 
     def update(self):
-        si = self.not_in_error()
+        si = self.current
         if si is None:
             return
+        not_in_error = self.not_in_error()
 
         flags = sublime.DRAW_NO_FILL if _ST3 else sublime.DRAW_OUTLINED
-        self.view.add_regions("find", si.regions, "text", "", flags)
-        selected = si.selected or []
-        self.view.add_regions("selected", selected, "string", "", sublime.DRAW_NO_OUTLINE)
+        self.view.add_regions(REGION_FIND, si.regions, "text", "", flags)
+        selected = si.selected or (not_in_error.selected and [not_in_error.selected[-1]]) or []
+        self.view.add_regions(REGION_SELECTED, selected, "string", "", sublime.DRAW_NO_OUTLINE)
         if selected:
             self.view.show(selected[-1])
 
         status = ""
-        if si != self.current:
+        if si != not_in_error or si.try_wrapped:
             status += "Failing "
         if self.current.wrapped:
             status += "Wrapped "
         status += "I-Search " + ("Forward" if self.current.forward else "Reverse")
-        if si != self.current:
+        if si != not_in_error:
             if len(self.current.regions) > 0:
-                status += " %s matches %s" % (len(self.current.regions), ("above" if self.forward else "below"))
+                status += " %s %s" % (pluralize("match", len(self.current.regions), "es"), ("above" if self.forward else "below"))
         else:
-            status += " %d matches, %d cursors" % (len(si.regions), len(si.selected))
+            n_cursors = min(len(si.selected), len(si.regions))
+            status += " %s, %s" % (pluralize("match", len(si.regions), "es"), pluralize("cursor", n_cursors))
 
         self.util.set_status(status)
 
@@ -2025,7 +2046,7 @@ class ISearchInfo():
             new = self.current.step(forward=forward, keep=keep)
             if new:
                 self.push(new)
-                self.update()
+            self.update()
 
     def keep_all(self):
         while self.current.regions and self.current.current_index < len(self.current.regions):
