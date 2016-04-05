@@ -1980,7 +1980,8 @@ class ISearchInfo():
         if not abort:
             selection = self.view.sel()
             selection.clear()
-            current = self.not_in_error()
+            current = self.current
+            not_in_error = self.not_in_error()
             if current and current.selected:
                 if not current.forward:
                     # put the cursor at the front of the each region
@@ -1988,6 +1989,9 @@ class ISearchInfo():
                 else:
                     selected = current.selected
                 selection.add_all(selected)
+                point_set = True
+            elif not_in_error and not_in_error.regions:
+                selection.add_all([not_in_error.regions[not_in_error.current_index]])
                 point_set = True
 
         if not point_set:
@@ -2081,12 +2085,12 @@ class ISearchInfo():
         separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
         case_sensitive = re.search(r'[A-Z]', search) is not None
 
-        def append_one(util):
+        def append_one(ch):
             if not case_sensitive:
-                util = util.lower()
-            if self.regex and util in "{}()[].*+":
-                return "\\" + util
-            return util
+                ch = ch.lower()
+            if self.regex and ch in "{}()[].*+":
+                return "\\" + ch
+            return ch
 
         if point < limit:
             # append at least one character, word character or not
@@ -2096,8 +2100,8 @@ class ISearchInfo():
 
             # now insert word characters
             while point < limit and helper.is_word_char(point, True, separators):
-                util = view.substr(point)
-                search += append_one(util)
+                ch = view.substr(point)
+                search += append_one(ch)
                 self.on_change(search)
                 point += 1
         self.set_text(self.current.search)
@@ -2243,7 +2247,7 @@ class SbpZapToCharEdit(sublime_plugin.TextCommand):
 
     def run(self, edit, begin, end):
         region = sublime.Region(int(begin), int(end))
-        kill_ring.add(self.view.substr(region), True, False)
+        kill_ring.add([self.view.substr(region)], True, False)
         self.view.erase(edit, region)
 
 

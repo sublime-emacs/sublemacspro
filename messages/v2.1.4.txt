@@ -1,0 +1,12 @@
+Sublemacs Pro v2.1.4 Update
+=============================
+
+Improvements to incremental search behavior:
+
+  * when searching backword, the cursor is at the beginning of the match
+  * when the current search is failing, no longer highlights what used to match
+  * wrap-around search is a little more intuitive
+
+Other misc fixes include:
+
+  * zap to char was not copying everything into the kill ring
