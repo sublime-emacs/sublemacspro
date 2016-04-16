@@ -82,7 +82,7 @@
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
-    {"keys": ["alt+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}, "context": [ {"key": "sbp_alt+digit_inserts"}]},
+    {"keys": ["alt+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
     {"keys": ["alt+1"], "command": "sbp_universal_argument", "args": {"value": 1}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
     {"keys": ["alt+2"], "command": "sbp_universal_argument", "args": {"value": 2}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
     {"keys": ["alt+3"], "command": "sbp_universal_argument", "args": {"value": 3}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
