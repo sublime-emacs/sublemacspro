@@ -74,6 +74,12 @@ class KillRing:
                     self.regions[i] = regions[i] + self.regions[i]
             return True
 
+        def get_sample(self):
+            text = self.regions[0][0:256]
+            text = text.strip("\n \t").replace("\n", "\\n")
+            text = re.sub("\\s\\s+", " ", text)
+            return text
+
         def set_clipboard(self):
             sublime.set_clipboard(self.regions[0])
 
@@ -120,11 +126,34 @@ class KillRing:
             self.entries[index].set_clipboard()
 
     #
-    # Returns the current entry in the kill ring for the purposes of yanking. If pop is
-    # non-zero, we move backwards or forwards once in the kill ring and return that data
-    # instead. We need to match the specified number of regions or else we cannot return
-    # anything with a different number of regions nor can we pop the ring in either
-    # direction if the number of regions does not match.
+    # Returns a sample of the first region of each entry in the kill ring, so that it can be
+    # displayed to the user to allow them to choose it. The sample is truncated unfortunately.
+    #
+    def get_popup_sample(self):
+        index = self.index
+        result = []
+        seen = {}
+        while True:
+            kill = self.entries[index]
+            if kill:
+                text = kill.get_sample()
+                if text not in seen:
+                    result.append((index, text))
+                    seen[text] = True
+            index = (index - 1) % self.KILL_RING_SIZE
+            if index == self.index:
+                break
+        return result
+
+    def set_current(self, index):
+        if self.entries[index]:
+            self.index = index
+            self.entries[index].set_clipboard()
+
+    #
+    # Returns the current entry in the kill ring for the purposes of yanking. If pop is non-zero, we
+    # move backwards or forwards once in the kill ring and return that data instead. If the number
+    # of regions doesn't match, we either truncate or duplicate the regions to make a match.
     #
     def get_current(self, n_regions, pop):
         entries = self.entries
@@ -139,13 +168,14 @@ class KillRing:
             if n_regions == 1:
                 # check the clipboard
                 clipboard = sublime.get_clipboard()
+
             if clipboard and (entry is None or entry.n_regions != 1 or entry.regions[0] != clipboard):
                 # We switched to another app and cut or copied something there, so add the clipboard
                 # to our kill ring.
                 result = [clipboard]
                 self.add(result, True, False)
-            elif entries[index]:
-                result = entries[index].regions
+            elif entry:
+                result = entry.regions
             self.pop_index = None
         else:
             if self.pop_index is None:
@@ -158,7 +188,6 @@ class KillRing:
                     return None
                 index = (index + incr) % self.KILL_RING_SIZE
 
-            # don't do it unless the number of regions matches
             self.pop_index = index
             result = entries[index].regions
             entries[index].set_clipboard()
@@ -1791,6 +1820,22 @@ class SbpYankCommand(SbpTextCommand):
         util.state.mark_ring.set(util.get_cursors(begin=True), True)
         util.make_cursors_empty()
         util.ensure_visible(util.get_last_cursor())
+
+class SbpChooseAndYank(SbpTextCommand):
+    def run_cmd(self, util):
+        # items is an array of (index, text) pairs
+        items = kill_ring.get_popup_sample()
+
+        def on_done(idx):
+            if idx >= 0:
+                kill_ring.set_current(items[idx][0])
+                util.run_command("sbp_yank", {})
+
+        if items:
+            sublime.active_window().show_quick_panel([item[1] for item in items], on_done)
+        else:
+            sublime.status_message('Nothing in history')
+
 
 #####################################################
 #            Better incremental search              #
