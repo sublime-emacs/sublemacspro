@@ -93,6 +93,22 @@ class SbpPointToRegister(jove.SbpTextCommand):
         # Get the region
         sbp_point_registers.store(register, (self.view, self.view.window(), sel[0], self.view.substr(self.jove.get_encompassing_region())[0:256]))
 
+
+class SbpJumpToPoint:
+    def jump(point_data):
+        point = point_data[2]
+
+        point_data[0].sel().clear()
+        point_data[0].sel().add(point)
+
+        point_data[1].focus_group(0)
+        point_data[1].focus_view(point_data[0])
+
+        # Check if the point is in view, if not scroll to
+        visible = point_data[0].visible_region()
+        if not visible.contains(point):
+            point_data[0].run_command("jove_center_view")
+
 # For some reason switching windows does not work and we can only switch to files
 # in the current window
 class SbpPointFromRegister(sublime_plugin.TextCommand):
@@ -117,19 +133,7 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
         self.panel.window().run_command("hide_panel")
 
         if register in sbp_point_registers:
-            point_data = sbp_point_registers.get(register)
-            point = point_data[2]
-    
-            point_data[0].sel().clear()
-            point_data[0].sel().add(point)
-    
-            point_data[1].focus_group(0)
-            point_data[1].focus_view(point_data[0])
-    
-            # Check if the point is in view, if not scroll to
-            visible = point_data[0].visible_region()
-            if not visible.contains(point):
-                point_data[0].run_command("jove_center_view")
+            SbpJumpToPoint.jump(sbp_point_registers.get(register))
 
 class SbpRegisterStore(jove.SbpTextCommand):
     '''
@@ -224,7 +228,7 @@ class SbpChooseAndYankPoint(jove.SbpTextCommand):
 
         def on_done(idx):
             if idx >= 0:
-                util.run_command("sbp_point_from_register", {"register": items[idx][0]})
+                SbpJumpToPoint.jump(sbp_point_registers.get(items[idx][0]))
 
         if items:
             sublime.active_window().show_quick_panel([item[0] + ": " + item[1] for item in items], on_done)
