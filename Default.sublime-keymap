@@ -62,6 +62,7 @@
     {"keys": ["ctrl+x", "ctrl+x"], "command": "sbp_swap_point_and_mark"},
     {"keys": ["ctrl+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_for_kill_line"}},
     {"keys": ["ctrl+w"], "command": "sbp_kill_region"},
+    {"keys": ["super+x"], "command": "sbp_kill_region"},
 
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
     {"keys": ["super+v"], "command": "sbp_yank"},
