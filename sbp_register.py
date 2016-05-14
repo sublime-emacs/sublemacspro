@@ -1,6 +1,7 @@
 import functools as fu
 import sublime
 import sublime_plugin
+import re
 
 # Handling the different imports in Sublime
 if sublime.version() < '3000':
@@ -12,36 +13,61 @@ else:
     from . import jove
 
 class SbpRegisterStore:
-  """
-  Base class to stroe data for the registers, could be a plain dict,
-  but we make it more complicated by wrapping the dict :)
-  """
-  registers = {}
+    """
+    Base class to store data for the registers, could be a plain dict,
+    but we make it more complicated by wrapping the dict :)
+    """
+    registers = {}
 
-  def get(self, key):
-    if not key in self.registers:
-      return ""
-    else:
-      return self.registers[key]
+    # If you want seperate text and point registers enabling mapping to the same keys
+    # delete the global registers and uncomment the code below
+    # def __init__(self):
+    #     self.registers = {}
 
-  def store(self, key, val):
-    self.registers[key] = val
+    def get(self, key):
+        if not key in self.registers:
+            return ""
+        else:
+            return self.registers[key]
 
-  def  __contains__(self, key):
-    return key in self.registers
+    def format_for_popup(self, text):
+        text = text.strip("\n \t").replace("\n", "\\n")
+        text = re.sub("\\s\\s+", " ", text)
+        return text
+
+    def get_point_registers(self):
+        items = []
+        for item in self.registers.items():
+            if item[1][0] is not None:
+                items.append([item[0],self.format_for_popup(item[1][3])])
+        return items
+
+    def get_text_registers(self):
+        items = []
+        for item in self.registers.items():
+            if item[1][0] is None:
+                items.append([item[0],self.format_for_popup(item[1][3])])
+        return items
+
+    def store(self, key, val):
+        self.registers[key] = val
+
+    def  __contains__(self, key):
+        return key in self.registers
 
 # Global variable to store data in the registers
-sbp_registers = SbpRegisterStore()
-sbp_point_register = SbpRegisterStore()
+sbp_text_registers = SbpRegisterStore()
+sbp_point_registers = SbpRegisterStore()
 
-class SbpPointToRegister(sublime_plugin.TextCommand):
+class SbpPointToRegister(jove.SbpTextCommand):
     ''' Stores the current selection, if it is a single selection, in a special
     register. This allows quick bookkeeping of positions in the document. However
     it stores as well the window and the region so that focussing from other
     windows is possible'''
     panel = None
 
-    def run(self, edit):
+    def run_cmd(self, jove):
+        self.jove = jove
         self.panel = self.view.window().show_input_panel("Store point into register:", "", \
             self.on_done, \
             self.on_change,\
@@ -65,8 +91,7 @@ class SbpPointToRegister(sublime_plugin.TextCommand):
             return
 
         # Get the region
-        sbp_point_register.store(register, (self.view, self.view.window(), sel[0]))
-
+        sbp_point_registers.store(register, (self.view, self.view.window(), sel[0], self.view.substr(self.jove.get_encompassing_region())[0:256]))
 
 # For some reason switching windows does not work and we can only switch to files
 # in the current window
@@ -76,8 +101,11 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
 
     panel = None
 
-    def run(self, edit):
-        self.panel = self.view.window().show_input_panel("Jump to point from register:", "", \
+    def run(self, edit, register = None):
+        if register in sbp_point_registers:
+            self.insert(edit, register)
+        else:
+            self.panel = self.view.window().show_input_panel("Jump to point from register:", "", \
             None, \
             fu.partial(self.insert, edit),\
             None)
@@ -87,17 +115,17 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
             return
 
         self.panel.window().run_command("hide_panel")
-        if register in sbp_registers:
 
-            point_data = sbp_registers.get(register)
+        if register in sbp_point_registers:
+            point_data = sbp_point_registers.get(register)
             point = point_data[2]
-
+    
             point_data[0].sel().clear()
             point_data[0].sel().add(point)
-
+    
             point_data[1].focus_group(0)
             point_data[1].focus_view(point_data[0])
-
+    
             # Check if the point is in view, if not scroll to
             visible = point_data[0].visible_region()
             if not visible.contains(point):
@@ -135,7 +163,7 @@ class SbpRegisterStore(jove.SbpTextCommand):
             return
 
         # Get the region
-        sbp_registers.store(register, self.view.substr(self.jove.get_encompassing_region()))
+        sbp_text_registers.store(register, (None, None, None, self.view.substr(self.jove.get_encompassing_region())))
 
 
 
@@ -172,4 +200,33 @@ class SbpRegisterInsert(jove.SbpTextCommand):
         if (sel is None) or len(sel) != 1:
             return
 
-        self.view.window().run_command("sbp_register_do_insert", {"content": sbp_registers.get(register)})
+        self.view.window().run_command("sbp_register_do_insert", {"content": sbp_text_registers.get(register)[3]})
+
+class SbpChooseAndYankRegister(jove.SbpTextCommand):
+    
+    def run_cmd(self, util):
+        # items is an array of (index, text) pairs
+        items = sbp_text_registers.get_text_registers()
+
+        def on_done(idx):
+            if idx >= 0:
+                util.run_command("sbp_register_do_insert", {"content": sbp_text_registers.get(items[idx][0])[3]})
+ 
+        if items:
+            sublime.active_window().show_quick_panel([item[0] + ": " + item[1] for item in items], on_done)
+        else:
+            sublime.status_message('Nothing in history')
+class SbpChooseAndYankPoint(jove.SbpTextCommand):
+    
+    def run_cmd(self, util):
+        # items is an array of (index, text) pairs
+        items = sbp_point_registers.get_point_registers()
+
+        def on_done(idx):
+            if idx >= 0:
+                util.run_command("sbp_point_from_register", {"register": items[idx][0]})
+
+        if items:
+            sublime.active_window().show_quick_panel([item[0] + ": " + item[1] for item in items], on_done)
+        else:
+            sublime.status_message('Nothing in history')
