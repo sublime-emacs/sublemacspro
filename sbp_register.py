@@ -49,6 +49,10 @@ class SbpRegisterStore:
                 items.append([item[0],self.format_for_popup(item[1][3])])
         return items
 
+    # TODO: Clear all text registers or point registers
+    # TODO: Possibly use pop-up to delete registers if easy
+
+
     def store(self, key, val):
         self.registers[key] = val
 
