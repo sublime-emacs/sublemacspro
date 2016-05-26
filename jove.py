@@ -1831,8 +1831,12 @@ class SbpChooseAndYank(SbpTextCommand):
                 kill_ring.set_current(items[idx][0])
                 util.run_command("sbp_yank", {})
 
+        # Detect width of viewport and modify output text accordingly for better viewing
+        viewWidth      = self.view.viewport_extent()[0]
+        viewTextLength = int(viewWidth*200/2000)
+
         if items:
-            sublime.active_window().show_quick_panel([item[1] for item in items], on_done)
+            sublime.active_window().show_quick_panel([item[1][:viewTextLength] for item in items], on_done)
         else:
             sublime.status_message('Nothing in history')
 
