@@ -91,11 +91,18 @@ class SbpPointToRegister(jove.SbpTextCommand):
         self.panel.window().run_command("hide_panel")
 
         sel = self.view.sel()
+        line = self.view.line(sel[0])
+        line_substr = ''
         if (sel is None) or len(sel) != 1:
             return
 
-        # Get the region
-        sbp_point_registers.store(register, (self.view, self.view.window(), sel[0], self.view.substr(self.jove.get_encompassing_region())[0:256]))
+        # grab first four lines below the current line for viewing of jump
+        for i in range(4):
+            line_substr += self.view.substr(line)
+            line = self.view.line(line.end()+2)
+
+        sbp_point_registers.store(register, (self.view, self.view.window(), sel[0],
+            line_substr))
 
 
 class SbpJumpToPoint:
@@ -211,7 +218,7 @@ class SbpRegisterInsert(jove.SbpTextCommand):
         self.view.window().run_command("sbp_register_do_insert", {"content": sbp_text_registers.get(register)[3]})
 
 class SbpChooseAndYankRegister(jove.SbpTextCommand):
-    
+
     def run_cmd(self, util):
         # items is an array of (index, text) pairs
         items = sbp_text_registers.get_text_registers()
@@ -219,13 +226,17 @@ class SbpChooseAndYankRegister(jove.SbpTextCommand):
         def on_done(idx):
             if idx >= 0:
                 util.run_command("sbp_register_do_insert", {"content": sbp_text_registers.get(items[idx][0])[3]})
- 
+
+        # Detect width of viewport and modify output text accordingly for better viewing
+        viewWidth      = self.view.viewport_extent()[0]
+        viewTextLength = int(viewWidth*200/2000)
+
         if items:
-            sublime.active_window().show_quick_panel([item[0] + ": " + item[1] for item in items], on_done)
+            sublime.active_window().show_quick_panel([item[0] + ": " + item[1][:viewTextLength] for item in items], on_done)
         else:
             sublime.status_message('Nothing in history')
 class SbpChooseAndYankPoint(jove.SbpTextCommand):
-    
+
     def run_cmd(self, util):
         # items is an array of (index, text) pairs
         items = sbp_point_registers.get_point_registers()
@@ -234,7 +245,11 @@ class SbpChooseAndYankPoint(jove.SbpTextCommand):
             if idx >= 0:
                 SbpJumpToPoint.jump(sbp_point_registers.get(items[idx][0]))
 
+        # Detect width of viewport and modify output text accordingly for better viewing
+        viewWidth      = self.view.viewport_extent()[0]
+        viewTextLength = int(viewWidth*200/2000)
+
         if items:
-            sublime.active_window().show_quick_panel([item[0] + ": " + item[1] for item in items], on_done)
+            sublime.active_window().show_quick_panel([item[0] + ": " + item[1][:viewTextLength] for item in items], on_done)
         else:
             sublime.status_message('Nothing in history')
