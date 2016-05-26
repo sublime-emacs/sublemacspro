@@ -7,7 +7,6 @@ import functools as fu
 import sublime, sublime_plugin
 from copy import copy
 
-
 # Handling the different imports in Sublime
 if sublime.version() < '3000':
     # we are on ST2 and Python 2.X
@@ -396,7 +395,6 @@ class CmdWatcher(sublime_plugin.EventListener):
     def on_anything(self, view):
         view.erase_status(JOVE_STATUS)
 
-
     def on_window_command(self, window, cmd, args):
         # Some window commands take us to new view. Here's where we abort the isearch if that happens.
         info = isearch_info_for(window)
@@ -420,7 +418,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         if args is None:
             args = {}
-
 
         # first keep track of this_cmd and last_cmd (if command starts with "sbp_" it's handled
         # elsewhere)
@@ -514,7 +511,6 @@ class CmdWatcher(sublime_plugin.EventListener):
                 cm.toggle_active_mark_mode(False)
         vs.drag_count += 1
 
-
     #
     # At a minimum this is called when bytes are inserted into the buffer.
     #
@@ -522,12 +518,10 @@ class CmdWatcher(sublime_plugin.EventListener):
         ViewState.get(view).this_cmd = None
         self.on_anything(view)
 
-
 class WindowCmdWatcher(sublime_plugin.EventListener):
 
     def __init__(self, *args, **kwargs):
         super(WindowCmdWatcher, self).__init__(*args, **kwargs)
-
 
     def on_window_command(self, window, cmd, args):
         # REMIND - JP: Why is this code here? Can't this be done in the SbpPaneCmd class?
@@ -1125,7 +1119,6 @@ class SbpCaseRegion(SbpTextCommand):
 
         util.view.replace(util.edit, region, text)
 
-
 class SbpCaseWordCommand(SbpTextCommand):
     should_reset_target_column = True
 
@@ -1176,15 +1169,12 @@ class SbpCaseWordCommand(SbpTextCommand):
                 selection.clear()
                 selection.add_all(new_regions)
 
-
-
 class SbpMoveSexprCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
     should_reset_target_column = True
 
     def run_cmd(self, util, direction=1):
         view = self.view
-
 
         separators = SettingsManager.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 
@@ -1231,19 +1221,29 @@ class SbpMoveSexprCommand(SbpTextCommand):
 
 # Move to paragraph depends on the functionality provided by the default
 # plugin in ST. So for now we use this.
+
 class SbpMoveToParagraphCommand(SbpTextCommand):
 
     def run_cmd(self, util, direction=1):
         # Clear all selections
         s = self.view.sel()[0]
+        view = self.view
+        whitespace = '\t\x0b\x0c\r \n'
         if direction == 1:
             if s.begin() == 0:
                 return
-            point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
+            # Remove whitespace and new lines for moving forward and backward paragraphs
+            this_region_begin = s.begin() - 1
+            while((view.substr(this_region_begin) in whitespace) and (this_region_begin > 0)):
+                this_region_begin -= 1
+            point = paragraph.expand_to_paragraph(self.view, this_region_begin).begin()
         else:
             if s.end() == self.view.size():
                 return
-            point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
+            this_region_end = s.end() + 1
+            while((view.substr(this_region_end) in whitespace) and (this_region_end < self.view.size()-1)):
+                this_region_end += 1
+            point = paragraph.expand_to_paragraph(self.view, this_region_end).end()
 
         self.view.sel().clear()
         #Clear selections
@@ -1312,7 +1312,6 @@ class SbpMoveThenDeleteCommand(SbpTextCommand):
         # erase the regions
         for region in selection:
             view.erase(util.edit, region)
-
 
 class SbpGotoLineCommand(SbpTextCommand):
     def run_cmd(self, util):
@@ -1619,7 +1618,6 @@ class SbpPaneCmdCommand(SbpWindowCommand):
         if stype == "v" and extent[0] / 2 <= 20 * view.em_width():
             return False
 
-
         # Perform the layout
         lm = ll.LayoutManager(layout)
         if not lm.split(current, stype):
@@ -1678,7 +1676,6 @@ class SbpPaneCmdCommand(SbpWindowCommand):
 
         window.set_layout(lm.build())
 
-
         for i in range(window.num_groups()):
             view = views[i]
             window.focus_group(i)
@@ -1686,7 +1683,6 @@ class SbpPaneCmdCommand(SbpWindowCommand):
 
         window.focus_group(max(0, current - 1))
         dedup_views(window)
-
 
     def move(self, window, **kwargs):
         if 'next_pane' in kwargs:
@@ -1849,7 +1845,6 @@ class ISearchInfo():
             if not keep and len(selected) > 0:
                 del(selected[-1])
             return ISearchInfo.StackItem(self.search, self.regions, selected, index, forward, wrapped)
-
 
     def __init__(self, view, forward, regex):
         self.view = view
@@ -2249,7 +2244,6 @@ class SbpZapToCharEdit(sublime_plugin.TextCommand):
         region = sublime.Region(int(begin), int(end))
         kill_ring.add([self.view.substr(region)], True, False)
         self.view.erase(edit, region)
-
 
 # This command handles the actual selecting of the zap char
 class SbpZapToCharCommand(SbpTextCommand):
