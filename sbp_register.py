@@ -31,7 +31,8 @@ class SbpRegisterStore:
             return self.registers[key]
 
     def format_for_popup(self, text):
-        text = text.strip("\n \t").replace("\n", "\\n")
+        text = text.strip("\n \t").replace("\n", " \\n")
+        text = re.sub("(\s\\\\n)+"," \\\\n", text)
         text = re.sub("\\s\\s+", " ", text)
         return text
 
@@ -98,7 +99,7 @@ class SbpPointToRegister(jove.SbpTextCommand):
 
         # grab first four lines below the current line for viewing of jump
         for i in range(4):
-            line_substr += self.view.substr(line)
+            line_substr += self.view.substr(line) + '\n'
             line = self.view.line(line.end()+2)
 
         sbp_point_registers.store(register, (self.view, self.view.window(), sel[0],
