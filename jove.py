@@ -76,7 +76,8 @@ class KillRing:
 
         def get_sample(self):
             text = self.regions[0][0:256]
-            text = text.strip("\n \t").replace("\n", "\\n")
+            text = text.strip("\n \t").replace("\n", " \\n")
+            text = re.sub("(\s\\\\n)+"," \\\\n", text)
             text = re.sub("\\s\\s+", " ", text)
             return text
 
