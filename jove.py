@@ -2256,9 +2256,11 @@ class SbpZapToCharCommand(SbpTextCommand):
 
     is_kill_cmd = True
     panel = None
+    include_char = True
 
-    def run_cmd(self, util, **args):
+    def run_cmd(self, util, include_char=True, **args):
         self.util = util
+        self.include_char = include_char
         self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
 
     def zap(self):
@@ -2284,7 +2286,10 @@ class SbpZapToCharCommand(SbpTextCommand):
 
         # Zap to char
         if found:
-            self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
+            if self.include_char is False:
+                self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish})
+            else:
+                self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
         else:
             sublime.status_message("Character %s not found" % content)
 
