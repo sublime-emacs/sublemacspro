@@ -2288,6 +2288,49 @@ class SbpZapToCharCommand(SbpTextCommand):
         else:
             sublime.status_message("Character %s not found" % content)
 
+class SbpZapToStringCommand(SbpTextCommand):
+
+    is_kill_cmd = True
+    panel = None
+    include_string = False
+
+    def run_cmd(self, util, include_string=False, **args):
+        self.util = util
+        self.include_string = include_string
+        self.panel = self.view.window().show_input_panel("Zap To String:", "", self.on_done, self.on_change, None)
+
+    def on_done(self, content):
+        """Search forward from the current selection to the next ocurence
+        of char"""
+
+        if self.panel == None:
+            return
+
+        content_len = len(content)
+        start = finish = self.util.get_point()
+        found = False
+        while not found and finish < self.view.size():
+            region = sublime.Region(finish, finish + content_len)
+            data = self.view.substr(region)
+            if data == content:
+                found = True
+                break
+            finish += 1
+
+        # Zap to char
+        if found:
+            print(self.include_string)
+            if self.include_string is True:
+                print(self.include_string)
+                self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + content_len})
+            else:
+                self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish})
+        else:
+            sublime.status_message("String %s not found" % content)
+
+    def on_change(self, content):
+        pass
+
 class SbpConvertPlistToJsonCommand(SbpTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
     PLIST_SYNTAX = "Packages/XML/XML.tmLanguage"
