@@ -1,0 +1,9 @@
+Sublemacs Pro v2.1.6 Update
+=============================
+
+New feature: choose_and_yank. It allows you to display a popup window with a sample from each entry
+in the kill ring, and then choose which one you want to yank.
+
+One possible binding is this:
+
+    {"keys": ["alt+super+y"], "command": "sbp_choose_and_yank"},

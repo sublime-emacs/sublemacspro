@@ -175,10 +175,10 @@
     {"keys": ["ctrl+x", "3"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
 
     // Modifying the Pane Sies
-    {"keys": ["ctrl+shift+c+i"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
-    {"keys": ["ctrl+shift+c+k"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
-    {"keys": ["ctrl+shift+c+j"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
-    {"keys": ["ctrl+shift+c+l"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
+    {"keys": ["ctrl+shift+i"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
+    {"keys": ["ctrl+shift+k"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
+    {"keys": ["ctrl+shift+j"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
+    {"keys": ["ctrl+shift+l"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
 
     {"keys": ["ctrl+x", "d"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
     {"keys": ["ctrl+x", "0"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},

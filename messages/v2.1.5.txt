@@ -1,4 +1,4 @@
-Sublemacs Pro v2.1.4 Update
+Sublemacs Pro v2.1.5 Update
 =============================
 
 Fixed problem with alt+- key binding.

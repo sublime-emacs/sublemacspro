@@ -193,9 +193,11 @@ class KillRing:
             entries[index].set_clipboard()
 
         # make sure we have enough data for the specified number of regions
-        while len(result) < n_regions:
-            result *= 2
-        return result[0:n_regions]
+        if result:
+            while len(result) < n_regions:
+                result *= 2
+            return result[0:n_regions]
+        return None
 
 # kill ring shared across all buffers
 kill_ring = KillRing()
@@ -1629,7 +1631,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             for g in range(window.num_groups()):
                 view = window.active_view_in_group(g)
                 util = CmdUtil(view)
-                util.ensure_visible(util.get_point())
+                util.ensure_visible(util.get_last_cursor())
         sublime.set_timeout(ensure_visible, 50)
 
     #
