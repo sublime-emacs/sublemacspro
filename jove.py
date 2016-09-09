@@ -2002,9 +2002,8 @@ class ISearchInfo():
     def set_text(self, text, is_pop=True):
         if is_pop:
             self.in_changes += 1
-        self.input_view.run_command("select_all")
-        self.input_view.run_command("left_delete")
-        self.input_view.run_command("insert", {"characters": text})
+        v = self.input_view
+        self.input_view.run_command("sbp_inc_search", {"cmd": "set_search", "text": text})
 
     #
     # Find the most recent stack item where we were not in the error state.
@@ -2199,7 +2198,6 @@ class SbpIncSearchCommand(SbpTextCommand):
                 regex = not regex
             info = set_isearch_info_for(self.view, ISearchInfo(self.view, kwargs['forward'], regex))
             info.open()
-
         else:
             if cmd == "next":
                 info.next(**kwargs)
@@ -2215,6 +2213,10 @@ class SbpIncSearchCommand(SbpTextCommand):
                 info.quit()
             elif cmd == "yank":
                 info.input_view.run_command("sbp_yank")
+            elif cmd == "set_search":
+                view = info.input_view
+                view.replace(util.edit, sublime.Region(0, view.size()), kwargs['text'])
+                view.run_command("move_to", {"to": "eof"})
             else:
                 print("Not handling cmd", cmd, kwargs)
 
