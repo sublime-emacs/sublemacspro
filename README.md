@@ -19,7 +19,7 @@ To install SublemacsPro you have to install [Package
 Control](http://wbond.net/sublime_packages/package_control) as an automatic
 package manager for Sublime Text. Now you can easily install Sublemacs Pro and
 your installation will never be outdated. When you installed Package Control,
-hit ``S-Shift P`` to open up the command palette and type ``install``. Now
+hit ``[CMD]-Shift P`` to open up the command palette and type ``install``. Now
 select "Package Control: Install Package". This will load all packages from the
 remote repository and you can select ``sublemacspro`` from the drop-down list.
 
