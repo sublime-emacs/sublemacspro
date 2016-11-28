@@ -1,0 +1,17 @@
+Sublemacs Pro v2.1.7 Update
+=============================
+
+Fixed a bug where using the previous search string would fail.
+
+New feature: built-in auto-completion across all views. I have been using the All Autocomplete
+plugin for a while but occasionally couldn't understand why things were not being found. I
+discovered that there are two reasons: one is it has a built-in limit of 20 views to search, and the
+other was that there are issues with some syntaxes which prevent some symbols from being found. I
+have fixed both those problems.
+
+It is disabled by default.
+
+To enable it, add the following plugin setting:
+
+    "sbp_use_internal_complete_all_buffers": true,
+

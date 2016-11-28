@@ -2,7 +2,7 @@
 # true until the first time next-line and prev-line are called (assuming we can trap that). That way
 # we don't do it after each command but only just before we issue a next/prev line command.
 
-import re, sys
+import re, sys, time, os
 import functools as fu
 import sublime, sublime_plugin
 from copy import copy
@@ -314,8 +314,10 @@ class ViewState():
     current = None
 
     def __init__(self, view):
+        ViewState.view_state_dict[view.id()] = self
         self.view = view
         self.active_mark = False
+        self.touch()
 
         # a mark ring per view (should be per buffer)
         self.mark_ring = MarkRing(view)
@@ -327,16 +329,29 @@ class ViewState():
             del(cls.view_state_dict[view.id()])
 
     @classmethod
+    def find_or_create(cls, view):
+        state = cls.view_state_dict.get(view.id(), None)
+        if state is None:
+            state = ViewState(view)
+        return state
+
+    @classmethod
     def get(cls, view):
         # make sure current is set to this view
         if ViewState.current is None or ViewState.current.view != view:
             state = cls.view_state_dict.get(view.id(), None)
             if state is None:
                 state = ViewState(view)
-                cls.view_state_dict[view.id()] = state
-                state.view = view
             ViewState.current = state
+        ViewState.current.touch()
         return ViewState.current
+
+    @classmethod
+    def sorted_views(cls, window):
+        views = window.views()
+        states = [cls.find_or_create(view) for view in window.views()]
+        sorted_states = sorted(states, key=lambda state: state.touched, reverse=True)
+        return [state.view for state in sorted_states]
 
     def reset(self):
         self.this_cmd = None
@@ -346,6 +361,9 @@ class ViewState():
         self.argument_negative = False
         self.drag_count = 0
         self.entered = 0
+
+    def touch(self):
+        self.touched = time.time()
 
     #
     # Get the argument count and reset it for the next command (unless peek is True).
@@ -573,6 +591,115 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
             args["next_pane"] = pos
             return cmd, args
+
+#
+# Switch buffer command that sorts buffers by last access and displays file name as well.
+#
+MIN_AUTO_COMPLETE_WORD_SIZE = 3
+MAX_AUTO_COMPLETE_WORD_SIZE = 100
+class CompleteAllBuffers(sublime_plugin.EventListener):
+    def __init__(self):
+        self.extra_word_characters = SettingsManager.get("sbp_syntax_specific_extra_word_characters")
+        self.separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
+
+    def on_query_completions(self, view, prefix, locations):
+        if SettingsManager.get("sbp_use_internal_complete_all_buffers") != True:
+            return None
+
+        # This happens if you type a non-word character. We don't want to process any completions in
+        # this case because there are too many.
+        if len(prefix) == 0:
+            return None
+
+        seen = set()
+        words = []
+        re_by_syntax = {}
+
+        # get a sorted (by last access) list of views in the current window
+        window = sublime.active_window()
+        views = ViewState.sorted_views(window)
+
+        # determine the set of root directories in the current project if possible
+        if window.project_file_name() is None:
+            roots = None
+        else:
+            project_dir = os.path.dirname(window.project_file_name())
+            roots = sorted([os.path.normpath(os.path.join(project_dir, folder['path']))
+                           for folder in window.project_data().get('folders')],
+                           key=lambda name: len(name), reverse=True)
+        start = time.time()
+        re_flags = sublime.IGNORECASE if prefix.lower() == prefix else 0
+        for v in views:
+            if v.is_scratch():
+                continue
+
+            point = 0
+            sel = v.selection
+            if len(sel) > 0:
+                point = sel[-1].begin()
+
+            # Determine regex by syntax. Rewrite the prefix so it does fuzzy matching rather than
+            # strict prefix matching.
+            syntax_name = v.settings().get("syntax")
+            regex = re_by_syntax.get(syntax_name, None)
+            if regex is None:
+                extra = self.extra_word_characters.get(syntax_name) or ""
+                word_re = r'[\w' + extra + r']'
+                re_prefix = (word_re + '*').join(re.escape(p) for p in prefix)
+
+                # If our starting character is not considered a word character, we cannot use '\b'
+                # to start this regex.
+                if prefix[0] in self.separators:
+                    regex = ""
+                else:
+                    regex = r'\b'
+                regex += re_prefix + word_re + r'+\b'
+                re_by_syntax[syntax_name] = regex
+                print("Using", regex, "for", syntax_name)
+
+            view_words = self.extract_completions_from_view(v, regex, re_flags, point, view, seen)
+            if len(view_words) == 0:
+                continue
+
+            # figure the best way to display the file name unless this is the current view
+            if v == view:
+                file_name = None
+            else:
+                file_name = v.file_name()
+                if file_name is not None:
+                    if roots is not None:
+                        for root in roots:
+                            if file_name.startswith(root):
+                                file_name = file_name[len(root) + 1:]
+                                break
+                    # show (no more than the) last 2 components of the matching path name
+                    file_name = os.path.sep.join(file_name.split(os.path.sep)[-2:])
+
+            for word in view_words:
+                if v == view:
+                    trigger = word + "\t[HERE]"
+                else:
+                    trigger = "%s\t(%s)" % (word, file_name)
+                words.append((trigger, word.replace("$", "\\$")))
+        print("COMPLETE in", time.time() - start)
+        return words
+
+    def extract_from_view(self, view, prefix, point):
+        return view.extract_completions(prefix, point)
+
+    def extract_completions_from_view(self, view, regex, re_flags, point, current_view, seen):
+        regions = sorted(view.find_all(regex, re_flags),
+                         key=lambda r: abs(point - r.begin()))
+        results = []
+        for region in regions:
+            if view == current_view and region.contains(point):
+                continue
+            if MIN_AUTO_COMPLETE_WORD_SIZE <= region.size() <= MAX_AUTO_COMPLETE_WORD_SIZE:
+                word = view.substr(region)
+                if word not in seen:
+                    results.append(word)
+                    seen.add(word)
+        return results
 
 #
 # A helper class which provides a bunch of useful functionality on a view

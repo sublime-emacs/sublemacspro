@@ -1,3 +1,4 @@
+
 {
   /* Allows to always switch to active mark mode */
   "sbp_active_mark_mode" : false,
@@ -23,4 +24,14 @@
   /* a fixed version of trim trailing white space and ensure newline */
   "sbp_ensure_newline_at_eof_on_save": false,
   "sbp_trim_trailing_white_space_on_save": false,
+
+  /* a built-in version of all auto-complete that fixes some bugs and improves performance */
+  "sbp_use_internal_complete_all_buffers": false,
+
+  "sbp_syntax_specific_extra_word_characters": {
+    "Packages/Better CoffeeScript/CoffeeScript.tmLanguage": "$",
+    "Packages/Rails/HTML (Rails).sublime-syntax": ".-",
+    "Packages/HTML/HTML.sublime-syntax": ".-",
+    "Packages/Ruby/Ruby.sublime-syntax": "!?",
+  },
 }
