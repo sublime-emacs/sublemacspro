@@ -78,7 +78,7 @@
 
     {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": true}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
@@ -319,7 +319,7 @@
 
     {"keys": ["super+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_super_bindings"}]},
 
-    {"keys": ["super+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+z"], "command": "sbp_zap_to_char", "args": {"include_char": true}, "context": [ {"key": "sbp_use_super_bindings"}]},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
