@@ -44,6 +44,37 @@ def pluralize(string, count, es="s"):
     else:
         return "%d %s%s" % (count, string, es)
 
+#
+# Get the current set of project roots, sorted from longest to shortest. They are suitable for
+# passing to the get_relative_path function to produce the best relative path for a view file name.
+#
+def get_project_roots():
+    window = sublime.active_window()
+    if window.project_file_name() is None:
+        roots = None
+    else:
+        project_dir = os.path.dirname(window.project_file_name())
+        roots = sorted([os.path.normpath(os.path.join(project_dir, folder))
+                       for folder in window.folders()],
+                       key=lambda name: len(name), reverse=True)
+    return roots
+
+#
+# Returns the relative path for the specified file name. The roots are supplied by the
+# get_project_roots function, which sorts themn appropriately for this function.
+#
+def get_relative_path(roots, file_name):
+    if file_name is not None:
+        if roots is not None:
+            for root in roots:
+                if file_name.startswith(root):
+                    file_name = file_name[len(root) + 1:]
+                    break
+        # show (no more than the) last 2 components of the matching path name
+        return os.path.sep.join(file_name.split(os.path.sep)[-2:])
+    else:
+        return "<no file>"
+
 class SettingsManager:
     def get(key, default = None):
         global_settings = sublime.load_settings('sublemacspro.sublime-settings')
@@ -620,13 +651,7 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
         views = ViewState.sorted_views(window)
 
         # determine the set of root directories in the current project if possible
-        if window.project_file_name() is None:
-            roots = None
-        else:
-            project_dir = os.path.dirname(window.project_file_name())
-            roots = sorted([os.path.normpath(os.path.join(project_dir, folder['path']))
-                           for folder in window.project_data().get('folders')],
-                           key=lambda name: len(name), reverse=True)
+        roots = get_project_roots()
         start = time.time()
         re_flags = sublime.IGNORECASE if prefix.lower() == prefix else 0
         for v in views:
@@ -665,15 +690,7 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
             if v == view:
                 file_name = None
             else:
-                file_name = v.file_name()
-                if file_name is not None:
-                    if roots is not None:
-                        for root in roots:
-                            if file_name.startswith(root):
-                                file_name = file_name[len(root) + 1:]
-                                break
-                    # show (no more than the) last 2 components of the matching path name
-                    file_name = os.path.sep.join(file_name.split(os.path.sep)[-2:])
+                file_name = get_relative_path(roots, v.file_name())
 
             for word in view_words:
                 if v == view:
@@ -2508,6 +2525,49 @@ class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
         if trim or ensure:
             view.run_command("sbp_trim_trailing_white_space_and_ensure_newline_at_eof",
                              {"trim_whitespace": trim, "ensure_newline": ensure})
+
+
+#
+# Switch buffer command. "C-x b" equiv in emacs. This limits the set of files in a chooser to the
+# ones currently loaded. We sort the files by last access hopefully like emacs.
+#
+class SbpSwitchToViewCommand(SbpTextCommand):
+    def run(self, util):
+        self.window = sublime.active_window()
+        self.views = ViewState.sorted_views(self.window)
+        self.roots = get_project_roots()
+
+        # swap the top two views to enable switching back and forth like emacs
+        if len(self.views) >= 2:
+            self.views[0], self.views[1] = self.views[1], self.views[0]
+        self.window.show_quick_panel(self.get_items(), self.select)
+
+    def select(self, index):
+        if index >= 0:
+            self.window.focus_view(self.views[index])
+
+    def get_items(self):
+        return [[self.get_display_name(view), self.get_path(view)] for view in self.views]
+
+    def get_display_name(self, view):
+        mod_star = '*' if view.is_dirty() else ''
+
+        if view.is_scratch() or not view.file_name():
+            disp_name = view.name() if len(view.name()) > 0 else 'untitled'
+        else:
+            disp_name = os.path.basename(view.file_name())
+
+        return '%s%s' % (disp_name, mod_star)
+
+    def get_path(self, view):
+        if view.is_scratch():
+            return ''
+
+        if not view.file_name():
+            return '<unsaved>'
+
+        return get_relative_path(self.roots, view.file_name())
+
 
 #
 # Function to dedup views in all the groups of the specified window. This does not close views that

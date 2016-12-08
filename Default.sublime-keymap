@@ -46,7 +46,7 @@
 
     // Goto open file
     {"keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
-    {"keys": ["ctrl+x", "ctrl+b"], "command": "goto_open_file"},
+    {"keys": ["ctrl+x", "ctrl+b"], "command": "sbp_switch_to_view"},
 
     // Goto Symbol
     {"keys": ["ctrl+alt+g"], "command": "show_overlay", "args": {"overlay":"goto", "show_files" : false, "text": "@"}},
