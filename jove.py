@@ -29,11 +29,19 @@ JOVE_STATUS = "jove"
 default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
 default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
 
+#
+# global variables for the complete all buffers code.
+#
+all_complete_extra_word_characters = all_complete_separators = None
+
 # ensure_visible commands
 ensure_visible_cmds = set(['move', 'move_to'])
 
 # initialized at the end of this file after all commands are defined
 kill_cmds = set()
+
+# settings helper
+settings_helper = None
 
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete', 'undo', 'redo'])
@@ -75,11 +83,16 @@ def get_relative_path(roots, file_name):
     else:
         return "<no file>"
 
-class SettingsManager:
-    def get(key, default = None):
-        global_settings = sublime.load_settings('sublemacspro.sublime-settings')
-        settings  = sublime.active_window().active_view().settings()
-        return settings.get(key, global_settings.get(key, default))
+class SettingsHelper:
+    def __init__(self):
+        self.global_settings = sublime.load_settings('sublemacspro.sublime-settings')
+
+    def get(self, key, default = None):
+        settings = sublime.active_window().active_view().settings()
+        value = settings.get(key, None)
+        if value is None:
+            value = self.global_settings.get(key, default)
+        return value
 
 #
 # Classic emacs kill ring except this supports multiple cursors.
@@ -446,15 +459,15 @@ class ViewWatcher(sublime_plugin.EventListener):
         if key == "i_search_active":
             return test(isearch_info_for(view) is not None)
         if key == "sbp_has_visible_mark":
-            if not SettingsManager.get("sbp_cancel_mark_enabled", False):
+            if not settings_helper.get("sbp_cancel_mark_enabled", False):
                 return False
             return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
         if key == "sbp_use_alt_bindings":
-            return test(SettingsManager.get("sbp_use_alt_bindings"))
+            return test(settings_helper.get("sbp_use_alt_bindings"))
         if key == "sbp_use_super_bindings":
-            return test(SettingsManager.get("sbp_use_super_bindings"))
+            return test(settings_helper.get("sbp_use_super_bindings"))
         if key == "sbp_alt+digit_inserts":
-            return test(SettingsManager.get("sbp_alt+digit_inserts") or not SettingsManager.get("sbp_use_alt_bindings"))
+            return test(settings_helper.get("sbp_alt+digit_inserts") or not settings_helper.get("sbp_use_alt_bindings"))
         if key == 'sbp_has_prefix_argument':
             return test(CmdUtil(view).has_prefix_arg())
 
@@ -629,12 +642,8 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 MIN_AUTO_COMPLETE_WORD_SIZE = 3
 MAX_AUTO_COMPLETE_WORD_SIZE = 100
 class CompleteAllBuffers(sublime_plugin.EventListener):
-    def __init__(self):
-        self.extra_word_characters = SettingsManager.get("sbp_syntax_specific_extra_word_characters")
-        self.separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
-
     def on_query_completions(self, view, prefix, locations):
-        if SettingsManager.get("sbp_use_internal_complete_all_buffers") != True:
+        if settings_helper.get("sbp_use_internal_complete_all_buffers") != True:
             return None
 
         # This happens if you type a non-word character. We don't want to process any completions in
@@ -668,13 +677,13 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
             syntax_name = v.settings().get("syntax")
             regex = re_by_syntax.get(syntax_name, None)
             if regex is None:
-                extra = self.extra_word_characters.get(syntax_name) or ""
+                extra = all_complete_extra_word_characters.get(syntax_name) or ""
                 word_re = r'[\w' + extra + r']'
                 re_prefix = (word_re + '*').join(re.escape(p) for p in prefix)
 
                 # If our starting character is not considered a word character, we cannot use '\b'
                 # to start this regex.
-                if prefix[0] in self.separators:
+                if prefix[0] in all_complete_separators:
                     regex = ""
                 else:
                     regex = r'\b'
@@ -1205,7 +1214,7 @@ class SbpMoveWordCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         view = self.view
 
-        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
+        separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
 
         # determine the direction
         count = util.get_count() * direction
@@ -1269,7 +1278,7 @@ class SbpToWordCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         view = self.view
 
-        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
+        separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
         forward = direction > 0
 
         def to_word(cursor):
@@ -1361,7 +1370,7 @@ class SbpMoveSexprCommand(SbpTextCommand):
         view = self.view
 
 
-        separators = SettingsManager.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
+        separators = settings_helper.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 
         # determine the direction
         count = util.get_count() * direction
@@ -1663,7 +1672,7 @@ class SbpSetMarkCommand(SbpTextCommand):
             # set the mark
             util.set_mark()
 
-        if SettingsManager.get("sbp_active_mark_mode", False):
+        if settings_helper.get("sbp_active_mark_mode", False):
             util.set_active_mark_mode()
 
 class SbpCancelMarkCommand(SbpTextCommand):
@@ -2272,7 +2281,7 @@ class ISearchInfo():
         # now push new states for each character we append to the search string
         helper = self.util
         search = si.search
-        separators = SettingsManager.get("sbp_word_separators", default_sbp_word_separators)
+        separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
         case_sensitive = re.search(r'[A-Z]', search) is not None
 
         def append_one(ch):
@@ -2520,8 +2529,8 @@ class SbpTrimTrailingWhiteSpaceAndEnsureNewlineAtEofCommand(sublime_plugin.TextC
 
 class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
     def on_pre_save(self, view):
-        trim = SettingsManager.get("sbp_trim_trailing_white_space_on_save") == True
-        ensure = SettingsManager.get("sbp_ensure_newline_at_eof_on_save") == True
+        trim = settings_helper.get("sbp_trim_trailing_white_space_on_save") == True
+        ensure = settings_helper.get("sbp_ensure_newline_at_eof_on_save") == True
         if trim or ensure:
             view.run_command("sbp_trim_trailing_white_space_and_ensure_newline_at_eof",
                              {"trim_whitespace": trim, "ensure_newline": ensure})
@@ -2536,14 +2545,26 @@ class SbpSwitchToViewCommand(SbpTextCommand):
         self.window = sublime.active_window()
         self.views = ViewState.sorted_views(self.window)
         self.roots = get_project_roots()
+        self.original_view = self.window.active_view()
+        self.highlight_count = 0
 
         # swap the top two views to enable switching back and forth like emacs
         if len(self.views) >= 2:
-            self.views[0], self.views[1] = self.views[1], self.views[0]
-        self.window.show_quick_panel(self.get_items(), self.select)
+            # self.views[0], self.views[1] = self.views[1], self.views[0]
+            index = 1
+        else:
+            index = 0
+        self.window.show_quick_panel(self.get_items(), self.on_select, 0, index, self.on_highlight)
 
-    def select(self, index):
+    def on_select(self, index):
         if index >= 0:
+            self.window.focus_view(self.views[index])
+        else:
+            self.window.focus_view(self.original_view)
+
+    def on_highlight(self, index):
+        self.highlight_count += 1
+        if self.highlight_count > 1:
             self.window.focus_view(self.views[index])
 
     def get_items(self):
@@ -2598,7 +2619,14 @@ def dedup_views(window):
         window.focus_view(active)
     window.focus_group(group)
 
-def InitModule(module_name):
+def plugin_loaded():
+    global all_complete_extra_word_characters, all_complete_separators, settings_helper
+
+    settings_helper = SettingsHelper()
+    all_complete_extra_word_characters = settings_helper.get("sbp_syntax_specific_extra_word_characters")
+    all_complete_separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
+
+    module_name = __name__
     def get_cmd_name(cls):
         name = cls.__name__
         name = re.sub('(?!^)([A-Z]+)', r'_\1', name).lower()
@@ -2621,5 +2649,3 @@ def InitModule(module_name):
                 kill_cmds.add(name)
             if cls.is_ensure_visible_cmd:
                 ensure_visible_cmds.add(name)
-
-InitModule(__name__)
