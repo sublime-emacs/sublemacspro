@@ -1467,6 +1467,7 @@ class SbpMoveThenDeleteCommand(SbpTextCommand):
         # extend each cursor so we can delete the bytes, and only if there is only one region will
         # we add the data to the kill ring
         new_cursors = [s for s in selection]
+        print("Running", orig_cursors, new_cursors)
 
         selection.clear()
         for old,new in zip(orig_cursors, new_cursors):
@@ -2444,51 +2445,77 @@ class SbpQuitCommand(SbpTextCommand):
                 pos = self.view.text_point((top_line + bottom_line) / 2, 0)
             util.set_selection(sublime.Region(pos))
 
-# This is the actual editor of the zap command
-class SbpZapToCharEdit(sublime_plugin.TextCommand):
-
-    def run(self, edit, begin, end):
-        region = sublime.Region(int(begin), int(end))
-        kill_ring.add([self.view.substr(region)], True, False)
-        self.view.erase(edit, region)
-
-
-# This command handles the actual selecting of the zap char
-class SbpZapToCharCommand(SbpTextCommand):
-
-    is_kill_cmd = True
-    panel = None
-
-    def run_cmd(self, util, **args):
+#
+# A class which knows how to ask for a single character and then does something with it.
+#
+class AskCharOrStringBase(SbpTextCommand):
+    def run_cmd(self, util, prompt="Type character"):
         self.util = util
-        self.panel = self.view.window().show_input_panel("Zap To Char:", "", self.zap, self.on_change, None)
+        self.window = self.view.window()
+        self.count = util.get_count()
+        self.mode = "char"
 
-    def zap(self):
-        pass
+        # kick things off by showing the panel
+        self.window.show_input_panel(prompt, "", self.on_done, self.on_change, None)
 
     def on_change(self, content):
-        """Search forward from the current selection to the next ocurence
-        of char"""
-
-        if self.panel == None:
+        # on_change is notified immediate upon showing the panel before a key is even pressed
+        if self.mode == "word" or len(content) < 1:
             return
+        self.process_cursors(content)
 
-        self.panel.window().run_command("hide_panel")
+    def process_cursors(self, content):
+        util = self.util
+        print("On change:", len(content), '"', content, '"')
+        self.window.run_command("hide_panel")
 
-        start = finish = self.util.get_point()
-        found = False
-        while not found and finish < self.view.size():
-            data = self.view.substr(finish)
-            if data == content:
-                found = True
-                break
-            finish += 1
+        count = abs(self.count)
+        for i in range(count):
+            self.last_iteration = (i == count - 1)
+            util.for_each_cursor(self.process, content)
 
-        # Zap to char
-        if found:
-            self.view.run_command("sbp_zap_to_char_edit", {"begin": start, "end": finish + 1})
-        else:
-            sublime.status_message("Character %s not found" % content)
+    def on_done(self, content):
+        if self.mode == "word":
+            print("DONE CALLED", content)
+            self.process_cursors(content)
+
+#
+# Jump to char command inputs one character and jumps to it. If plus_one is True it goes just past
+# the character in question, otherwise it stops just before it.
+#
+class SbpJumpToCharCommand(AskCharOrStringBase):
+    def run_cmd(self, util, *args, plus_one=False, **kwargs):
+        if 'prompt' not in kwargs:
+            kwargs['prompt'] = "Jump to char: "
+        super(SbpJumpToCharCommand, self).run_cmd(util, *args, **kwargs)
+        self.plus_one = plus_one
+
+    def process(self, cursor, ch):
+        r = self.view.find(ch, cursor.end(), sublime.LITERAL)
+        if r:
+            p = r.begin()
+            if self.plus_one or not self.last_iteration:
+                # advance one more if this is not the last_iteration or else we'll forever be stuck
+                # at the same position
+                p += 1
+            return p
+        return None
+
+#
+# Jump to char command inputs one character and jumps to it. If plus_one is True it goes just past
+# the character in question, otherwise it stops just before it.
+#
+class SbpJumpToWordCommand(AskCharOrStringBase):
+    def run_cmd(self, util, *args, **kwargs):
+        super(SbpJumpToWordCommand, self).run_cmd(util, *args, prompt="Jump to word: ", **kwargs)
+        self.mode = "word"
+
+    def process(self, cursor, word):
+        r = self.view.find(word, cursor.end(), sublime.LITERAL)
+        if r:
+            p = r.end()
+            return p
+        return None
 
 class SbpConvertPlistToJsonCommand(SbpTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
