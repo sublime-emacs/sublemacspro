@@ -6,8 +6,9 @@ import re, sys, time, os
 import functools as fu
 import sublime, sublime_plugin
 from copy import copy
-from sublemacspro import viewtest
 
+from sublemacspro.lib.misc import *
+from sublemacspro.lib.kill_ring import *
 
 # Handling the different imports in Sublime
 if sublime.version() < '3000':
@@ -20,313 +21,8 @@ else:
     import Default.paragraph as paragraph
     from . import sbp_layout as ll
 
-# Region names we use for i-search. Using our own names means that there is no interference from
-# Sublime in terms of messages it displays regarding regions and matches, etc.
-REGION_FIND = "rf"
-REGION_SELECTED = "rs"
-
-JOVE_STATUS = "jove"
-
-default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
-default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
-
-#
-# global variables for the complete all buffers code.
-#
-all_complete_extra_word_characters = all_complete_separators = None
-
-# ensure_visible commands
-ensure_visible_cmds = set(['move', 'move_to'])
-
-# initialized at the end of this file after all commands are defined
-kill_cmds = set()
-
-# settings helper
-settings_helper = None
-
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete', 'undo', 'redo'])
-
-def pluralize(string, count, es="s"):
-    if count == 1:
-        return "%d %s" % (count, string)
-    else:
-        return "%d %s%s" % (count, string, es)
-
-#
-# Get the current set of project roots, sorted from longest to shortest. They are suitable for
-# passing to the get_relative_path function to produce the best relative path for a view file name.
-#
-def get_project_roots():
-    window = sublime.active_window()
-    if window.project_file_name() is None:
-        roots = None
-    else:
-        project_dir = os.path.dirname(window.project_file_name())
-        roots = sorted([os.path.normpath(os.path.join(project_dir, folder))
-                       for folder in window.folders()],
-                       key=lambda name: len(name), reverse=True)
-    return roots
-
-#
-# Returns the relative path for the specified file name. The roots are supplied by the
-# get_project_roots function, which sorts themn appropriately for this function.
-#
-def get_relative_path(roots, file_name):
-    if file_name is not None:
-        if roots is not None:
-            for root in roots:
-                if file_name.startswith(root):
-                    file_name = file_name[len(root) + 1:]
-                    break
-        # show (no more than the) last 2 components of the matching path name
-        return os.path.sep.join(file_name.split(os.path.sep)[-2:])
-    else:
-        return "<no file>"
-
-class SettingsHelper:
-    def __init__(self):
-        self.global_settings = sublime.load_settings('sublemacspro.sublime-settings')
-
-    def get(self, key, default = None):
-        settings = sublime.active_window().active_view().settings()
-        value = settings.get(key, None)
-        if value is None:
-            value = self.global_settings.get(key, default)
-        return value
-
-#
-# Classic emacs kill ring except this supports multiple cursors.
-#
-class KillRing:
-    KILL_RING_SIZE = 64
-
-    class Kill(object):
-        """A single kill (maybe with multiple cursors)"""
-        def __init__(self, regions):
-            self.regions = regions
-            self.n_regions = len(regions)
-
-        # Joins a set of regions with our existing set, if possible. We must have
-        # the same number of regions.
-        def join_if_possible(self, regions, forward):
-            if len(regions) != self.n_regions:
-                return False
-            for i, c in enumerate(regions):
-                if forward:
-                    self.regions[i] += regions[i]
-                else:
-                    self.regions[i] = regions[i] + self.regions[i]
-            return True
-
-        def get_sample(self):
-            text = self.regions[0][0:256]
-            text = text.strip("\n \t").replace("\n", "\\n")
-            text = re.sub("\\s\\s+", " ", text)
-            return text
-
-        def set_clipboard(self):
-            sublime.set_clipboard(self.regions[0])
-
-        def same_as(self, regions):
-            if len(regions) != self.n_regions:
-                return False
-            for me, him in zip(regions, self.regions):
-                if me != him:
-                    return False
-            return True
-
-    def __init__(self):
-        self.entries = [None] * self.KILL_RING_SIZE
-        self.index = 0
-        self.pop_index = None
-
-    #
-    # Add some text to the kill ring. 'forward' indicates whether the editing command that produced
-    # this data was in the forward or reverse direction. It only matters if 'join' is true, because
-    # it tells us how to add this data to the most recent kill ring entry rather than creating a new
-    # entry.
-    #
-    def add(self, regions, forward, join):
-        total_bytes = sum((len(c) for c in regions))
-
-        if total_bytes == 0:
-            return
-        index = self.index
-        try:
-            if not join:
-                # if the current item is the same as what we're trying to kill, don't bother
-                if self.entries[index] and self.entries[index].same_as(regions):
-                    return
-            else:
-                # try to join
-                if self.entries[index] and self.entries[index].join_if_possible(regions, forward):
-                    return
-
-            # create the new entry
-            index = (index + 1) % self.KILL_RING_SIZE
-            self.entries[index] = KillRing.Kill(regions)
-        finally:
-            self.index = index
-            self.entries[index].set_clipboard()
-
-    #
-    # Returns a sample of the first region of each entry in the kill ring, so that it can be
-    # displayed to the user to allow them to choose it. The sample is truncated unfortunately.
-    #
-    def get_popup_sample(self):
-        index = self.index
-        result = []
-        seen = {}
-        while True:
-            kill = self.entries[index]
-            if kill:
-                text = kill.get_sample()
-                if text not in seen:
-                    result.append((index, text))
-                    seen[text] = True
-            index = (index - 1) % self.KILL_RING_SIZE
-            if index == self.index:
-                break
-        return result
-
-    def set_current(self, index):
-        if self.entries[index]:
-            self.index = index
-            self.entries[index].set_clipboard()
-
-    #
-    # Returns the current entry in the kill ring for the purposes of yanking. If pop is non-zero, we
-    # move backwards or forwards once in the kill ring and return that data instead. If the number
-    # of regions doesn't match, we either truncate or duplicate the regions to make a match.
-    #
-    def get_current(self, n_regions, pop):
-        entries = self.entries
-
-        clipboard = result = None
-        if pop == 0:
-            index = self.index
-            entry = entries[index]
-
-            # first check to see whether we bring in the clipboard
-            clipboard = sublime.get_clipboard()
-
-            if clipboard and (entry is None or entry.n_regions != 1 or entry.regions[0] != clipboard):
-                # We switched to another app and cut or copied something there, so add the clipboard
-                # to our kill ring.
-                result = [clipboard]
-                self.add(result, True, False)
-            elif entry:
-                result = entry.regions
-            self.pop_index = None
-        else:
-            if self.pop_index is None:
-                self.pop_index = self.index
-
-            incr = -1 if pop > 0 else 1
-            index = (self.pop_index + incr) % self.KILL_RING_SIZE
-            while entries[index] is None:
-                if index == self.pop_index:
-                    return None
-                index = (index + incr) % self.KILL_RING_SIZE
-
-            self.pop_index = index
-            result = entries[index].regions
-            entries[index].set_clipboard()
-
-        # make sure we have enough data for the specified number of regions
-        if result:
-            while len(result) < n_regions:
-                result *= 2
-            return result[0:n_regions]
-        return None
-
-# kill ring shared across all buffers
-kill_ring = KillRing()
-
-#
-# Classic emacs mark ring with multi-cursor support. Each entry in the ring is implemented
-# with a named view region with an index, so that the marks are adjusted automatically by
-# Sublime. The special region called "jove_mark" is used to display the current mark. It's
-# a copy of the current mark with gutter display properties turned on.
-#
-# Each entry is an array of 1 or more regions.
-#
-class MarkRing:
-    MARK_RING_SIZE = 16
-
-    def __init__(self, view):
-        self.view = view
-        self.index = 0
-
-        # in case any left over from before
-        self.view.erase_regions("jove_mark")
-        for i in range(self.MARK_RING_SIZE):
-            self.view.erase_regions(self.get_key(i))
-
-    def get_key(self, index):
-        return "jove_mark:" + str(index)
-
-    def clear(self):
-        self.view.erase_regions("jove_mark")
-
-    def has_visible_mark(self):
-        return self.view.get_regions("jove_mark") != None and len(self.view.get_regions("jove_mark")) > 0
-
-    #
-    # Update the display to show the current mark.
-    #
-    def display(self):
-        # display the mark's dot
-        regions = self.get()
-        if regions is not None:
-            self.view.add_regions("jove_mark", regions, "mark", "dot", sublime.HIDDEN)
-
-    #
-    # Get the current mark(s).
-    #
-    def get(self):
-        return self.view.get_regions(self.get_key(self.index))
-
-    #
-    # Set the mark to pos. If index is supplied we overwrite that mark, otherwise we push to the
-    # next location.
-    #
-    def set(self, regions, reuse_index=False):
-        if self.get() == regions:
-            # don't set another mark in the same place
-            return
-        if not reuse_index:
-            self.index = (self.index + 1) % self.MARK_RING_SIZE
-        self.view.add_regions(self.get_key(self.index), regions, "mark", "", sublime.HIDDEN)
-        self.display()
-
-    #
-    # Exchange the current mark with the specified pos, and return the current mark.
-    #
-    def exchange(self, regions):
-        current = self.get()
-        if current is not None:
-            self.set(regions, True)
-            return current
-
-    #
-    # Pops the current mark from the ring and returns it. The caller sets point to that value. The
-    # new mark is the previous mark on the ring.
-    #
-    def pop(self):
-        regions = self.get()
-
-        # find a non-None mark in the ring
-        start = self.index
-        while True:
-            self.index -= 1
-            if self.index < 0:
-                self.index = self.MARK_RING_SIZE - 1
-            if self.get() or self.index == start:
-                break
-        self.display()
-        return regions
 
 isearch_info = dict()
 def isearch_info_for(view):
@@ -345,89 +41,6 @@ def clear_isearch_info_for(view):
     window = view.window()
     del(isearch_info[window.id()])
 
-#
-# We store state about each view.
-#
-class ViewState():
-    # per view state
-    view_state_dict = dict()
-
-    # currently active view
-    current = None
-
-    def __init__(self, view):
-        ViewState.view_state_dict[view.id()] = self
-        self.view = view
-        self.active_mark = False
-        self.touch()
-
-        # a mark ring per view (should be per buffer)
-        self.mark_ring = MarkRing(view)
-        self.reset()
-
-    @classmethod
-    def on_view_closed(cls, view):
-        if view.id() in cls.view_state_dict:
-            del(cls.view_state_dict[view.id()])
-
-    @classmethod
-    def find_or_create(cls, view):
-        state = cls.view_state_dict.get(view.id(), None)
-        if state is None:
-            state = ViewState(view)
-        return state
-
-    @classmethod
-    def get(cls, view):
-        # make sure current is set to this view
-        if ViewState.current is None or ViewState.current.view != view:
-            state = cls.view_state_dict.get(view.id(), None)
-            if state is None:
-                state = ViewState(view)
-            ViewState.current = state
-        ViewState.current.touch()
-        return ViewState.current
-
-    @classmethod
-    def sorted_views(cls, window):
-        views = window.views()
-        states = [cls.find_or_create(view) for view in window.views()]
-        sorted_states = sorted(states, key=lambda state: state.touched, reverse=True)
-        return [state.view for state in sorted_states]
-
-    def reset(self):
-        self.this_cmd = None
-        self.last_cmd = None
-        self.argument_supplied = False
-        self.argument_value = 0
-        self.argument_negative = False
-        self.drag_count = 0
-        self.entered = 0
-
-    def touch(self):
-        self.touched = time.time()
-
-    #
-    # Get the argument count and reset it for the next command (unless peek is True).
-    #
-    def get_count(self, peek=False):
-        if self.argument_supplied:
-            count = self.argument_value
-            if self.argument_negative:
-                if count == 0:
-                    count = -1
-                else:
-                    count = -count
-                if not peek:
-                    self.argument_negative = False
-            if not peek:
-                self.argument_supplied = False
-        else:
-            count = 1
-        return count
-
-    def last_was_kill_cmd(self):
-        return self.last_cmd in kill_cmds
 
 class ViewWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
@@ -479,14 +92,20 @@ class ViewWatcher(sublime_plugin.EventListener):
                 dedup_views(sublime.active_window())
         sublime.set_timeout(doit, 50)
 
+#
+# CmdWatcher watches all the commands and tries to correctly process the following situations:
+#
+#   - canceling i-search if another window command is performed or a mouse drag starts
+#   - override commands and run them N times if there is a numeric argument supplied
+#   - if transient mark mode, automatically extend the mark when using certain commands like forward
+#     word or character
+#
 class CmdWatcher(sublime_plugin.EventListener):
-
     def __init__(self, *args, **kwargs):
         super(CmdWatcher, self).__init__(*args, **kwargs)
 
     def on_anything(self, view):
         view.erase_status(JOVE_STATUS)
-
 
     def on_window_command(self, window, cmd, args):
         # Some window commands take us to new view. Here's where we abort the isearch if that happens.
@@ -633,513 +252,6 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
             args["next_pane"] = pos
             return cmd, args
-
-#
-# Switch buffer command that sorts buffers by last access and displays file name as well.
-#
-MIN_AUTO_COMPLETE_WORD_SIZE = 3
-MAX_AUTO_COMPLETE_WORD_SIZE = 100
-class CompleteAllBuffers(sublime_plugin.EventListener):
-    def on_query_completions(self, view, prefix, locations):
-        if settings_helper.get("sbp_use_internal_complete_all_buffers") != True:
-            return None
-
-        # This happens if you type a non-word character. We don't want to process any completions in
-        # this case because there are too many.
-        if len(prefix) == 0:
-            return None
-
-        seen = set()
-        words = []
-        re_by_syntax = {}
-
-        # get a sorted (by last access) list of views in the current window
-        window = sublime.active_window()
-        views = ViewState.sorted_views(window)
-
-        # determine the set of root directories in the current project if possible
-        roots = get_project_roots()
-        start = time.time()
-        re_flags = sublime.IGNORECASE if prefix.lower() == prefix else 0
-        for v in views:
-            if v.is_scratch():
-                continue
-
-            point = 0
-            sel = v.selection
-            if len(sel) > 0:
-                point = sel[-1].begin()
-
-            # Determine regex by syntax. Rewrite the prefix so it does fuzzy matching rather than
-            # strict prefix matching.
-            syntax_name = v.settings().get("syntax")
-            regex = re_by_syntax.get(syntax_name, None)
-            if regex is None:
-                extra = all_complete_extra_word_characters.get(syntax_name) or ""
-                word_re = r'[\w' + extra + r']'
-                re_prefix = (word_re + '*').join(re.escape(p) for p in prefix)
-
-                # If our starting character is not considered a word character, we cannot use '\b'
-                # to start this regex.
-                if prefix[0] in all_complete_separators:
-                    regex = ""
-                else:
-                    regex = r'\b'
-                regex += re_prefix + word_re + r'+\b'
-                re_by_syntax[syntax_name] = regex
-                print("Using", regex, "for", syntax_name)
-
-            view_words = self.extract_completions_from_view(v, regex, re_flags, point, view, seen)
-            if len(view_words) == 0:
-                continue
-
-            # figure the best way to display the file name unless this is the current view
-            if v == view:
-                file_name = None
-            else:
-                file_name = get_relative_path(roots, v.file_name())
-
-            for word in view_words:
-                if v == view:
-                    trigger = word + "\t[HERE]"
-                else:
-                    trigger = "%s\t(%s)" % (word, file_name)
-                words.append((trigger, word.replace("$", "\\$")))
-        print("COMPLETE in", time.time() - start)
-        return words
-
-    def extract_from_view(self, view, prefix, point):
-        return view.extract_completions(prefix, point)
-
-    def extract_completions_from_view(self, view, regex, re_flags, point, current_view, seen):
-        regions = sorted(view.find_all(regex, re_flags),
-                         key=lambda r: abs(point - r.begin()))
-        results = []
-        for region in regions:
-            if view == current_view and region.contains(point):
-                continue
-            if MIN_AUTO_COMPLETE_WORD_SIZE <= region.size() <= MAX_AUTO_COMPLETE_WORD_SIZE:
-                word = view.substr(region)
-                if word not in seen:
-                    results.append(word)
-                    seen.add(word)
-        return results
-
-#
-# A helper class which provides a bunch of useful functionality on a view
-#
-class CmdUtil:
-    def __init__(self, view, state=None, edit=None):
-        self.view = view
-        if state is None:
-            state = ViewState.get(self.view)
-        self.state = state
-        self.edit = edit
-
-    #
-    # Sets the status text on the bottom of the window.
-    #
-    def set_status(self, msg):
-        self.view.set_status(JOVE_STATUS, msg)
-
-    #
-    # Returns point. Point is where the cursor is in the possibly extended region. If there are multiple cursors it
-    # uses the first one in the list.
-    #
-    def get_point(self):
-        sel = self.view.sel()
-        if len(sel) > 0:
-            return sel[0].b
-        return -1
-
-    #
-    # This no-op ensures the next/prev line target column is reset to the new locations.
-    #
-    def reset_target_column(self):
-        selection = self.view.sel()
-        if len(selection) == 1 and selection[0].empty() and selection[0].b < self.view.size():
-            self.run_command("move", {"by": "characters", "forward": True})
-            self.run_command("move", {"by": "characters", "forward": False})
-
-    def get_tab_size(self):
-        return self.view.settings().get("tab_size", 8)
-
-    #
-    # Returns the mark position.
-    #
-    def get_mark(self):
-        mark = self.view.get_regions("jove_mark")
-        if mark:
-            mark = mark[0]
-            return mark.a
-
-    #
-    # Returns true if all the regions are NON-empty.
-    #
-    def no_empty_regions(self, regions):
-        for r in regions:
-            if r.empty():
-                return False
-        return True
-
-    #
-    # Returns true if all the regions are empty.
-    #
-    def all_empty_regions(self, regions):
-        for r in regions:
-            if not r.empty():
-                return False
-        return True
-
-    #
-    # Get_regions() returns the current selection as regions (if the cursors are not
-    # empty).  If the cursors are empty but the number of cursors matches the number of
-    # marks, and the marks are not overlapping, we return a region for each cursor.
-    # Otherwise, we display an error.
-    #
-    def get_regions(self):
-        view = self.view
-        cursors = list(view.sel())
-        if not self.state.active_mark and self.no_empty_regions(cursors):
-            return cursors
-        marks = self.view.get_regions("jove_mark")
-        if len(marks) == len(cursors):
-            regions = [sublime.Region(m.a, c.b) for m, c in zip(marks, cursors)]
-            for i, r in enumerate(regions[1:]):
-                if r.intersects(regions[i]):
-                    self.set_status("Overlapping regions unpredictable outcome!")
-            return regions
-        self.set_status("Mark/Cursor mismatch: {} marks, {} cursors".format(len(marks), len(cursors)))
-
-    def get_encompassing_region(self):
-        regions = self.get_regions()
-        if regions:
-            return sublime.Region(regions[0].begin(), regions[-1].end())
-        return None
-
-    #
-    # Save all the current cursors because we're about to do something that could cause
-    # them to move around. The only thing that handles that properly is using named
-    # regions.
-    #
-    def save_cursors(self, name):
-        cursors = self.get_cursors()
-        if cursors:
-            cursors = [sublime.Region(c.b) for c in cursors]
-            self.view.add_regions(name, cursors, "mark", "", sublime.HIDDEN)
-
-    #
-    # Restore the current region to the named saved mark.
-    #
-    def restore_cursors(self, name):
-        cursors = self.view.get_regions(name)
-        if cursors:
-            self.set_selection(cursors)
-        self.view.erase_regions(name)
-
-    #
-    # Iterator on all the lines in the specified sublime Region.
-    #
-    def for_each_line(self, region):
-        view = self.view
-        pos = region.begin()
-        limit = region.end()
-        if pos == limit:
-            limit += 1
-        while pos < limit:
-            line = view.line(pos)
-            yield line
-            pos = line.end() + 1
-
-    #
-    # Returns true if all the text between a and b is blank.
-    #
-    def is_blank(self, a, b):
-        text = self.view.substr(sublime.Region(a, b))
-        return re.match(r'[ \t]*$', text) is not None
-
-    #
-    # Returns the current indent of the line containing the specified POS and the column of POS.
-    #
-    def get_line_indent(self, pos):
-        data,col,region = self.get_line_info(pos)
-        m = re.match(r'[ \t]*', data)
-        return (len(m.group(0)), col)
-
-    #
-    # Sets the buffers mark to the specified pos (or the current position in the view).
-    #
-    def set_mark(self, regions=None, update_status=True, and_selection=True):
-        view = self.view
-        mark_ring = self.state.mark_ring
-        if regions is None:
-            regions = self.get_cursors()
-
-        # update the mark ring
-        mark_ring.set(regions)
-
-        if self.state.active_mark:
-            # make sure the existing selection disappears and is replaced with an empty selection or
-            # selections.
-            self.set_cursors(self.get_regions())
-
-        # if and_selection:
-        #     self.set_selection(pos)
-        if update_status:
-            self.set_status("Mark Saved")
-
-    # Allows to always set the active mark mode
-    def set_active_mark_mode(self):
-        self.set_cursors(self.get_regions())
-        self.state.active_mark = True
-
-    #
-    # Enabling active mark means highlight the current emacs regions.
-    #
-    def toggle_active_mark_mode(self, value=None):
-        if value is not None and self.state.active_mark == value:
-            return
-
-        self.state.active_mark = value if value is not None else (not self.state.active_mark)
-        if self.state.active_mark:
-            self.set_cursors(self.get_regions())
-        else:
-            self.make_cursors_empty()
-
-        # elif len(self.view.sel()) <= 1:
-        #     self.make_cursors_empty()
-
-    def swap_point_and_mark(self):
-        view = self.view
-        mark_ring = self.state.mark_ring
-        mark = mark_ring.exchange(self.get_cursors())
-        if mark is not None:
-            # set the cursors to where the mark was
-            self.set_cursors(mark)
-            if self.state.active_mark:
-                # restore the visible region if there was one
-                self.set_cursors(self.get_regions())
-        else:
-            self.set_status("No mark in this buffer")
-
-    def get_cursors(self, begin=False):
-        return [sublime.Region(c.a if begin else c.b) if not c.empty() else c for c in self.view.sel()]
-
-    def count_cursors(self):
-        return len(self.view.sel())
-
-    def get_last_cursor(self):
-        return self.view.sel()[-1]
-
-    def set_cursors(self, regions, ensure_visible=True):
-        if not regions:
-            # save the caller from having to check - do nothing if the regions are null
-            return
-        sel = self.view.sel()
-        sel.clear()
-        sel.add_all(regions)
-        if ensure_visible:
-            self.ensure_visible(regions[-1])
-
-    def make_cursors_empty(self):
-        selection = self.view.sel()
-        cursors = [sublime.Region(c.b) for c in selection]
-        selection.clear()
-        selection.add_all(cursors)
-
-    def set_selection(self, regions):
-        if isinstance(regions, sublime.Region):
-            regions = [regions]
-        selection = self.view.sel()
-        selection.clear()
-        selection.add_all(regions)
-
-    def get_line_info(self, point):
-        view = self.view
-        region = view.line(point)
-        data = view.substr(region)
-        row,col = view.rowcol(point)
-        return (data, col, region)
-
-    def run_window_command(self, cmd, args):
-        self.view.window().run_command(cmd, args)
-
-    def has_prefix_arg(self):
-        return self.state.argument_supplied
-
-    def just_one_cursor(self):
-        return len(self.view.sel()) == 1
-
-    def get_count(self, peek=False):
-        return self.state.get_count(peek)
-
-    #
-    # A helper function that runs the specified callback with args/kwargs on each cursor one after
-    # another. It does this one cursor at a time from the end of the buffer towards the front of the
-    # buffer in case any edits occur. This tries to watch out for overlapping cursors but that's
-    # always problematic anyway.
-    #
-    def for_each_cursor(self, function, *args, **kwargs):
-        view = self.view
-        selection = view.sel()
-        regions = list(selection)
-        selection.clear()
-        fail = False
-
-        # REMIND: for delete-white-space and other commands that change the size of the
-        # buffer, you need to keep the cursors in a named set of cursors (like the mark
-        # ring) so that they are adjusted properly. Also if the function returns None,
-        # grab the cursor from the selection.
-        can_modify = kwargs.pop('can_modify', False)
-
-        if can_modify:
-            key = "tmp_cursors"
-            view.add_regions(key, regions, "tmp", "", sublime.HIDDEN)
-            for i in range(len(regions)):
-                # Grab the region (whose position has been maintained/adjusted by
-                # sublime). Unfortunately we need to assume one region might merge into
-                # another at any time, and reload all regions to check.
-                regions = view.get_regions(key)
-                if i >= len(regions):
-                    # we've deleted some cursors along the way - we're done
-                    break
-                selection.add(regions[i])
-                cursor = function(regions[i], *args, **kwargs)
-                selection.clear()
-            cursors = view.get_regions(key)
-            view.erase_regions(key)
-        else:
-            # run the command passing in each cursor and collecting the returned cursor
-            cursors = []
-            for i,cursor in enumerate(regions):
-                selection.add(cursor)
-                cursor = function(cursor, *args, **kwargs)
-                if cursor is None:
-                    fail = True
-                    break
-                selection.clear()
-                cursors.append(cursor)
-
-        # add them all back when we're done
-        if fail:
-            self.set_status("Operation failed on one of your cursors")
-            selection.add_all(regions)
-        else:
-            selection.add_all(cursors)
-
-    def goto_line(self, line):
-        if line >= 0:
-            view = self.view
-            point = view.text_point(line - 1, 0)
-            self.push_mark_and_goto_position(point)
-
-    #
-    # Called when we're moving to a new single-cursor location. This pushes the mark onto the mark
-    # ring so we can go right back.
-    #
-    def push_mark_and_goto_position(self, pos):
-        if self.get_point() != pos:
-            self.set_mark()
-        self.set_cursors([sublime.Region(pos)], ensure_visible=True)
-        if self.state.active_mark:
-            self.set_cursors(self.get_regions())
-
-    def is_visible(self, pos):
-        visible = self.view.visible_region()
-        return visible.contains(pos)
-
-    def ensure_visible(self, cursor, force=False):
-        if force or not self.is_visible(cursor.b):
-            self.view.show_at_center(cursor.b)
-
-    def is_word_char(self, pos, forward, separators):
-        if not forward:
-            if pos == 0:
-                return False
-            pos -= 1
-        char = self.view.substr(pos)
-        return not (char in " \t\r\n" or char in separators)
-
-    def is_one_of(self, pos, chars):
-        return self.view.substr(pos) in chars
-
-    #
-    # Goes to the other end of the scope at the specified position. The specified position should be
-    # around brackets or quotes.
-    #
-    def to_other_end(self, point, direction):
-        brac = "([{"
-        kets = ")]}"
-
-        view = self.view
-        scope_name = view.scope_name(point)
-        if scope_name.find("comment") >= 0:
-            return None
-
-        ch = view.substr(point)
-        if direction > 0 and view.substr(point) in brac:
-            return self.run_command("move_to", {"to": "brackets"}, point=point)
-        elif direction < 0 and view.substr(point - 1) in kets:
-            # this can be tricky due to inconsistencies with sublime bracket matching
-            # we need to handle "))" and "()[0]" when between the ) and [
-            if point < view.size() and view.substr(point) in brac:
-                # go inside the bracket (point - 1), then to the inside of the match, then back one more
-                return self.run_command("move_to", {"to": "brackets"}, point=point - 1) - 1
-            else:
-                return self.run_command("move_to", {"to": "brackets"}, point=point)
-
-        # otherwise it's a string
-        start = point + direction
-        self.run_command("expand_selection", {"to": "scope"}, point=start)
-        r = view.sel()[0]
-        return r.end() if direction > 0 else r.begin()
-
-    #
-    # Run the specified command and args in the current view. If point is specified set point in the
-    # view before running the command. Returns the resulting point.
-    #
-    def run_command(self, cmd, args, point=None):
-        view = self.view
-        if point is not None:
-            view.sel().clear()
-            view.sel().add(sublime.Region(point, point))
-        view.run_command(cmd, args)
-        return self.get_point()
-
-#
-# The baseclass for JOVE/SBP commands. This sets up state, creates a helper, processes the universal
-# argument, and then calls the run_cmd method, which subclasses should override.
-#
-class SbpTextCommand(sublime_plugin.TextCommand):
-    should_reset_target_column = False
-    is_kill_cmd = False
-    is_ensure_visible_cmd = False
-    unregistered = False
-
-    def run(self, edit, **kwargs):
-        # get our view state
-        vs = ViewState.get(self.view)
-
-        # first keep track of this_cmd and last_cmd but only if we're not called recursively
-        cmd = self.jove_cmd_name
-
-        if vs.entered == 0 and (cmd != 'sbp_universal_argument' or self.unregistered):
-            vs.this_cmd = cmd
-        vs.entered += 1
-        util = CmdUtil(self.view, state=vs, edit=edit)
-        try:
-            self.run_cmd(util, **kwargs)
-        finally:
-            vs.entered -= 1
-
-        if vs.entered == 0 and (cmd != 'sbp_universal_argument' or self.unregistered):
-            vs.last_cmd = vs.this_cmd
-            vs.argument_value = 0
-            vs.argument_supplied = False
-
-            # this no-op ensures the next/prev line target column is reset to the new locations
-            if self.should_reset_target_column:
-                util.reset_target_column()
 
 class SbpWindowCommand(sublime_plugin.WindowCommand):
 
@@ -1300,6 +412,9 @@ class SbpToWordCommand(SbpTextCommand):
 
         util.for_each_cursor(to_word)
 
+#
+# Change the case of the current region. Not sure this is ... multi-cursor/region aware.
+#
 class SbpCaseRegion(SbpTextCommand):
 
     def run_cmd(self, util, mode):
@@ -1316,6 +431,9 @@ class SbpCaseRegion(SbpTextCommand):
         util.view.replace(util.edit, region, text)
 
 
+#
+# Perform the uppercase/lowercase/capitalize commands on all the current cursors.
+#
 class SbpCaseWordCommand(SbpTextCommand):
     should_reset_target_column = True
 
@@ -1366,8 +484,13 @@ class SbpCaseWordCommand(SbpTextCommand):
                 selection.clear()
                 selection.add_all(new_regions)
 
-
-
+#
+# A poor implementation of moving by s-expressions. The problem is it tries to use the built-in
+# sublime capabilities for matching brackets, and it can be tricky getting that to work.
+#
+# The real solution is to figure out how to require/request the bracket highlighter code to be
+# loaded and just use it.
+#
 class SbpMoveSexprCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
     should_reset_target_column = True
@@ -1466,7 +589,7 @@ class MoveThenDeleteHelper():
 
     #
     # Finish the operation. Sometimes we're called later with a new util object, because the whole
-    # thing was done asycnhronously (see the zap code).
+    # thing was done asynchronously (see the zap code).
     #
     def finish(self, new_util=None):
         util = new_util if new_util else self.util
@@ -1532,6 +655,10 @@ class SbpMoveThenDeleteCommand(SbpTextCommand):
         util.view.run_command(move_cmd, kwargs)
         helper.finish()
 
+#
+# Goto the the Nth line as specified by the emacs arg count, or prompt for a line number of one
+# isn't specified.
+#
 class SbpGotoLineCommand(SbpTextCommand):
     def run_cmd(self, util):
         if util.has_prefix_arg():
@@ -1539,6 +666,9 @@ class SbpGotoLineCommand(SbpTextCommand):
         else:
             util.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
 
+#
+# Emacs delete-white-space command.
+#
 class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
     def run_cmd(self, util):
         util.for_each_cursor(self.delete_white_space, util, can_modify=True)
@@ -2707,32 +1837,5 @@ def dedup_views(window):
     window.focus_group(group)
 
 def plugin_loaded():
-    global all_complete_extra_word_characters, all_complete_separators, settings_helper
-
-    settings_helper = SettingsHelper()
-    all_complete_extra_word_characters = settings_helper.get("sbp_syntax_specific_extra_word_characters")
-    all_complete_separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
-
-    module_name = __name__
-    def get_cmd_name(cls):
-        name = cls.__name__
-        name = re.sub('(?!^)([A-Z]+)', r'_\1', name).lower()
-        # strip "_command"
-        return name[0:len(name) - 8]
-
-    module = sys.modules[module_name]
-    for name in dir(module):
-        if name.startswith("Sbp"):
-            cls = getattr(module, name)
-            try:
-                if not issubclass(cls, SbpTextCommand):
-                    continue
-            except:
-                continue
-            # see what the deal is
-            name = get_cmd_name(cls)
-            cls.jove_cmd_name = name
-            if cls.is_kill_cmd:
-                kill_cmds.add(name)
-            if cls.is_ensure_visible_cmd:
-                ensure_visible_cmds.add(name)
+    # preprocess this module
+    preprocess_module(sys.modules[__name__])

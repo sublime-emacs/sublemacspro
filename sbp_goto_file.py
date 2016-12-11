@@ -3,6 +3,9 @@
 # the views by last touch date.
 #
 import sublime, sublime_plugin, os
+
+from sublemacspro.lib.misc import *
+
 isSt2 = False
 
 try:

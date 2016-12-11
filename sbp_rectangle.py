@@ -2,6 +2,8 @@ import functools as fu
 import sublime
 import sublime_plugin
 
+from sublemacspro.lib.misc import *
+
 # Handling the different imports in Sublime
 if sublime.version() < '3000':
     # we are on ST2 and Python 2.X
