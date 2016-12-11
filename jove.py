@@ -986,6 +986,7 @@ class CmdUtil:
         selection = view.sel()
         regions = list(selection)
         selection.clear()
+        fail = False
 
         # REMIND: for delete-white-space and other commands that change the size of the
         # buffer, you need to keep the cursors in a named set of cursors (like the mark
@@ -1015,11 +1016,18 @@ class CmdUtil:
             for i,cursor in enumerate(regions):
                 selection.add(cursor)
                 cursor = function(cursor, *args, **kwargs)
+                if cursor is None:
+                    fail = True
+                    break
                 selection.clear()
                 cursors.append(cursor)
 
         # add them all back when we're done
-        selection.add_all(cursors)
+        if fail:
+            self.set_status("Operation failed on one of your cursors")
+            selection.add_all(regions)
+        else:
+            selection.add_all(cursors)
 
     def goto_line(self, line):
         if line >= 0:
@@ -1442,32 +1450,35 @@ class SbpMoveToParagraphCommand(SbpTextCommand):
         self.view.show(self.view.sel()[0].begin())
 
 #
-# This command remembers all the current cursor positions, executes a command on all the cursors,
-# and then deletes all the data between the two.
+# A class which implements all the hard work of performing a move and then delete/kill command. It
+# keeps track of the cursors, then runs the command to move all the cursors, and then performs the
+# kill. This is used by the generic SbpMoveThenDeleteCommand command, but also commands that require
+# input from a panel and so are not synchronous.
 #
-# If there's only one selection, the deleted data is added to the kill ring appropriately.
-#
-class SbpMoveThenDeleteCommand(SbpTextCommand):
-    is_ensure_visible_cmd = True
-    is_kill_cmd = True
+class MoveThenDeleteHelper():
+    def __init__(self, util):
+        self.util = util
+        self.selection = util.view.sel()
 
-    def run_cmd(self, util, move_cmd, **kwargs):
-        view = self.view
-        selection = view.sel()
-
-        # peek at the count
-        count = util.get_count(True)
-        if 'direction' in kwargs:
-            count *= kwargs['direction']
+        # assume forward kill direction
+        self.forward = True
 
         # remember the current cursor positions
-        orig_cursors = [s for s in selection]
-        view.run_command(move_cmd, kwargs)
+        self.orig_cursors = [s for s in self.selection]
+
+    #
+    # Finish the operation. Sometimes we're called later with a new util object, because the whole
+    # thing was done asycnhronously (see the zap code).
+    #
+    def finish(self, new_util=None):
+        util = new_util if new_util else self.util
+        view = util.view
+        selection = self.selection
+        orig_cursors = self.orig_cursors
 
         # extend each cursor so we can delete the bytes, and only if there is only one region will
         # we add the data to the kill ring
         new_cursors = [s for s in selection]
-        print("Running", orig_cursors, new_cursors)
 
         selection.clear()
         for old,new in zip(orig_cursors, new_cursors):
@@ -1492,12 +1503,36 @@ class SbpMoveThenDeleteCommand(SbpTextCommand):
 
         # copy the text into the kill ring
         regions = [view.substr(r) for r in view.sel()]
-        kill_ring.add(regions, forward=count > 0, join=util.state.last_was_kill_cmd())
+        kill_ring.add(regions, forward=self.forward, join=util.state.last_was_kill_cmd())
 
         # erase the regions
         for region in selection:
             view.erase(util.edit, region)
 
+
+
+#
+# This command remembers all the current cursor positions, executes a command on all the cursors,
+# and then deletes all the data between the two.
+#
+# If there's only one selection, the deleted data is added to the kill ring appropriately.
+#
+class SbpMoveThenDeleteCommand(SbpTextCommand):
+    is_ensure_visible_cmd = True
+    is_kill_cmd = True
+
+    def run_cmd(self, util, move_cmd, **kwargs):
+        # prepare
+        helper = MoveThenDeleteHelper(util)
+
+        # peek at the count and update the helper's forward direction
+        count = util.get_count(True)
+        if 'direction' in kwargs:
+            count *= kwargs['direction']
+        helper.forward = count > 0
+
+        util.view.run_command(move_cmd, kwargs)
+        helper.finish()
 
 class SbpGotoLineCommand(SbpTextCommand):
     def run_cmd(self, util):
@@ -2466,17 +2501,15 @@ class AskCharOrStringBase(SbpTextCommand):
 
     def process_cursors(self, content):
         util = self.util
-        print("On change:", len(content), '"', content, '"')
         self.window.run_command("hide_panel")
 
         count = abs(self.count)
         for i in range(count):
             self.last_iteration = (i == count - 1)
-            util.for_each_cursor(self.process, content)
+            util.for_each_cursor(self.process_one, content)
 
     def on_done(self, content):
         if self.mode == "word":
-            print("DONE CALLED", content)
             self.process_cursors(content)
 
 #
@@ -2490,7 +2523,7 @@ class SbpJumpToCharCommand(AskCharOrStringBase):
         super(SbpJumpToCharCommand, self).run_cmd(util, *args, **kwargs)
         self.plus_one = plus_one
 
-    def process(self, cursor, ch):
+    def process_one(self, cursor, ch):
         r = self.view.find(ch, cursor.end(), sublime.LITERAL)
         if r:
             p = r.begin()
@@ -2500,6 +2533,35 @@ class SbpJumpToCharCommand(AskCharOrStringBase):
                 p += 1
             return p
         return None
+
+class SbpZapToCharCommand(SbpJumpToCharCommand):
+    is_kill_cmd = True
+    def run_cmd(self, util, **kwargs):
+        # prepare
+        self.helper = MoveThenDeleteHelper(util)
+        kwargs['prompt'] = "Zap to char: "
+        super(SbpZapToCharCommand, self).run_cmd(util, **kwargs)
+
+    def process_cursors(self, content):
+        # process cursors does all the work (of jumping) and then ...
+        super(SbpZapToCharCommand, self).process_cursors(content)
+
+        # Save the helper in view state and invoke a command to make use of it. We can't use it now
+        # because we don't have access to a valid edit object, because this function
+        # (process_cursors) is called asynchronously after the original text command has returned.
+        vs = ViewState.get(self.view)
+        vs.pending_move_then_delete_helper = self.helper
+
+        # ... we can finish what we started
+        self.window.run_command("sbp_finish_move_then_delete")
+
+class SbpFinishMoveThenDeleteCommand(SbpTextCommand):
+    is_kill_cmd = True
+    def run_cmd(self, util):
+        vs = ViewState.get(self.view)
+        helper = vs.pending_move_then_delete_helper
+        vs.pending_move_then_delete_helper = None
+        helper.finish(util)
 
 #
 # Jump to char command inputs one character and jumps to it. If plus_one is True it goes just past
