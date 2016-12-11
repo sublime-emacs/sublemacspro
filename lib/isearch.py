@@ -1,7 +1,11 @@
-import re, sys, time, os
-import functools as fu
-import sublime, sublime_plugin
+#####################################################
+#            Better incremental search              #
+#####################################################
+
+import re
 from copy import copy
+
+import sublime, sublime_plugin
 
 from sublemacspro.lib.misc import *
 
@@ -22,9 +26,6 @@ def clear_isearch_info_for(view):
     window = view.window()
     del(isearch_info[window.id()])
 
-#####################################################
-#            Better incremental search              #
-#####################################################
 class ISearchInfo():
     last_search = None
 
@@ -241,8 +242,7 @@ class ISearchInfo():
             return
         not_in_error = self.not_in_error()
 
-        flags = sublime.DRAW_NO_FILL if _ST3 else sublime.DRAW_OUTLINED
-        self.view.add_regions(REGION_FIND, si.regions, "text", "", flags)
+        self.view.add_regions(REGION_FIND, si.regions, "text", "", sublime.DRAW_NO_FILL)
         selected = si.selected or (not_in_error.selected and [not_in_error.selected[-1]]) or []
         self.view.add_regions(REGION_SELECTED, selected, "string", "", sublime.DRAW_NO_OUTLINE)
         if selected:

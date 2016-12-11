@@ -2,14 +2,7 @@ import functools as fu
 import sublime
 import sublime_plugin
 
-# Handling the different imports in Sublime
-if sublime.version() < '3000':
-    # we are on ST2 and Python 2.X
-    _ST3 = False
-    import jove
-else:
-    _ST3 = True
-    from . import jove
+from sublemacspro.lib.misc import *
 
 class SbpRegisterStore:
   """
@@ -42,10 +35,10 @@ class SbpPointToRegister(sublime_plugin.TextCommand):
     panel = None
 
     def run(self, edit):
-        self.panel = self.view.window().show_input_panel("Store point into register:", "", \
-            self.on_done, \
-            self.on_change,\
-            self.on_cancel)
+        self.panel = self.view.window().show_input_panel("Store point into register:", "",
+                                                         self.on_done,
+                                                         self.on_change,
+                                                         self.on_cancel)
 
     def on_done(self, register):
         pass
@@ -103,7 +96,7 @@ class SbpPointFromRegister(sublime_plugin.TextCommand):
             if not visible.contains(point):
                 point_data[0].run_command("jove_center_view")
 
-class SbpRegisterStore(jove.SbpTextCommand):
+class SbpRegisterStore(SbpTextCommand):
     '''
     Emacs style command allowing to store a certain value
     inside a global register.
@@ -139,7 +132,7 @@ class SbpRegisterStore(jove.SbpTextCommand):
 
 
 
-class SbpRegisterDoInsert(jove.SbpTextCommand):
+class SbpRegisterDoInsert(SbpTextCommand):
 
     def run_cmd(self, jove, content):
         sel = jove.get_point()
@@ -148,7 +141,7 @@ class SbpRegisterDoInsert(jove.SbpTextCommand):
         jove.view.sel().add(sublime.Region(sel + len(content), sel + len(content)))
         jove.view.window().focus_view(self.view)
 
-class SbpRegisterInsert(jove.SbpTextCommand):
+class SbpRegisterInsert(SbpTextCommand):
     """
     Simple command to insert the value stored in the register
     at the point that is currently active

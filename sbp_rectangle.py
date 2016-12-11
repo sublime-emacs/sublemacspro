@@ -4,16 +4,7 @@ import sublime_plugin
 
 from sublemacspro.lib.misc import *
 
-# Handling the different imports in Sublime
-if sublime.version() < '3000':
-    # we are on ST2 and Python 2.X
-    _ST3 = False
-    import jove
-else:
-    _ST3 = True
-    from . import jove
-
-class SbpRectangleDelete(jove.SbpTextCommand):
+class SbpRectangleDelete(SbpTextCommand):
   """
   Deletes the content of a given rectangle, content is not saved to kill ring
   and cannot be pasted
@@ -44,7 +35,7 @@ class SbpRectangleDelete(jove.SbpTextCommand):
     self.view.end_edit(jove.edit)
 
 
-class SbpRectangleInsertHandler(jove.SbpTextCommand):
+class SbpRectangleInsertHandler(SbpTextCommand):
   """
   executes the actual insert from the rectangle
   """
@@ -76,7 +67,7 @@ class SbpRectangleInsertHandler(jove.SbpTextCommand):
     self.view.end_edit(jove.edit)
 
 
-class SbpRectangleInsert(jove.SbpTextCommand):
+class SbpRectangleInsert(SbpTextCommand):
   """
   Given a rectangle insert the text at points
   """

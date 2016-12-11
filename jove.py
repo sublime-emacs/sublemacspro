@@ -11,16 +11,8 @@ from sublemacspro.lib.misc import *
 from sublemacspro.lib.kill_ring import *
 from sublemacspro.lib.isearch import *
 
-# Handling the different imports in Sublime
-if sublime.version() < '3000':
-    # we are on ST2 and Python 2.X
-    _ST3 = False
-    import paragraph
-    import sbp_layout as ll
-else:
-    _ST3 = True
-    import Default.paragraph as paragraph
-    from . import sbp_layout as ll
+import Default.paragraph as paragraph
+from . import sbp_layout as ll
 
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete', 'undo', 'redo'])
@@ -327,10 +319,7 @@ class SbpMoveWordCommand(SbpTextCommand):
           This is a small wrapper that maps to the right find_by_class call
           depending on the version of ST installed
           '''
-          if _ST3:
-            return self.find_by_class_native(view, point, forward, classes, separators)
-          else:
-            return self.find_by_class_fallback(view, point, forward, classes, separators)
+          return self.find_by_class_native(view, point, forward, classes, separators)
 
         def move_word0(cursor, first=False):
             point = cursor.b
@@ -1087,8 +1076,7 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
                 if re.match(r'[ \t]*$', text[index:]) and end < util.view.size():
                     end += 1
 
-            # ST2 / ST3 compatibility
-            return sublime.Region(end,end)
+            return sublime.Region(end, end)
 
         util.for_each_cursor(advance)
 
