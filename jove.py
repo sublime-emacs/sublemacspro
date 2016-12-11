@@ -6,6 +6,7 @@ import re, sys, time, os
 import functools as fu
 import sublime, sublime_plugin
 from copy import copy
+from sublemacspro import viewtest
 
 
 # Handling the different imports in Sublime
@@ -207,11 +208,8 @@ class KillRing:
             index = self.index
             entry = entries[index]
 
-            # First check to see whether we bring in the clipboard. We do that if the
-            # specified number of regions is 1.
-            if n_regions == 1:
-                # check the clipboard
-                clipboard = sublime.get_clipboard()
+            # first check to see whether we bring in the clipboard
+            clipboard = sublime.get_clipboard()
 
             if clipboard and (entry is None or entry.n_regions != 1 or entry.regions[0] != clipboard):
                 # We switched to another app and cut or copied something there, so add the clipboard
