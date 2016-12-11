@@ -7,41 +7,6 @@ import sublime, sublime_plugin
 class KillRing:
     KILL_RING_SIZE = 64
 
-    class Kill(object):
-        """A single kill (maybe with multiple cursors)"""
-        def __init__(self, regions):
-            self.regions = regions
-            self.n_regions = len(regions)
-
-        # Joins a set of regions with our existing set, if possible. We must have
-        # the same number of regions.
-        def join_if_possible(self, regions, forward):
-            if len(regions) != self.n_regions:
-                return False
-            for i, c in enumerate(regions):
-                if forward:
-                    self.regions[i] += regions[i]
-                else:
-                    self.regions[i] = regions[i] + self.regions[i]
-            return True
-
-        def get_sample(self):
-            text = self.regions[0][0:256]
-            text = text.strip("\n \t").replace("\n", "\\n")
-            text = re.sub("\\s\\s+", " ", text)
-            return text
-
-        def set_clipboard(self):
-            sublime.set_clipboard(self.regions[0])
-
-        def same_as(self, regions):
-            if len(regions) != self.n_regions:
-                return False
-            for me, him in zip(regions, self.regions):
-                if me != him:
-                    return False
-            return True
-
     def __init__(self):
         self.entries = [None] * self.KILL_RING_SIZE
         self.index = 0
@@ -71,10 +36,9 @@ class KillRing:
 
             # create the new entry
             index = (index + 1) % self.KILL_RING_SIZE
-            self.entries[index] = KillRing.Kill(regions)
+            self.entries[index] = Kill(regions)
         finally:
-            self.index = index
-            self.entries[index].set_clipboard()
+            self.set_current(index)
 
     #
     # Returns a sample of the first region of each entry in the kill ring, so that it can be
@@ -117,7 +81,7 @@ class KillRing:
             # first check to see whether we bring in the clipboard
             clipboard = sublime.get_clipboard()
 
-            if clipboard and (entry is None or entry.n_regions != 1 or entry.regions[0] != clipboard):
+            if clipboard and (entry is None or entry.regions[0] != clipboard):
                 # We switched to another app and cut or copied something there, so add the clipboard
                 # to our kill ring.
                 result = [clipboard]
@@ -146,6 +110,45 @@ class KillRing:
                 result *= 2
             return result[0:n_regions]
         return None
+
+class Kill(object):
+    """A single kill (maybe with multiple cursors)"""
+    def __init__(self, regions):
+        self.regions = regions
+        self.n_regions = len(regions)
+
+    # Joins a set of regions with our existing set, if possible. We must have
+    # the same number of regions.
+    def join_if_possible(self, regions, forward):
+        if len(regions) != self.n_regions:
+            return False
+        for i, c in enumerate(regions):
+            if forward:
+                self.regions[i] += regions[i]
+            else:
+                self.regions[i] = regions[i] + self.regions[i]
+        return True
+
+    def get_sample(self):
+        text = self.regions[0][0:256]
+        text = text.strip("\n \t").replace("\n", "\\n")
+        text = re.sub("\\s\\s+", " ", text)
+        return text
+
+    #
+    # We set the clipboard to the value of the first region.
+    #
+    def set_clipboard(self):
+        sublime.set_clipboard(self.regions[0])
+
+    def same_as(self, regions):
+        if len(regions) != self.n_regions:
+            return False
+        for me, him in zip(regions, self.regions):
+            if me != him:
+                return False
+        return True
+
 
 # kill ring shared across all buffers
 kill_ring = KillRing()
