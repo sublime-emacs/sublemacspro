@@ -45,6 +45,8 @@ class KillRing:
     # displayed to the user to allow them to choose it. The sample is truncated unfortunately.
     #
     def get_popup_sample(self):
+        self.add_external_clipboard()
+
         index = self.index
         result = []
         seen = {}
@@ -66,6 +68,23 @@ class KillRing:
             self.entries[index].set_clipboard()
 
     #
+    # Add the external clipboard to the kill ring, if appropriate. And return it if we do.
+    #
+    def add_external_clipboard(self):
+        # first check to see whether we bring in the clipboard
+        index = self.index
+        entry = self.entries[index]
+        clipboard = sublime.get_clipboard()
+
+        if clipboard and (entry is None or entry.regions[0] != clipboard):
+            # We switched to another app and cut or copied something there, so add the clipboard
+            # to our kill ring.
+            result = [clipboard]
+            self.add(result, True, False)
+            return result
+        return None
+
+    #
     # Returns the current entry in the kill ring for the purposes of yanking. If pop is non-zero, we
     # move backwards or forwards once in the kill ring and return that data instead. If the number
     # of regions doesn't match, we either truncate or duplicate the regions to make a match.
@@ -78,15 +97,9 @@ class KillRing:
             index = self.index
             entry = entries[index]
 
-            # first check to see whether we bring in the clipboard
-            clipboard = sublime.get_clipboard()
-
-            if clipboard and (entry is None or entry.regions[0] != clipboard):
-                # We switched to another app and cut or copied something there, so add the clipboard
-                # to our kill ring.
-                result = [clipboard]
-                self.add(result, True, False)
-            elif entry:
+            # grab the external clipboard if available
+            result = self.add_external_clipboard()
+            if not result:
                 result = entry.regions
             self.pop_index = None
         else:
