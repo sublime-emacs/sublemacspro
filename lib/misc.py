@@ -2,7 +2,6 @@ import os, re
 import sublime, sublime_plugin
 
 from .viewstate import *
-from .mark_ring import *
 
 # Region names we use for i-search. Using our own names means that there is no interference from
 # Sublime in terms of messages it displays regarding regions and matches, etc.

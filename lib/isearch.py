@@ -26,65 +26,52 @@ def clear_isearch_info_for(view):
     window = view.window()
     del(isearch_info[window.id()])
 
-class ISearchInfo():
-    last_search = None
+# ring buffer of saved searches
+ISEARCH_SAVED_ITEMS_SIZE = 64
+isearch_history = [None] * ISEARCH_SAVED_ITEMS_SIZE
 
-    class StackItem():
-        def __init__(self, search, regions, selected, current_index, forward, wrapped):
-            self.prev = None
-            self.search = search
-            self.regions = regions
-            self.selected = selected
-            self.current_index = current_index
-            self.forward = forward
-            self.try_wrapped = False
-            self.wrapped = wrapped
-            if current_index >= 0 and regions:
-                # add the new one to selected
-                selected.append(regions[current_index])
+# most recently added item
+isearch_current = 0
 
-        def get_point(self):
-            if self.current_index >= 0:
-                r = self.regions[self.current_index]
-                return r.begin() if self.forward else r.end()
+# most recently accessed via up/down arrows
+isearch_index = 0
+
+#
+# Save the search string to the ring buffer if it's different from the most recent entry.
+#
+def save_search(search):
+    global isearch_current, isearch_index
+    current = isearch_history[(isearch_current - 1) % ISEARCH_SAVED_ITEMS_SIZE]
+    if search != current:
+        isearch_history[isearch_current] = search
+        isearch_current = (isearch_current + 1) % ISEARCH_SAVED_ITEMS_SIZE
+
+        # reset the index to the new current whenever one is added
+        isearch_index = isearch_current
+
+#
+# Get the most recently saved search string.
+#
+def get_saved_search():
+    return isearch_history[(isearch_current - 1) % ISEARCH_SAVED_ITEMS_SIZE]
+
+#
+# Cycle through history searching for the next search string.
+#
+def cycle_history(dir):
+    global isearch_index
+    start = isearch_index
+    while True:
+        isearch_index = (isearch_index + dir) % ISEARCH_SAVED_ITEMS_SIZE
+        if isearch_index == start:
             return None
+        if isearch_history[isearch_index] is not None:
+            return isearch_history[isearch_index]
 
-        #
-        # Clone is called when we want to make progress with the same search string as before.
-        #
-        def clone(self):
-            return copy.copy(self)
-
-        #
-        # Go to the next match of the current string. Keep means "keep the current location as a
-        # future cursor" and forward is True if we're moving forward.
-        #
-        def step(self, forward, keep):
-            index = self.current_index
-            matches = len(self.regions)
-            if (self.regions and (index < 0 or (index == 0 and not forward) or (index == matches - 1) and forward)):
-                # wrap around!
-                index = 0 if forward else matches - 1
-                if self.try_wrapped or not self.regions:
-                    wrapped = True
-                    self.try_wrapped = False
-                else:
-                    self.try_wrapped = True
-                    return None
-            elif (forward and index < matches - 1) or (not forward and index > 0):
-                index = index + 1 if forward else index - 1
-                wrapped = self.wrapped
-            else:
-                return None
-            selected = copy(self.selected)
-            if not keep and len(selected) > 0:
-                del(selected[-1])
-            return ISearchInfo.StackItem(self.search, self.regions, selected, index, forward, wrapped)
-
-
+class ISearchInfo():
     def __init__(self, view, forward, regex):
         self.view = view
-        self.current = ISearchInfo.StackItem("", [], [], -1, forward, False)
+        self.current = StackItem("", [], [], -1, forward, False)
         self.util = CmdUtil(view)
         self.window = view.window()
         self.point = self.util.get_cursors()
@@ -93,6 +80,18 @@ class ISearchInfo():
         self.in_changes = 0
         self.forward = forward
         self.regex = regex
+
+    #
+    # Restart the search.
+    #
+    def restart(self, text=""):
+        item = self.current
+        while item.prev != None:
+            item = item.prev
+        self.current = item
+        self.on_change(text)
+        self.set_text(text, False)
+        self.update()
 
     def open(self):
         window = self.view.window()
@@ -141,15 +140,11 @@ class ISearchInfo():
             index = self.find_closest(regions, pos, self.forward)
 
             # push this new state onto the stack
-            self.push(ISearchInfo.StackItem(val, regions, [], index, self.forward, self.current.wrapped))
+            self.push(StackItem(val, regions, [], index, self.forward, self.current.wrapped))
         else:
             regions = None
             index = -1
         self.update()
-
-    #
-    # Implementation and internal API.
-    #
 
     #
     # Push a new state onto the stack.
@@ -179,6 +174,15 @@ class ISearchInfo():
     def done(self):
         self.finish()
 
+    def history(self, dir):
+        search = cycle_history(dir)
+        if search:
+            self.restart(search)
+
+    #
+    # INTERNAL FUNCTIONATITY BELOW
+    #
+
     #
     # Set the text of the search to a particular value. If is_pop is True it means we're restoring
     # to a previous state. Otherwise, we want to pretend as though this text were actually inserted.
@@ -203,7 +207,7 @@ class ISearchInfo():
         if isearch_info_for(self.view) != self:
             return
         if self.current and self.current.search:
-            ISearchInfo.last_search = self.current.search
+            save_search(self.current.search)
         util.set_status("")
 
         point_set = False
@@ -270,9 +274,10 @@ class ISearchInfo():
     def next(self, keep, forward=None):
         if self.current.prev is None:
             # do something special if we invoke "i-search" twice at the beginning
-            if ISearchInfo.last_search:
+            last_search = get_saved_search()
+            if last_search is not None:
                 # insert the last search string
-                self.set_text(ISearchInfo.last_search, is_pop=False)
+                self.set_text(last_search, is_pop=False)
         else:
             if forward is None:
                 forward = self.current.forward
@@ -372,3 +377,54 @@ class ISearchInfo():
                     return index - 1
             return len(regions) - 1
 
+class StackItem():
+    def __init__(self, search, regions, selected, current_index, forward, wrapped):
+        self.prev = None
+        self.search = search
+        self.regions = regions
+        self.selected = selected
+        self.current_index = current_index
+        self.forward = forward
+        self.try_wrapped = False
+        self.wrapped = wrapped
+        if current_index >= 0 and regions:
+            # add the new one to selected
+            selected.append(regions[current_index])
+
+    def get_point(self):
+        if self.current_index >= 0:
+            r = self.regions[self.current_index]
+            return r.begin() if self.forward else r.end()
+        return None
+
+    #
+    # Clone is called when we want to make progress with the same search string as before.
+    #
+    def clone(self):
+        return copy.copy(self)
+
+    #
+    # Go to the next match of the current string. Keep means "keep the current location as a
+    # future cursor" and forward is True if we're moving forward.
+    #
+    def step(self, forward, keep):
+        index = self.current_index
+        matches = len(self.regions)
+        if (self.regions and (index < 0 or (index == 0 and not forward) or (index == matches - 1) and forward)):
+            # wrap around!
+            index = 0 if forward else matches - 1
+            if self.try_wrapped or not self.regions:
+                wrapped = True
+                self.try_wrapped = False
+            else:
+                self.try_wrapped = True
+                return None
+        elif (forward and index < matches - 1) or (not forward and index > 0):
+            index = index + 1 if forward else index - 1
+            wrapped = self.wrapped
+        else:
+            return None
+        selected = copy(self.selected)
+        if not keep and len(selected) > 0:
+            del(selected[-1])
+        return StackItem(self.search, self.regions, selected, index, forward, wrapped)
