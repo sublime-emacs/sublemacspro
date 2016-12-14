@@ -136,6 +136,12 @@
     { "keys": ["ctrl+y"], "command": "sbp_inc_search", "args": {"cmd": "yank"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
+    { "keys": ["up"], "command": "sbp_inc_search", "args": {"cmd": "history", "dir": -1},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    { "keys": ["down"], "command": "sbp_inc_search", "args": {"cmd": "history", "dir": 1},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
 
     //
     // keys to escape isearch

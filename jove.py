@@ -1037,6 +1037,24 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             window.focus_view(views[index])
 
 #
+# Close the N least recently touched views, leaving at least one view remaining.
+#
+class SbpCloseOlderWindowsCommand(SbpWindowCommand):
+    def run_cmd(self, util, n_windows=10):
+        window = sublime.active_window()
+        sorted = ViewState.sorted_views(window)
+        while n_windows > 0 and len(sorted) > 1:
+            view = sorted.pop()
+            if view.is_dirty():
+                continue
+            window.focus_view(view)
+            window.run_command('close')
+            n_windows -= 1
+
+        # go back to the original view
+        window.focus_view(util.view)
+
+#
 # Exists only to support kill-line with multiple cursors.
 #
 class SbpMoveForKillLineCommand(SbpTextCommand):
@@ -1155,6 +1173,8 @@ class SbpIncSearchCommand(SbpTextCommand):
                 view = info.input_view
                 view.replace(util.edit, sublime.Region(0, view.size()), kwargs['text'])
                 view.run_command("move_to", {"to": "eof"})
+            elif cmd == "history":
+                info.history(**kwargs)
             else:
                 print("Not handling cmd", cmd, kwargs)
 
