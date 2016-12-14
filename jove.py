@@ -1039,7 +1039,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
 #
 # Close the N least recently touched views, leaving at least one view remaining.
 #
-class SbpCloseOlderWindowsCommand(SbpWindowCommand):
+class SbpCloseOlderViewsCommand(SbpWindowCommand):
     def run_cmd(self, util, n_windows=10):
         window = sublime.active_window()
         sorted = ViewState.sorted_views(window)
@@ -1053,6 +1053,23 @@ class SbpCloseOlderWindowsCommand(SbpWindowCommand):
 
         # go back to the original view
         window.focus_view(util.view)
+
+#
+# Closes the current view and selects the most recently used one in its place. This is almost like
+# kill buffer in emacs but if another view is displaying this file, it will still exist there. In
+# short, this is like closing a tab but rather than selecting an adjacent tab, it selects the most
+# recently used "buffer".
+#
+class SbpCloseCurrentViewCommand(SbpWindowCommand):
+    def run_cmd(self, util, n_windows=10):
+        window = sublime.active_window()
+        sorted = ViewState.sorted_views(window)
+        if len(sorted) > 0:
+            view = sorted.pop(0)
+            window.focus_view(view)
+            window.run_command('close')
+            if len(sorted) > 0:
+                window.focus_view(sorted[0])
 
 #
 # Exists only to support kill-line with multiple cursors.
