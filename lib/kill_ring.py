@@ -44,7 +44,7 @@ class KillRing:
     # Returns a sample of the first region of each entry in the kill ring, so that it can be
     # displayed to the user to allow them to choose it. The sample is truncated unfortunately.
     #
-    def get_popup_sample(self):
+    def get_popup_sample(self, view):
         self.add_external_clipboard()
 
         index = self.index
@@ -53,7 +53,7 @@ class KillRing:
         while True:
             kill = self.entries[index]
             if kill:
-                text = kill.get_sample()
+                text = kill.get_sample(view)
                 if text not in seen:
                     result.append((index, text))
                     seen[text] = True
@@ -142,10 +142,30 @@ class Kill(object):
                 self.regions[i] = regions[i] + self.regions[i]
         return True
 
-    def get_sample(self):
-        text = self.regions[0][0:256]
-        text = text.strip("\n \t").replace("\n", "\\n")
+    #
+    # Get a sample from the first cursor. This is trickier than it seems because we don't like the
+    # way sublime samples the string when displaying it, so we need to try to make sure it fits on
+    # the screen or at least comes close. We pass in the view to get the current approximate width
+    # of the screen in characters.
+    #
+    def get_sample(self, view):
+        # approximate number of chars we can show
+        max_chars = (view.viewport_extent()[0] / view.em_width()) * .9
+        text = self.regions[0]
+
+        # stripe newlines, spaces and tabs from the beginning and end
+        text = text.strip("\n \t")
+
+        # collapse multiple newlines into a single and convert to a glyph
+        text = re.sub("\n+", "↩", text)
+
+        # replace multiple white space with single spaces within the string
         text = re.sub("\\s\\s+", " ", text)
+
+        # truncate if necessary
+        if len(text) > max_chars:
+            half = int(max_chars / 2)
+            text = text[:half] + "..." + text[-half:] + "   "
         return text
 
     #

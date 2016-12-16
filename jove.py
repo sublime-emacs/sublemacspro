@@ -1070,6 +1070,8 @@ class SbpCloseCurrentViewCommand(SbpWindowCommand):
             window.run_command('close')
             if len(sorted) > 0:
                 window.focus_view(sorted[0])
+        else:
+            window.run_command('close')
 
 #
 # Exists only to support kill-line with multiple cursors.
@@ -1149,7 +1151,7 @@ class SbpYankCommand(SbpTextCommand):
 class SbpChooseAndYank(SbpTextCommand):
     def run_cmd(self, util):
         # items is an array of (index, text) pairs
-        items = kill_ring.get_popup_sample()
+        items = kill_ring.get_popup_sample(util.view)
 
         def on_done(idx):
             if idx >= 0:
