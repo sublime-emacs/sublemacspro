@@ -157,7 +157,9 @@ class Kill(object):
         text = text.strip("\n \t")
 
         # collapse multiple newlines into a single and convert to a glyph
-        text = re.sub("\n+", "↩", text)
+        # text = re.sub("\n+", "↩", text)
+        # text = re.sub("\n+", "\u23ce", text)
+        text = re.sub("\n+", "\u00b6", text)
 
         # replace multiple white space with single spaces within the string
         text = re.sub("\\s\\s+", " ", text)
@@ -165,7 +167,7 @@ class Kill(object):
         # truncate if necessary
         if len(text) > max_chars:
             half = int(max_chars / 2)
-            text = text[:half] + "..." + text[-half:] + "   "
+            text = text[:half] + "\u27FA" + text[-half:] + "   "
         return text
 
     #
