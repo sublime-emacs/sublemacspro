@@ -1426,7 +1426,7 @@ class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
 class SbpSwitchToViewCommand(SbpTextCommand):
     def run(self, util):
         self.window = sublime.active_window()
-        self.views = ViewState.sorted_views(self.window)
+        self.views = ViewState.sorted_views(self.window, True)
         self.roots = get_project_roots()
         self.original_view = self.window.active_view()
         self.highlight_count = 0

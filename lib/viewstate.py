@@ -48,9 +48,9 @@ class ViewState():
         return ViewState.current
 
     @classmethod
-    def sorted_views(cls, window):
-        views = window.views()
-        states = [cls.find_or_create(view) for view in window.views()]
+    def sorted_views(cls, window, group_only=False):
+        views = window.views_in_group(window.active_group()) if group_only else window.views()
+        states = [cls.find_or_create(view) for view in views]
         sorted_states = sorted(states, key=lambda state: state.touched, reverse=True)
         return [state.view for state in sorted_states]
 
