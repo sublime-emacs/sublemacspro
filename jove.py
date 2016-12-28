@@ -1283,7 +1283,7 @@ class AskCharOrStringBase(SbpTextCommand):
 
     def on_change(self, content):
         # on_change is notified immediate upon showing the panel before a key is even pressed
-        if self.mode == "word" or len(content) < 1:
+        if self.mode == "string" or len(content) < 1:
             return
         self.process_cursors(content)
 
@@ -1297,25 +1297,25 @@ class AskCharOrStringBase(SbpTextCommand):
             util.for_each_cursor(self.process_one, content)
 
     def on_done(self, content):
-        if self.mode == "word":
+        if self.mode == "string":
             self.process_cursors(content)
 
 #
-# Jump to char command inputs one character and jumps to it. If plus_one is True it goes just past
+# Jump to char command inputs one character and jumps to it. If include_char is True it goes just past
 # the character in question, otherwise it stops just before it.
 #
 class SbpJumpToCharCommand(AskCharOrStringBase):
-    def run_cmd(self, util, *args, plus_one=False, **kwargs):
+    def run_cmd(self, util, *args, include_char=True, **kwargs):
         if 'prompt' not in kwargs:
             kwargs['prompt'] = "Jump to char: "
         super(SbpJumpToCharCommand, self).run_cmd(util, *args, **kwargs)
-        self.plus_one = plus_one
+        self.include_char = include_char
 
     def process_one(self, cursor, ch):
         r = self.view.find(ch, cursor.end(), sublime.LITERAL)
         if r:
             p = r.begin()
-            if self.plus_one or not self.last_iteration:
+            if self.include_char or not self.last_iteration:
                 # advance one more if this is not the last_iteration or else we'll forever be stuck
                 # at the same position
                 p += 1
@@ -1358,20 +1358,51 @@ class SbpFinishMoveThenDeleteCommand(SbpTextCommand):
         helper.finish(util)
 
 #
-# Jump to char command inputs one character and jumps to it. If plus_one is True it goes just past
-# the character in question, otherwise it stops just before it.
+# Jump to string command inputs a string and jumps to it (case sensitive).
+# If include_string is True it jumps past the string being searched,
+# otherwise it stops just before it.
 #
-class SbpJumpToWordCommand(AskCharOrStringBase):
-    def run_cmd(self, util, *args, **kwargs):
-        super(SbpJumpToWordCommand, self).run_cmd(util, *args, prompt="Jump to word: ", **kwargs)
-        self.mode = "word"
+class SbpJumpToStringCommand(AskCharOrStringBase):
+    def run_cmd(self, util, *args, include_string=True, **kwargs):
+        if 'prompt' not in kwargs:
+            kwargs['prompt'] = "Jump to string: "
+        super(SbpJumpToStringCommand, self).run_cmd(util, *args, **kwargs)
+        self.mode = "string"
+        self.include_string = include_string
 
-    def process(self, cursor, word):
+    def process_one(self, cursor, word):
         r = self.view.find(word, cursor.end(), sublime.LITERAL)
         if r:
-            p = r.end()
+            if self.include_string is False:
+                # Jump to beginning of string
+                p = r.begin()
+            else:
+                # Jump to after the string
+                p = r.end()
             return p
         return None
+
+# Largely unchanged from zap to char command besides calling jump to string
+class SbpZapToStringCommand(SbpJumpToStringCommand):
+    is_kill_cmd = True
+    def run_cmd(self, util, **kwargs):
+        # prepare
+        self.helper = MoveThenDeleteHelper(util)
+        kwargs['prompt'] = "Zap to string: "
+        super(SbpZapToStringCommand, self).run_cmd(util, **kwargs)
+
+    def process_cursors(self, content):
+        # process cursors does all the work (of jumping) and then ...
+        super(SbpZapToStringCommand, self).process_cursors(content)
+
+        # Save the helper in view state and invoke a command to make use of it. We can't use it now
+        # because we don't have access to a valid edit object, because this function
+        # (process_cursors) is called asynchronously after the original text command has returned.
+        vs = ViewState.get(self.view)
+        vs.pending_move_then_delete_helper = self.helper
+
+        # ... we can finish what we started
+        self.window.run_command("sbp_finish_move_then_delete")
 
 class SbpConvertPlistToJsonCommand(SbpTextCommand):
     JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
