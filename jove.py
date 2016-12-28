@@ -521,14 +521,23 @@ class SbpMoveToParagraphCommand(SbpTextCommand):
     def run_cmd(self, util, direction=1):
         # Clear all selections
         s = self.view.sel()[0]
+        view = self.view
+        whitespace = '\t\x0b\x0c\r \n'
         if direction == 1:
             if s.begin() == 0:
                 return
-            point = paragraph.expand_to_paragraph(self.view, s.begin()-1).begin()
+            # Remove whitespace and new lines for moving forward and backward paragraphs
+            this_region_begin = s.begin() - 1
+            while((view.substr(this_region_begin) in whitespace) and (this_region_begin > 0)):
+                this_region_begin -= 1
+            point = paragraph.expand_to_paragraph(self.view, this_region_begin).begin()
         else:
             if s.end() == self.view.size():
                 return
-            point = paragraph.expand_to_paragraph(self.view, s.end()+1).end()
+            this_region_end = s.end() + 1
+            while((view.substr(this_region_end) in whitespace) and (this_region_end < self.view.size()-1)):
+                this_region_end += 1
+            point = paragraph.expand_to_paragraph(self.view, this_region_end).end()
 
         self.view.sel().clear()
         #Clear selections
