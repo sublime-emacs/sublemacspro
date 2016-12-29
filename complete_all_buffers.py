@@ -65,7 +65,6 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
                     regex = r'\b'
                 regex += re_prefix + word_re + r'+\b'
                 re_by_syntax[syntax_name] = regex
-                print("Using", regex, "for", syntax_name)
 
             view_words = self.extract_completions_from_view(v, regex, re_flags, point, view, seen)
             if len(view_words) == 0:

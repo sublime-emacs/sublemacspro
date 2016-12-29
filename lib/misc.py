@@ -512,7 +512,7 @@ class CmdUtil:
     # Run the specified command and args in the current view. If point is specified set point in the
     # view before running the command. Returns the resulting point.
     #
-    def run_command(self, cmd, args, point=None):
+    def run_command(self, cmd, args=None, point=None):
         view = self.view
         if point is not None:
             view.sel().clear()

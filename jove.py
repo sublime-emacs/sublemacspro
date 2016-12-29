@@ -45,9 +45,7 @@ class ViewWatcher(sublime_plugin.EventListener):
         if key == "i_search_active":
             return test(isearch_info_for(view) is not None)
         if key == "sbp_has_visible_mark":
-            if not settings_helper.get("sbp_cancel_mark_enabled", False):
-                return False
-            return CmdUtil(view).state.mark_ring.has_visible_mark() == operand
+            return CmdUtil(view).state.active_mark
         if key == "sbp_use_alt_bindings":
             return test(settings_helper.get("sbp_use_alt_bindings"))
         if key == "sbp_use_super_bindings":
@@ -56,6 +54,8 @@ class ViewWatcher(sublime_plugin.EventListener):
             return test(settings_helper.get("sbp_alt+digit_inserts") or not settings_helper.get("sbp_use_alt_bindings"))
         if key == 'sbp_has_prefix_argument':
             return test(CmdUtil(view).has_prefix_arg())
+        if key == "sbp_catchall":
+            return True
 
     def on_post_save(self, view):
         # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
@@ -1234,39 +1234,59 @@ class SbpTabCmdCommand(SbpTextCommand):
                     util.run_command("move_to", {"to": "bol", "extend": False})
                 util.run_command("reindent", {})
 
+#
+# A quit command which is basically a no-op unless there are multiple cursors, in which case it
+# tries to pick one end or the other to make the single selection.
+#
 class SbpQuitCommand(SbpTextCommand):
-    def run_cmd(self, util):
+    def run_cmd(self, util, favor_side="start"):
         window = self.view.window()
 
-        info = isearch_info_for(self.view)
-        if info:
-            info.quit()
-            return
-
-        for cmd in ['clear_fields', 'hide_overlay', 'hide_auto_complete', 'hide_panel']:
-            window.run_command(cmd)
-
-        if util.state.active_mark:
-            util.toggle_active_mark_mode()
-            return
-
-        # If there is a selection, set point to the end of it that is visible.
+        # If there is a selection or multiple cursors, set point to the end of it that is visible OR
+        # if neither the start nor end is visible, go to whichever is closest.
         s = list(self.view.sel())
-        if s:
+        if s and s[0].begin() != s[-1].end():
             start = s[0].a
             end = s[-1].b
 
-            if util.is_visible(end):
-                pos = end
-            elif util.is_visible(start):
-                pos = start
-            else:
-                # set point to the beginning of the line in the middle of the window
+            favor_start = favor_side == "start"
+            favor_end = favor_side == "end"
+
+            start_visible = util.is_visible(start)
+            end_visible = util.is_visible(end)
+
+            pos = None
+            if not (start_visible or end_visible):
+                # pick whichever side is closest
                 visible = self.view.visible_region()
-                top_line = self.view.rowcol(visible.begin())[0]
-                bottom_line = self.view.rowcol(visible.end())[0]
-                pos = self.view.text_point((top_line + bottom_line) / 2, 0)
-            util.set_selection(sublime.Region(pos))
+                if abs(visible.begin() - start) < abs(visible.end() - end):
+                    pos = start
+                else:
+                    pos = end
+            elif len(s) > 1:
+                if favor_start and start_visible:
+                    pos = start
+                elif favor_end and end_visible:
+                    pos = end
+                elif start_visible:
+                    pos = start
+                elif end_visible:
+                    pos = end
+            # default value for pos is the current end of the single selection
+            if pos is None:
+                pos = s[-1].b
+            else:
+                s = sublime.Region(pos)
+                util.set_selection(s)
+                util.ensure_visible(s)
+
+        #
+        # Cancel the mark if it's visible and we're supposed to.
+        #
+        if settings_helper.get("sbp_cancel_mark_enabled", False):
+            # if util.state.mark_ring.has_visible_mark():
+            util.run_command("sbp_cancel_mark")
+
 
 #
 # A class which knows how to ask for a single character and then does something with it.
