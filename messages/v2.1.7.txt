@@ -1,0 +1,119 @@
+Sublemacs Pro v2.1.7 Update
+=============================
+
+I-Search
+
+    Fixed a bug where using the previous search string would fail.
+
+    Added support for remembering previous searches. You can access previous searches with the up and
+    down arrow keys after you initiate a search.
+
+New: Switch to View Command
+
+    Implemented a better version of emacs "switch-to-buffer" which sorts the views by last used time, so
+    that you get the same experience as regular emacs. Also the top two views are switched so you can
+    easily switch back and forth between them:
+
+        {"keys": ["ctrl+x", "b"], "command": "sbp_switch_to_view"},
+
+    for the original emacs key binding.
+
+    There are optional arguments completion_components=2 and display_components=1 and they both
+    specify the number of components of the view's file name that are displayed. The default
+    configuration displays displays the view's file name and parent directory (the last 2 components
+    of the file path) on the top line and just the last component of the file name on the second
+    line. The completion is performed on the first line. If you set the value of display_components
+    to 0, the second line will be omitted entirely.
+
+New: All View Auto Complete
+
+    I have been using the All Autocomplete plugin for a while but occasionally couldn't understand why
+    strings were not being found. I discovered that there are two reasons: one is it has a built-in
+    limit of 20 views to search, and the other was that there are issues with some syntaxes which
+    prevent some symbols from being found. The issues with specific syntaxes can be considered bugs with
+    those syntaxes, but it doesn't help since I am not going to fix those syntaxes. So I have fixed both
+    those problems to the best of my ability by writing my own completion.
+
+    It is disabled by default.
+
+    To enable it, add the following plugin setting:
+
+        "sbp_use_internal_complete_all_buffers": true,
+
+
+Fixed bugs with Quit Command (ctrl+g)
+
+    The ctrl+g command was dismissing popups and panels AND disabling multi-cursors at the same
+    time, so it was not possible to just dismiss a popup without losing your cursors.
+
+    The command now also takes an optional parameter favor_side="start". This is used when there are
+    multiple cursors or a large selection. The possible values are "start" and "end" and it
+    specifies which side of the selection to use. In the case of multi-cursors, it means the first
+    or last cursor.
+
+    If the start AND the end of the current selection or the set of cursors is NOT currently
+    visible, the plugin automatically chooses the end closest to the current view.
+
+New: Close Current View
+
+    This command bound closes the current view but then selects the most recently used view (like
+    emacs) rather than one of the adjacent views.
+
+New: Close Older Views Commands
+
+    Now that this plugin keeps track of the last used time for views, it's possible to close the N
+    least recently used views. This is a good way to trim the current number of views if you feel
+    like things are getting out of hand.
+
+    Here's a possible binding.
+
+    {"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows": 5}},
+
+Improve: Choose and Yank Command
+
+    The choose and yank command now does a better job of picking the sample text from each kill so
+    that they display better especially when the text is wider than your window.
+
+    Also this command pulls in the external clipboard before showing you the choices. It used to be
+    the case that only the yank command pulled in the external clipboard.
+
+Improve: Move To Paragraph Command
+
+    This command has been improved in the way it moves over paragraphs.
+
+    It is also now multi-cursor aware.
+
+    WARNING: The direction argument was reversed from what it was supposed to be so if you have your
+    own bindings for this command you will have to change direction=1 to direction=-1 and vice
+    versa.
+
+New: Jump to Char/String and Zap to Char/String Commands
+
+    These try to mimic the emacs jump and zap commands. Our implementation is multi-cursor aware. An
+    optional argument decides whether the character your jump to is included (e.g., jumped over) or
+    not. The same applies for the zap commands.
+
+    Here are some example bindings:
+
+
+    {"keys": ["ctrl+j", "c"], "command": "sbp_jump_to_char", "args": {"include_char": true}},
+    {"keys": ["ctrl+j", "C"], "command": "sbp_jump_to_char", "args": {"include_char": false}},
+    {"keys": ["ctrl+j", "s"], "command": "sbp_jump_to_string", "args": {"include_char": true}},
+    {"keys": ["ctrl+c", "ctrl+j", "S"], "command": "sbp_jump_to_string", "args": {"include_char": false}},
+    {"keys": ["ctrl+c", "ctrl+z", "c"], "command": "sbp_zap_to_char", "args": {"include_char": true}},
+    {"keys": ["ctrl+c", "ctrl+z", "C"], "command": "sbp_zap_to_char", "args": {"include_char": false}},
+
+New: Choose and Yank Register Command
+
+    There is now a choose and yank feature for text registers that mirrors the choose and yank
+    command for the kill ring.
+
+New: Choose and Yank Point Command
+
+    There is now a choose and yank feature for point registers that mirrors the choose and yank
+    command for the kill ring.
+
+
+Credits
+
+    Many thanks to excetara2 implementing many of these features and making loads of suggestions.

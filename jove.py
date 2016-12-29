@@ -517,39 +517,35 @@ class SbpMoveSexprCommand(SbpTextCommand):
 # Move to paragraph depends on the functionality provided by the default
 # plugin in ST. So for now we use this.
 class SbpMoveToParagraphCommand(SbpTextCommand):
-
     def run_cmd(self, util, direction=1):
-        # Clear all selections
-        s = self.view.sel()[0]
         view = self.view
-        whitespace = '\t\x0b\x0c\r \n'
-        if direction == 1:
-            if s.begin() == 0:
-                return
-            # Remove whitespace and new lines for moving forward and backward paragraphs
-            this_region_begin = s.begin() - 1
-            while((view.substr(this_region_begin) in whitespace) and (this_region_begin > 0)):
-                this_region_begin -= 1
-            point = paragraph.expand_to_paragraph(self.view, this_region_begin).begin()
-        else:
-            if s.end() == self.view.size():
-                return
-            this_region_end = s.end() + 1
-            while((view.substr(this_region_end) in whitespace) and (this_region_end < self.view.size()-1)):
-                this_region_end += 1
-            point = paragraph.expand_to_paragraph(self.view, this_region_end).end()
 
-        self.view.sel().clear()
-        #Clear selections
+        count = util.get_count() * direction
+        forward = count > 0
+        count = abs(count)
 
-        if point < 0:
-            point = 0
+        def advance(cursor):
+            whitespace = '\t\x0b\x0c\r \n'
+            if not forward:
+                # Remove whitespace and new lines for moving forward and backward paragraphs
+                this_region_begin = max(0, cursor.begin() - 1)
+                while this_region_begin > 0 and view.substr(this_region_begin) in whitespace:
+                    this_region_begin -= 1
+                point = paragraph.expand_to_paragraph(view, this_region_begin).begin()
+            else:
+                this_region_end = cursor.end()
+                limit = self.view.size() - 1
+                while this_region_end < limit and view.substr(this_region_end) in whitespace:
+                    this_region_end += 1
+                point = paragraph.expand_to_paragraph(self.view, this_region_end).end()
 
-        if point > self.view.size():
-            point = self.view.size()
+            return sublime.Region(point)
 
-        self.view.sel().add(sublime.Region(point, point))
-        self.view.show(self.view.sel()[0].begin())
+        for c in range(count):
+            util.for_each_cursor(advance)
+
+        s = view.sel()
+        util.ensure_visible(s[-1] if forward else s[0])
 
 #
 # A class which implements all the hard work of performing a move and then delete/kill command. It

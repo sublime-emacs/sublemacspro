@@ -7,7 +7,7 @@ from sublemacspro.lib.misc import *
 # ones currently loaded. We sort the files by last access hopefully like emacs.
 #
 class SbpSwitchToViewCommand(SbpTextCommand):
-    def run(self, util, current_group_only=False, preview=True, completion_components=4, display_components=0):
+    def run(self, util, current_group_only=False, preview=True, completion_components=2, display_components=1):
         self.preview = preview
         self.completion_components = completion_components
         self.display_components = display_components
