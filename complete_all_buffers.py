@@ -6,11 +6,11 @@ from sublemacspro.lib.misc import *
 # Called when the system is initialized.
 #
 def plugin_loaded():
-    global all_complete_extra_word_characters, all_complete_separators, settings_helper
+    global extra_word_characters, separator_characters, settings_helper
 
     settings_helper = SettingsHelper()
-    all_complete_extra_word_characters = settings_helper.get("sbp_syntax_specific_extra_word_characters")
-    all_complete_separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
+    extra_word_characters = settings_helper.get("sbp_syntax_specific_extra_word_characters")
+    separator_characters = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
 
 #
 # Switch buffer command that sorts buffers by last access and displays file name as well.
@@ -53,13 +53,13 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
             syntax_name = v.settings().get("syntax")
             regex = re_by_syntax.get(syntax_name, None)
             if regex is None:
-                extra = all_complete_extra_word_characters.get(syntax_name) or ""
+                extra = extra_word_characters.get(syntax_name) or ""
                 word_re = r'[\w' + extra + r']'
                 re_prefix = (word_re + '*').join(re.escape(p) for p in prefix)
 
                 # If our starting character is not considered a word character, we cannot use '\b'
                 # to start this regex.
-                if prefix[0] in all_complete_separators:
+                if prefix[0] in separator_characters:
                     regex = ""
                 else:
                     regex = r'\b'
@@ -80,10 +80,10 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
                 if v == view:
                     trigger = word + "\t[HERE]"
                 else:
-                    trigger = "%s\t(%s)" % (word, file_name)
+                    trigger = "%s\t%s" % (word, file_name)
                 words.append((trigger, word.replace("$", "\\$")))
         print("COMPLETE in", time.time() - start)
-        return words
+        return (words, sublime.INHIBIT_WORD_COMPLETIONS)
 
     def extract_from_view(self, view, prefix, point):
         return view.extract_completions(prefix, point)

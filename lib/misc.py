@@ -44,9 +44,9 @@ def get_project_roots():
 
 #
 # Returns the relative path for the specified file name. The roots are supplied by the
-# get_project_roots function, which sorts themn appropriately for this function.
+# get_project_roots function, which sorts them appropriately for this function.
 #
-def get_relative_path(roots, file_name):
+def get_relative_path(roots, file_name, n_components=2):
     if file_name is not None:
         if roots is not None:
             for root in roots:
@@ -54,7 +54,7 @@ def get_relative_path(roots, file_name):
                     file_name = file_name[len(root) + 1:]
                     break
         # show (no more than the) last 2 components of the matching path name
-        return os.path.sep.join(file_name.split(os.path.sep)[-2:])
+        return os.path.sep.join(file_name.split(os.path.sep)[-n_components:])
     else:
         return "<no file>"
 
