@@ -60,7 +60,7 @@ class SbpSwitchToViewCommand(SbpTextCommand):
 
     def get_path(self, view):
         if view.is_scratch():
-            return ''
+            return view.name() or ""
 
         if not view.file_name():
             return '<unsaved>'
