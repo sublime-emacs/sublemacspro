@@ -1,13 +1,16 @@
 
 {
+  /* kill ring size */
+  "sbp_kill_ring_size": 64,
+
   /* Allows to always switch to active mark mode */
-  "sbp_active_mark_mode" : false,
+  "sbp_active_mark_mode": false,
 
   /* Regular expression for word navigation */
-  "sbp_word_separators" : "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?",
+  "sbp_word_separators": "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?",
 
   /* Regular expression for sexp navigation */
-  "sbp_sexpr_separators" : "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?",
+  "sbp_sexpr_separators": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?",
 
   /* if true, sbp_cancel_mark command will is enabled */
   "sbp_cancel_mark_enabled": true,

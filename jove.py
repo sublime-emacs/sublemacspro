@@ -8,7 +8,7 @@ import sublime, sublime_plugin
 from copy import copy
 
 from sublemacspro.lib.misc import *
-from sublemacspro.lib.kill_ring import *
+from sublemacspro.lib import kill_ring
 from sublemacspro.lib.isearch import *
 
 import Default.paragraph as paragraph
