@@ -49,7 +49,7 @@
     {"keys": ["ctrl+alt+f"], "command": "sbp_move_sexpr", "args": {"direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["alt+b"], "command": "sbp_move_word", "args": {"direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+alt+b"], "command": "sbp_move_sexpr", "args": {"direction": -1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
-    {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+c"], "command": "sbp_change_case", "args": {"direction": 1, "mode": "title"}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
     {"keys": ["alt+u"], "command": "sbp_change_case", "args": {"direction": 1, "mode": "upper"},
         "context": [ {"key": "sbp_use_alt_bindings"}]
@@ -263,8 +263,8 @@
     {"keys": ["shift+alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": false},
         "context": [{"key": "sbp_use_alt_bindings"}]
     },
-    {"keys": ["ctrl+x", "z"], "command": "sbp_zap_to_string", "args": {"include_char": true}},
-    {"keys": ["ctrl+x", "Z"], "command": "sbp_zap_to_string", "args": {"include_char": false}},
+    {"keys": ["ctrl+x", "z"], "command": "sbp_zap_to_string", "args": {"include_string": true}},
+    {"keys": ["ctrl+x", "Z"], "command": "sbp_zap_to_string", "args": {"include_string": false}},
 
     {"keys": ["alt+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "k"], "command": "sbp_close_current_view"},

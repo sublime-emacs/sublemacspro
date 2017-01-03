@@ -6,15 +6,20 @@
     {"caption": "Sublemacs - Forward S-expression", "command": "sbp_move_sexpr", "args": {"direction": 1}},
     {"caption": "Sublemacs - Backward Word", "command": "sbp_move_word", "args": {"direction": -1}},
     {"caption": "Sublemacs - Backward S-expression", "command": "sbp_move_sexpr", "args": {"direction": -1}},
-    {"caption": "Sublemacs - Capitalize Word", "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"}},
-    {"caption": "Sublemacs - Uppercase Word", "command": "sbp_case_word", "args": {"direction": 1, "mode": "upper"}},
-    {"caption": "Sublemacs - Lowercase Word", "command": "sbp_case_word", "args": {"direction": 1, "mode": "lower"}},
+    {"caption": "Sublemacs - Capitalize Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "title"}},
+    {"caption": "Sublemacs - Uppercase Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "upper"}},
+    {"caption": "Sublemacs - Lowercase Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "lower"}},
+    {"caption": "Sublemacs - Convert Under_scores <--> camelCase", "command": "sbp_change_case", "args": {"use_region": true, "mode": "camel"}},
+    {"caption": "Sublemacs - Convert camelCase <--> Under_scores", "command": "sbp_change_case", "args": {"use_region": true, "mode": "underscore"}},
 
     {"caption": "Sublemacs - Go to End of File", "command": "sbp_move_to", "args": {"to": "eof"}},
     {"caption": "Sublemacs - Go to Beginning of File", "command": "sbp_move_to", "args": {"to": "bof"}},
     {"caption": "Sublemacs - Go to End of Pane", "command": "sbp_move_to", "args": {"to": "eow"}},
     {"caption": "Sublemacs - Go to Beginning of Pane", "command": "sbp_move_to", "args": {"to": "bow"}},
     {"caption": "Sublemacs - Go to Line", "command": "sbp_goto_line"},
+
+    {"caption": "Sublemacs - Move Paragraph Backward", "command": "sbp_move_to_paragraph", "args": {"direction": -1}},
+    {"caption": "Sublemacs - Move Paragraph Forward", "command": "sbp_move_to_paragraph", "args": {"direction": 1}},
 
     {"caption": "Sublemacs - Open line", "command": "sbp_open_line"},
     {"caption": "Sublemacs - Center View Around Point", "command": "sbp_center_view"},
@@ -24,6 +29,7 @@
     //
     {"caption": "Sublemacs - Set Emacs-Style Mark", "command": "sbp_set_mark"},
     {"caption": "Sublemacs - Swap Point and Mark", "command": "sbp_swap_point_and_mark"},
+    {"caption": "Sublemacs - Toggle Mark Highlighting", "command": "sbp_swap_point_and_mark", "args": {"toggle_active_mark_mode": true}},
     {"caption": "Sublemacs - Kill to End of Line", "command": "sbp_kill_line"},
     {"caption": "Sublemacs - Kill Region", "command": "sbp_kill_region"},
     {"caption": "Sublemacs - Copy Region", "command": "sbp_kill_region", "args": {"is_copy": true}},
@@ -33,6 +39,7 @@
     {"caption": "Sublemacs - Kill Word Forward", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": 1}},
     {"caption": "Sublemacs - Kill Word Backward", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": -1}},
     {"caption": "Sublemacs - Kill S-expression", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}},
+    {"caption": "Sublemacs - Kill S-expression Backward", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": -1}},
 
     {"caption": "Sublemacs - Delete White Space", "command": "sbp_delete_white_space"},
 
@@ -59,10 +66,14 @@
 
     {"caption": "Sublemacs - Split Window Horizontal", "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
     {"caption": "Sublemacs - Split Window Vertical", "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
-    {"caption": "Sublemacs - Grow Window", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": 1}},
-    {"caption": "Sublemacs - Shrink Window", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "amount": -1}},
+    {"caption": "Sublemacs - Grow Window Vertical", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
+    {"caption": "Sublemacs - Shrink Window Vertical", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
+    {"caption": "Sublemacs - Grow Window Horizontal", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
+    {"caption": "Sublemacs - Shrink Window Horizontal", "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
     {"caption": "Sublemacs - Destroy Window", "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
     {"caption": "Sublemacs - Destroy Other Windows", "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
+    {"caption": "Sublemacs - Close Current View", "command": "sbp_close_current_view"},
+    {"caption": "Sublemacs - Destroy Older Views", "command": "sbp_close_older_views", "args": {"n_windows": 5}},
     {"caption": "Sublemacs - Go to Next Window", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"caption": "Sublemacs - Go to Previous Window", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
     {"caption": "Sublemacs - Previous Tab", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},
@@ -70,13 +81,34 @@
 
     {"caption": "Sublemacs - Quit All Open Panels, Overlays and Selections", "command": "sbp_quit"},
 
+    // Jump and Zapping commands
     {"caption": "Sublemacs - Jump To Char", "command": "sbp_jump_to_char", "args": {"include_char": true}},
     {"caption": "Sublemacs - Jump Up To Char", "command": "sbp_jump_to_char", "args": {"include_char": false}},
     {"caption": "Sublemacs - Jump To String", "command": "sbp_jump_to_string", "args": {"include_string": true}},
     {"caption": "Sublemacs - Jump Up To String", "command": "sbp_jump_to_string", "args": {"include_string": false}},
     {"caption": "Sublemacs - Zap To Char", "command": "sbp_zap_to_char", "args": {"include_char": true}},
     {"caption": "Sublemacs - Zap Up To Char", "command": "sbp_zap_to_char", "args": {"include_char": false}},
-    {"caption": "Sublemacs - Zap To String", "command": "sbp_zap_to_string", "args": {"include_char": true}},
-    {"caption": "Sublemacs - Zap Up To String", "command": "sbp_zap_to_string", "args": {"include_char": false}},
+    {"caption": "Sublemacs - Zap To String", "command": "sbp_zap_to_string", "args": {"include_string": true}},
+    {"caption": "Sublemacs - Zap Up To String", "command": "sbp_zap_to_string", "args": {"include_string": false}},
+
+    // Rectangle and Register commands
+    {"caption": "Sublemacs - Insert Rectangle", "command": "sbp_rectangle_insert"},
+    {"caption": "Sublemacs - Delete Rectangle", "command": "sbp_rectangle_delete"},
+    {"caption": "Sublemacs - Store Text Register", "command": "sbp_register_store"},
+    {"caption": "Sublemacs - Insert From Register", "command": "sbp_register_insert"},
+    {"caption": "Sublemacs - Store Point Register", "command": "sbp_point_to_register"},
+    {"caption": "Sublemacs - Jump To Point Register", "command": "sbp_point_from_register"},
+
+    // Shift region commands
+    {"caption": "Sublemacs - Shift Region Backward (Left)", "command": "sbp_shift_region", "args": {"direction": -1}},
+    {"caption": "Sublemacs - Shift Region Forward (Right)", "command": "sbp_shift_region", "args": {"direction": 1}},
+
+    // Switch to view command
+    {"caption": "Sublemacs - Switch To View", "command": "sbp_switch_to_view"},
+
+    // Choose and Yank Kill Ring / Choose Text and Point Registers
+    {"caption": "Sublemacs - Choose and Yank Kill Ring", "command": "sbp_choose_and_yank"},
+    {"caption": "Sublemacs - Choose and Insert Text Register", "command": "sbp_choose_and_yank_register"},
+    {"caption": "Sublemacs - Choose and Jump To Point Register", "command": "sbp_choose_and_yank_point"},
 
 ]
