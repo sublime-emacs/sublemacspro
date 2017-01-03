@@ -1255,12 +1255,18 @@ class SbpQuitCommand(SbpTextCommand):
     def run_cmd(self, util, favor_side="start"):
         window = self.view.window()
 
+        # get all the regions
+        regions = list(self.view.sel())
+        if not util.all_empty_regions(regions):
+            util.make_cursors_empty()
+            util.toggle_active_mark_mode(False)
+            return
+
         # If there is a selection or multiple cursors, set point to the end of it that is visible OR
         # if neither the start nor end is visible, go to whichever is closest.
-        s = list(self.view.sel())
-        if s and s[0].begin() != s[-1].end():
-            start = s[0].a
-            end = s[-1].b
+        if regions and regions[0].begin() != regions[-1].end():
+            start = regions[0].a
+            end = regions[-1].b
 
             favor_start = favor_side == "start"
             favor_end = favor_side == "end"
@@ -1276,7 +1282,7 @@ class SbpQuitCommand(SbpTextCommand):
                     pos = start
                 else:
                     pos = end
-            elif len(s) > 1:
+            elif len(regions) > 1:
                 if favor_start and start_visible:
                     pos = start
                 elif favor_end and end_visible:
@@ -1287,11 +1293,12 @@ class SbpQuitCommand(SbpTextCommand):
                     pos = end
             # default value for pos is the current end of the single selection
             if pos is None:
-                pos = s[-1].b
+                pos = regions[-1].b
             else:
-                s = sublime.Region(pos)
-                util.set_selection(s)
-                util.ensure_visible(s)
+                regions = sublime.Region(pos)
+                util.set_selection(regions)
+                util.ensure_visible(regions)
+            return
 
         #
         # Cancel the mark if it's visible and we're supposed to.
