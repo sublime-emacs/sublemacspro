@@ -21,6 +21,18 @@ settings_helper = None
 default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
 default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
 
+bracket_highlighter_installed = None
+
+def plugin_loaded():
+    global bracket_highlighter_installed
+    if bracket_highlighter_installed == None:
+        try:
+            import BracketHighlighter.bh_core as bh_core
+        except ImportError as e:
+            bracket_highlighter_installed = False
+        else:
+            bracket_highlighter_installed = True
+
 def pluralize(string, count, es="s"):
     if count == 1:
         return "%d %s" % (count, string)
@@ -157,14 +169,22 @@ class CmdUtil:
         self.view.set_status(JOVE_STATUS, msg)
 
     #
-    # Returns point. Point is where the cursor is in the possibly extended region. If there are multiple cursors it
-    # uses the first one in the list.
+    # Returns point. Point is where the cursor is in the possibly extended region. If there are
+    # multiple cursors it uses the first one in the list.
     #
     def get_point(self):
         sel = self.view.sel()
         if len(sel) > 0:
             return sel[0].b
         return -1
+
+    #
+    # Sets the point to the specified value. This will erase multiple cursors and replace with just
+    # one.
+    def set_point(self, point):
+        selection = self.view.sel()
+        selection.clear()
+        selection.add(sublime.Region(point))
 
     #
     # This no-op ensures the next/prev line target column is reset to the new locations.
@@ -482,31 +502,82 @@ class CmdUtil:
     # around brackets or quotes.
     #
     def to_other_end(self, point, direction):
-        brac = "([{"
-        kets = ")]}"
+        #
+        # Original but broken version of this code which uses sublime functions to do bracket
+        # and string matching.
+        #
+        def goto_orig():
+            brac = "([{"
+            kets = ")]}"
+            view = self.view
+            scope_name = view.scope_name(point)
+            if scope_name.find("comment") >= 0:
+                return None
 
-        view = self.view
-        scope_name = view.scope_name(point)
-        if scope_name.find("comment") >= 0:
+            ch = view.substr(point)
+            if direction > 0 and view.substr(point) in brac:
+                return self.run_command("move_to", {"to": "brackets"}, point=point)
+            elif direction < 0 and view.substr(point - 1) in kets:
+                # this can be tricky due to inconsistencies with sublime bracket matching
+                # we need to handle "))" and "()[0]" when between the ) and [
+                if point < view.size() and view.substr(point) in brac:
+                    # go inside the bracket (point - 1), then to the inside of the match, then back one more
+                    return self.run_command("move_to", {"to": "brackets"}, point=point - 1) - 1
+                else:
+                    return self.run_command("move_to", {"to": "brackets"}, point=point)
+
+            # otherwise it's a string
+            start = point + direction
+            self.run_command("expand_selection", {"to": "scope"}, point=start)
+            r = view.sel()[0]
+            return r.end() if direction > 0 else r.begin()
+
+        #
+        # A version which uses the bracket highlighter package when available.
+        #
+        def goto_bracket_highlighter():
+            brac = "([{\"\'"
+            kets = ")]}\"\'"
+            view = self.view
+            scope_name = view.scope_name(point)
+            if scope_name.find("comment") >= 0:
+                # we don't handle this brackets inside comments so just keep going
+                return None
+
+            if direction > 0:
+                ch = view.substr(point)
+                index = brac.find(ch)
+                if view.substr(point + 1) == kets[index]:
+                    # right next to the matching pair - bracket highlight doesn't handle this well
+                    return point + 2
+                self.set_point(point + 1)
+                self.run_command("bh_key", {
+                                     "lines": True, "no_block_mode": None, "no_outside_adj": None,
+                                     "plugin": {
+                                         "args": {"select": "right"},
+                                         "command": "bh_modules.bracketselect", "type": ["__all__"]
+                                     }
+                                 })
+                return self.get_point() + 1
+            elif direction < 0:
+                ch = view.substr(point - 1)
+                index = kets.find(ch)
+                if view.substr(point - 2) == brac[index]:
+                    # right next to the matching pair - bracket highlight doesn't handle this well
+                    return point - 2
+                self.set_point(point - 1)
+                self.run_command("bh_key", {
+                                     "lines": True, "no_block_mode": None, "no_outside_adj": None,
+                                     "plugin": {
+                                         "args": {"select": "left"},
+                                         "command": "bh_modules.bracketselect", "type": ["__all__"]
+                                     }
+                                 })
+                return self.get_point() - 1
+
             return None
 
-        ch = view.substr(point)
-        if direction > 0 and view.substr(point) in brac:
-            return self.run_command("move_to", {"to": "brackets"}, point=point)
-        elif direction < 0 and view.substr(point - 1) in kets:
-            # this can be tricky due to inconsistencies with sublime bracket matching
-            # we need to handle "))" and "()[0]" when between the ) and [
-            if point < view.size() and view.substr(point) in brac:
-                # go inside the bracket (point - 1), then to the inside of the match, then back one more
-                return self.run_command("move_to", {"to": "brackets"}, point=point - 1) - 1
-            else:
-                return self.run_command("move_to", {"to": "brackets"}, point=point)
-
-        # otherwise it's a string
-        start = point + direction
-        self.run_command("expand_selection", {"to": "scope"}, point=start)
-        r = view.sel()[0]
-        return r.end() if direction > 0 else r.begin()
+        return goto_bracket_highlighter() if bracket_highlighter_installed else goto_orig()
 
     #
     # Run the specified command and args in the current view. If point is specified set point in the

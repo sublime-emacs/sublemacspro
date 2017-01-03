@@ -13,8 +13,6 @@ def plugin_loaded():
     # kill ring size - default 64 entries
     kill_ring_size = settings_helper.get("sbp_kill_ring_size", 64)
 
-    print("Kill ring initialized: size =", kill_ring_size)
-
     entries = [None] * kill_ring_size
     kill_index = 0
 
@@ -99,6 +97,8 @@ def add_external_clipboard():
 # of regions doesn't match, we either truncate or duplicate the regions to make a match.
 #
 def get_current(n_regions, pop):
+    global pop_index
+
     clipboard = result = None
     if pop == 0:
         index = kill_index
