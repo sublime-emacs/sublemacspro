@@ -60,6 +60,8 @@
 
     {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_change_case", "args": {"mode": "upper", "use_region": true}},
     {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_change_case", "args": {"mode": "lower", "use_region": true}},
+    {"keys": ["ctrl+x", "ctrl+super+u"], "command": "sbp_change_case", "args": {"mode": "underscore", "use_region": true}},
+    {"keys": ["ctrl+x", "ctrl+super+c"], "command": "sbp_change_case", "args": {"mode": "camel", "use_region": true}},
 
     {"keys": ["ctrl+alt+["], "command": "sbp_move_to_paragraph", "args": {"direction": -1},
         "context": [ {"key": "sbp_use_alt_bindings"}]

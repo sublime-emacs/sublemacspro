@@ -365,6 +365,18 @@ class SbpMoveBackToIndentation(SbpTextCommand):
 #
 class SbpChangeCaseCommand(SbpTextCommand):
     should_reset_target_column = True
+    re_to_underscore = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
+    re_to_camel = re.compile(r'(?!^)_([a-zA-Z])')
+
+    # re_to_camel = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
+
+    def underscore(self, text):
+        s1 = self.re_to_underscore.sub(r'_\1', text).lower()
+        return s1
+
+    def camel(self, text):
+        s1 = self.re_to_camel.sub(lambda m: m.group(1).upper(), text)
+        return s1
 
     def run_cmd(self, util, mode, use_region=False, direction=1):
         view = self.view
@@ -409,16 +421,31 @@ class SbpChangeCaseCommand(SbpTextCommand):
         elif mode == "title":
             for r in selection:
                 util.view.replace(util.edit, r, view.substr(r).title())
+        elif mode in ("underscore", "camel"):
+            fcn = self.underscore if mode == "underscore" else self.camel
+            for r, s in zip(regions, selection):
+                orig = view.substr(s)
+                replace = fcn(orig)
+                util.view.replace(util.edit, s, replace)
+                # if the point > mark, we need to adjust point forward by the difference in size
+                # between the original and the replacement
+                if s.b > s.a:
+                    if r.a == r.b:
+                        r.a = r.b = r.a + len(replace) - len(orig)
+                    else:
+                        r.b += len(replace) - len(orig)
         else:
             print("Unknown case setting:", mode)
             return
 
         if empty and count > 0:
+            # was a word-based execution
             for r in new_regions:
                 r.a = r.b = r.end()
             selection.clear()
             selection.add_all(new_regions)
         else:
+            # we the selection or the emacs regions
             selection.clear()
             selection.add_all(regions)
 
@@ -435,7 +462,6 @@ class SbpMoveSexprCommand(SbpTextCommand):
 
     def run_cmd(self, util, direction=1):
         view = self.view
-
 
         separators = settings_helper.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 

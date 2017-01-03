@@ -117,8 +117,29 @@ Fix: Upper/Lower Case Region Command
 
     The C-X C-L/C-U commands to perform upper and lower case changes to the emacs region(s) were not
     working at all. They are all based on the same command, where you specify arguments for the case
-    change (e.g., case="upper"), the mode (e.g., mode="word" or mode="region"). But when the mode is
+    change (e.g., mode="upper", mode="lower") and whether we're required to operate on a region
+    (use_region="true"). When use_region is true, there must be a visible selection or selections,
+    OR, there must be an emacs region or regions (e.g., a region defined by mark and point).
+
+    The name of the command has changed so if you have your own bindings the new command name and
+    bindings are:
+
+    {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"},
+        "context": [ {"key": "sbp_use_alt_bindings"}]
+    },
+
+    {"keys": ["alt+u"], "command": "sbp_change_case", "args": {"direction": 1, "mode": "upper"},
+        "context": [ {"key": "sbp_use_alt_bindings"}]
+    },
+    {"keys": ["alt+l"], "command": "sbp_change_case", "args": {"direction": 1, "mode": "lower"},
+        "context": [ {"key": "sbp_use_alt_bindings"}]
+    },
+
+    {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_change_case", "args": {"mode": "upper", "use_region": true}},
+    {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_change_case", "args": {"mode": "lower", "use_region": true}},
+
+
 
 Credits
 
-    Many thanks to excetara2 implementing many of these features and making loads of suggestions.
+    Many thanks to excetara2 for implementing many of these features and making loads of suggestions.
