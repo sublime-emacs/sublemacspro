@@ -36,8 +36,8 @@
 
     {"caption": "Sublemacs - Delete White Space", "command": "sbp_delete_white_space"},
 
-    {"caption": "Sublemacs - I-Search Forward", "command": "sbp_inc_search", "args": {"forward": true, "regex": false}},
-    {"caption": "Sublemacs - I-Search Backward", "command": "sbp_inc_search", "args": {"forward": false, "regex": false}},
+    {"caption": "Sublemacs - I-Search Forward", "command": "sbp_inc_search_from_menu", "args": {"forward": true, "regex": false}},
+    {"caption": "Sublemacs - I-Search Backward", "command": "sbp_inc_search_from_menu", "args": {"forward": false, "regex": false}},
     {"caption": "Sublemacs - I-Search Append From Cursor", "command": "sbp_inc_search", "args": {"cmd": "append_from_cursor"}},
     {"caption": "Sublemacs - I-Search Keep and Next", "command": "sbp_inc_search", "args": {"cmd": "next", "keep": true}},
     {"caption": "Sublemacs - I-Search Skip and Next", "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": true}},
@@ -69,7 +69,4 @@
     {"caption": "Sublemacs - Next Tab", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 
     {"caption": "Sublemacs - Quit All Open Panels, Overlays and Selections", "command": "sbp_quit"},
-
-    {"caption": "Sublemacs - Convert PLIST to JSON", "command": "sbp_convert_plist_to_json"},
-    {"caption": "Sublemacs - Convert JSON to PLIST", "command": "sbp_convert_json_to_plist"}
 ]

@@ -41,7 +41,7 @@ New: All View Auto Complete
         "sbp_use_internal_complete_all_buffers": true,
 
 
-Fixed bugs with Quit Command (ctrl+g)
+Fix: Quit Command (ctrl+g)
 
     The ctrl+g command was dismissing popups and panels AND disabling multi-cursors at the same
     time, so it was not possible to just dismiss a popup without losing your cursors.
@@ -113,6 +113,11 @@ New: Choose and Yank Point Command
     There is now a choose and yank feature for point registers that mirrors the choose and yank
     command for the kill ring.
 
+Fix: Upper/Lower Case Region Command
+
+    The C-X C-L/C-U commands to perform upper and lower case changes to the emacs region(s) were not
+    working at all. They are all based on the same command, where you specify arguments for the case
+    change (e.g., case="upper"), the mode (e.g., mode="word" or mode="region"). But when the mode is
 
 Credits
 

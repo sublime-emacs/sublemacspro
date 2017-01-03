@@ -358,73 +358,39 @@ class SbpMoveBackToIndentation(SbpTextCommand):
         util.for_each_cursor(to_indentation)
 
 #
-# Advance to the beginning (or end if going backward) word unless already positioned at a word
-# character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
-# the argument count.
+# Perform the uppercase/lowercase/capitalize commands on all the current cursors. If use_region is
+# true, the command will be applied to the regions, not to words. The regions are either existing
+# visible selection, OR, the emacs region(s) which might not be visible. If there are no non-empty
+# regions and use_region=True, this command is a no-op.
 #
-class SbpToWordCommand(SbpTextCommand):
+class SbpChangeCaseCommand(SbpTextCommand):
     should_reset_target_column = True
 
-    def run_cmd(self, util, direction=1):
-        view = self.view
-
-        separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
-        forward = direction > 0
-
-        def to_word(cursor):
-            point = cursor.b
-            if forward:
-                if not util.is_word_char(point, True, separators):
-                    point = view.find_by_class(point, True, sublime.CLASS_WORD_START, separators)
-            else:
-                if not util.is_word_char(point, False, separators):
-                    point = view.find_by_class(point, False, sublime.CLASS_WORD_END, separators)
-
-            return sublime.Region(point, point)
-
-        util.for_each_cursor(to_word)
-
-#
-# Change the case of the current region. Not sure this is ... multi-cursor/region aware.
-#
-class SbpCaseRegion(SbpTextCommand):
-
-    def run_cmd(self, util, mode):
-        region = util.get_regions()
-        text = util.view.substr(region)
-        if mode == "upper":
-            text = text.upper()
-        elif mode == "lower":
-            text = text.lower()
-        else:
-            util.set_status("Unknown Mode")
-            return
-
-        util.view.replace(util.edit, region, text)
-
-
-#
-# Perform the uppercase/lowercase/capitalize commands on all the current cursors.
-#
-class SbpCaseWordCommand(SbpTextCommand):
-    should_reset_target_column = True
-
-    def run_cmd(self, util, mode, direction=1):
-        # This works first by finding the bounds of the operation by executing a forward-word
-        # command. Then it performs the case command.
+    def run_cmd(self, util, mode, use_region=False, direction=1):
         view = self.view
         count = util.get_count(True)
 
-        # copy the cursors
+        # If cursors are not empty (e.g., visible marks) then we use the selection and we're in
+        # region mode. If the cursors are empty but the emacs regions are not, we use them as long
+        # as mode="regions". Otherwise, we generate regions by applying a word motion command.
         selection = view.sel()
         regions = list(selection)
-
-        # If the regions are all empty, we just move from where we are to where we're going. If
-        # there are regions, we use the regions and just do the cap, lower, upper within that
-        # region. That's different from Emacs but I think this is better than emacs.
         empty = util.all_empty_regions(regions)
+        if empty and use_region:
+            emacs_regions = util.get_regions()
+            if emacs_regions and not util.all_empty_regions(emacs_regions):
+                empty = False
+                selection.clear()
+                selection.add_all(emacs_regions)
 
         if empty:
+            if use_region:
+                return
+
+            # This works first by finding the bounds of the operation by executing a forward-word
+            # command. Then it performs the case command. But only if there are no selections or
+            # regions to operate on.
+
             # run the move-word command so we can create a region
             direction = -1 if count < 0 else 1
             util.run_command("sbp_move_word", {"direction": 1})
@@ -440,21 +406,21 @@ class SbpCaseWordCommand(SbpTextCommand):
         # perform the operation
         if mode in ('upper', 'lower'):
             util.run_command(mode + "_case", {})
-        else:
+        elif mode == "title":
             for r in selection:
                 util.view.replace(util.edit, r, view.substr(r).title())
+        else:
+            print("Unknown case setting:", mode)
+            return
 
-        if empty:
-            if count < 0:
-                # restore cursors to original state if direction was backward
-                selection.clear()
-                selection.add_all(regions)
-            else:
-                # otherwise we leave the cursors at the end of the regions
-                for r in new_regions:
-                    r.a = r.b = r.end()
-                selection.clear()
-                selection.add_all(new_regions)
+        if empty and count > 0:
+            for r in new_regions:
+                r.a = r.b = r.end()
+            selection.clear()
+            selection.add_all(new_regions)
+        else:
+            selection.clear()
+            selection.add_all(regions)
 
 #
 # A poor implementation of moving by s-expressions. The problem is it tries to use the built-in
@@ -868,7 +834,6 @@ class SbpKillRegionCommand(SbpTextCommand):
             util.toggle_active_mark_mode(False)
 
 class SbpPaneCmdCommand(SbpWindowCommand):
-
     def run_cmd(self, util, cmd, **kwargs):
         if cmd == 'split':
             self.split(self.window, util, **kwargs)
@@ -1122,6 +1087,9 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
 
         util.for_each_cursor(advance)
 
+#
+# Emacs Yank and Yank Pop commands.
+#
 class SbpYankCommand(SbpTextCommand):
     def run_cmd(self, util, pop=0):
         if pop and util.state.last_cmd != 'sbp_yank':
@@ -1153,6 +1121,10 @@ class SbpYankCommand(SbpTextCommand):
         util.make_cursors_empty()
         util.ensure_visible(util.get_last_cursor())
 
+#
+# Like the yank command except it displays a menu of all the kills and lets you choose which one to
+# yank.
+#
 class SbpChooseAndYank(SbpTextCommand):
     def run_cmd(self, util):
         # items is an array of (index, text) pairs
@@ -1167,6 +1139,16 @@ class SbpChooseAndYank(SbpTextCommand):
             sublime.active_window().show_quick_panel([item[1] for item in items], on_done)
         else:
             sublime.status_message('Nothing in history')
+
+
+#
+# A special command that allows us to invoke incremental-search commands from the menu.
+#
+class SbpIncSearchFromMenuCommand(SbpTextCommand):
+    def run_cmd(self, util, **kwargs):
+        def doit():
+            util.run_command("sbp_inc_search", kwargs)
+        sublime.set_timeout(doit, 50)
 
 
 class SbpIncSearchCommand(SbpTextCommand):
@@ -1206,7 +1188,7 @@ class SbpIncSearchCommand(SbpTextCommand):
         # REMIND: is it not possible to invoke isearch from the menu for some reason. I think the
         # problem is that a focus thing is happening and we're dismissing ourselves as a result. So
         # for now we hide it.
-        return False
+        return True
 
 class SbpIncSearchEscapeCommand(SbpTextCommand):
     # unregistered = True
@@ -1240,8 +1222,8 @@ class SbpTabCmdCommand(SbpTextCommand):
                 util.run_command("reindent", {})
 
 #
-# A quit command which is basically a no-op unless there are multiple cursors, in which case it
-# tries to pick one end or the other to make the single selection.
+# A quit command which is basically a no-op unless there are multiple cursors or a selection, in
+# which case it tries to pick one end or the other to make the single selection.
 #
 class SbpQuitCommand(SbpTextCommand):
     def run_cmd(self, util, favor_side="start"):
@@ -1429,31 +1411,11 @@ class SbpZapToStringCommand(SbpJumpToStringCommand):
         # ... we can finish what we started
         self.window.run_command("sbp_finish_move_then_delete")
 
-class SbpConvertPlistToJsonCommand(SbpTextCommand):
-    JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
-    PLIST_SYNTAX = "Packages/XML/XML.tmLanguage"
-
-    def run_cmd(self, util):
-        import json
-        from plistlib import readPlistFromBytes, writePlistToBytes
-
-        data = self.view.substr(sublime.Region(0, self.view.size())).encode("utf-8")
-        self.view.replace(util.edit, sublime.Region(0, self.view.size()),
-                          json.dumps(readPlistFromBytes(data), indent=4, separators=(',', ': ')))
-        self.view.set_syntax_file(JSON_SYNTAX)
-
-class SbpConvertJsonToPlistCommand(SbpTextCommand):
-    JSON_SYNTAX = "Packages/Javascript/JSON.tmLanguage"
-    PLIST_SYNTAX = "Packages/XML/XML.tmLanguage"
-
-    def run_cmd(self, util):
-        import json
-        from plistlib import readPlistFromBytes, writePlistToBytes
-
-        data = json.loads(self.view.substr(sublime.Region(0, self.view.size())))
-        self.view.replace(util.edit, sublime.Region(0, self.view.size()), writePlistToBytes(data).decode("utf-8"))
-        self.view.set_syntax_file(PLIST_SYNTAX)
-
+#
+# A single command that does both ensuring newline at end of file AND deleting trailing whitespace.
+# If this is not a single command, blank spaces at the end of the file will cause an extra newline.
+# It's important to delete end of line whitespace before doing the end of file newline check.
+#
 class SbpTrimTrailingWhiteSpaceAndEnsureNewlineAtEofCommand(sublime_plugin.TextCommand):
     def run(self, edit, trim_whitespace, ensure_newline):
         # make sure you trim trailing whitespace FIRST and THEN check for Newline
