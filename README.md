@@ -35,58 +35,113 @@ we'll be happy to fix them.
 
 ## Features
 
-The following features are supported and merged [from][ot3] [other][ot] [approaches][ot2]
-and the base code of the new beta of [Sublime Text 2][subl].
+The following features have largely been implemented from scratch and are only supported with
+Sublime Text 3.
 
-  * ``ctrl+u``, ``meta+0`` ... ``meta+9``: Emacs universal argument - you provide a prefix arguments to a command to run it that many times. E.g., ``meta+2`` ``meta+3`` ``ctrl+F`` means go forward 23 characters.
-  * ``meta+f`` and ``meta+b``: Forward and backward words with the same exact behavior of emacs in terms of how you move.
-  * ``ctrl+meta+f`` and ``ctrl+meta+b``: Forward and backward s-expressions. It works for skipping over identifiers, strings and parentheses, braces and square brackets.
-  * ``meta+c``, ``meta+l``, ``meta+u``: capitalize, lower case, upper case words. They support numeric arguments, including negative arguments which means "do it to the  previous N words".
-  * Full emacs kill ring support:
-    * 64 entries - not currently adjustable
+  * ``ctrl+u``, ``meta+0`` ... ``meta+9``: Emacs universal argument - you provide a prefix arguments
+    to a command to run it that many times. E.g., ``meta+2`` ``meta+3`` ``ctrl+F`` means go forward
+    23 characters.
+  * ``meta+f`` and ``meta+b``: Forward and backward words with the same exact behavior of emacs in
+    terms of how you move.
+  * ``ctrl+meta+f`` and ``ctrl+meta+b``: Forward and backward s-expressions. It works for skipping
+    over identifiers, strings and parentheses, braces and square brackets.
+  * ``meta+c``, ``meta+l``, ``meta+u``: capitalize, lower case, upper case words. They support
+    numeric arguments, including negative arguments which means "do it to the  previous N words".
+  * Support for emacs kill ring, with multi-cursor support:
+    * 64 entries by default, but settable with ``sbp_kill_ring_size``
     * adjascent kill commands are appended to the same entry
     * ``ctrl+w`` and ``meta+w``: kill and copy to the kill ring.
     * ``ctrl+y`` and ``meta+y``: yank and yank-pop.
-    * technically supplying a numeric argument to ``ctrl+d`` and ``Backspace`` should append to the kill ring but I have not done that (yet).
-    * The yank command will pull from the clipboard if it finds it is not the same as the current kill-ring entry, meaning you can go into a different app and copy  something there and paste it into emacs using ``ctrl+y``. Also, anything you kill in emacs will be placed on the clipboard for other apps to access.
-  * ``meta+d`` and ``meta+Backspace``: Delete word forward and backward, placinging the deleted text on the kill ring.
-  * ``ctrl+meta+k``: Delete S-Expression and place on the kill ring. (Negative arguments not supported.)
-  * ``ctrl+k``: Kill to end of line mimics emacs almost exactly (it does not support a 0 numeric argument to delete to the beginning of the line). Providing a numeric  argument means "delete that many lines" which is different from typing ``ctrl+k`` that many times.
-  * ``meta+<`` and ``meta+>``: move to beginning and end of file.
-  * ``meta+,`` and ``meta+.``: move to beginning and end of window.
-  * Support for a emacs-style mark including the mark-ring:
+    * Technically supplying a numeric argument to ``ctrl+d`` and ``Backspace`` should append to the
+      kill ring but I have not done that (yet).
+    * The yank command will pull from the clipboard if it finds it is not the same as the current
+      kill-ring entry, meaning you can go into a different app and copy  something there and paste
+      it into emacs using ``ctrl+y``. Also, anything you kill in emacs will be placed on the
+      clipboard for other apps to access.
+    * Choose and Yank command will display a menu of all the kills and let you choose which one to
+      yank.
+    * If you have multiple cursors, the kill entry will contain and remember those separate cursors.
+      If you try to yank multiple cursors, it will work as expected if you still have the same
+      number of cursors. If you have MORE cursors than your kill, the kill will be repeated until
+      you have enough. If you have fewer cursors than your kill, it will use just as many as it
+      needs.
+  * Support for a emacs-style mark ring, with multi-cursor support:
     * ``ctrl+space`` to push a new mark onto the ring
     * ``ctrl+x ctrl+x`` to switch point and mark
-    * Commands such as ``ctrl+y``, ``meta+y`` set the mark automatically as they do (and must) in emacs.
+    * Commands such as ``ctrl+y``, ``meta+y`` set the mark automatically as they do (and must) in
+      emacs.
     * ``meta+<`` and ``meta+>`` also set the mark.
-    * If you type ``ctrl+space`` twice in a row, it will activate the mark, which means "highlight it as a selection". It stays highlighted until you type ``ctrl+g`` or  execute certain commands.
-    * If you supply a numeric argument, e.g., ``ctrl+u ctrl+x ctrl+x`` or ``ctrl+u ctrl+space``, it will activate the mark without moving the cursor so you can see the  current emacs region.
-    * If you use the mouse to make a selection, it will set the mark and it will become the emacs region as well.
+    * If you type ``ctrl+space`` twice in a row, it will activate the mark, which means "highlight
+      it as a selection". It stays highlighted until you type ``ctrl+g`` or execute certain
+      commands.
+    * If you supply a numeric argument, e.g., ``ctrl+u ctrl+x ctrl+x`` or ``ctrl+u ctrl+space``, it
+      will activate the mark without moving the cursor so you can see the current emacs region.
+    * If you use the mouse to make a selection, it will set the mark and it will become the emacs
+      region as well.
+    * You can set the mark with multiple cursors. And then you can kill and copy those cursors, and
+      then yank them later as well. All the above commands for manipulating the mark ring will
+      continue to work with multiple cursors.
+  * ``meta+d`` and ``meta+Backspace``: Delete word forward and backward, placing the deleted text
+    on the kill ring.
+  * ``ctrl+meta+k``: Delete S-Expression and place on the kill ring. (Negative arguments not supported.)
+  * ``ctrl+k``: Kill to end of line mimics emacs almost exactly (it does not support a 0 numeric
+    argument to delete to the beginning of the line). Providing a numeric argument means "delete
+    that many lines" which is different from typing ``ctrl+k`` that many times.
+  * ``meta+<`` and ``meta+>``: move to beginning and end of file.
+  * ``meta+,`` and ``meta+.``: move to beginning and end of window.
   * ``ctrl+o``: Open line.
-  * ``meta+g``: Goto line via numeric argument, e.g., ``meta+4 meta+3 meta+5 meta+g`` goes to line 435. (meta+g is not a great choice on Mac OS X I realize.)
-  * ``ctrl+l``: Center current line in view. With numeric argument, put the current line at the Nth line on the screen.
+  * ``meta+g``: Goto line via numeric argument, e.g., ``meta+4 meta+3 meta+5 meta+g`` goes to line
+    435. (meta+g is not a great choice on Mac OS X I realize.)
+  * ``ctrl+l``: Center current line in view. With numeric argument, put the current line at the Nth
+    line on the screen.
   * ``meta+backslash``: Delete white space around point.
-  * ``ctrl+x 2``, ``ctrl+x 1``, ``ctrl+x d``, ``ctrl+x-o``: split window, delete all other windows, delete current window, go to other window.
-  * ``ctrl+s`` and ``ctrl+r``: proper emacs-style incremental search with Sublime Text multi-cursor extensions.
+  * ``ctrl+x 2``, ``ctrl+x 1``, ``ctrl+x d``, ``ctrl+x-o``: split window, delete all other windows,
+    delete current window, go to other window.
+  * ``ctrl+s`` and ``ctrl+r``: proper emacs-style incremental search with Sublime Text multi-cursor
+    extensions.
     * With a numeric argument ``ctrl+u ctrl+s`` does a regex search instead.
-    * When you press ``ctrl+s`` immediately after the first ``ctrl+s`` it will use the same search string as last time.
-    * If you type any uppercase characters in your search, the search automatically becomes case-sensitive.
+    * When you press ``ctrl+s`` immediately after the first ``ctrl+s`` it will use the same search
+      string as last time.
+    * If you type any uppercase characters in your search, the search automatically becomes case-
+      sensitive.
     * While searching, each time you type ``ctrl+s`` you will skip ahead to the next match.
-    * While searching, ``meta+d`` is like ``ctrl+s`` except the current match is kept as a future cursor (for when you finish the search).
-    * If you change your mind about a ``meta+d`` or ``ctrl+s``, you can press ``Backspace`` to undo it.
-    * When you type ``meta+a`` all remaining matches from your current position to the end of the file (or beginning if you're doing a reverse search) are added to the  kept matches.
-    * When you type ``Backspace`` you are restored you to your previous search state. It will go back to a previous match or delete a character from your search string  or remove the last kept match.
-    * When you type ``ctrl+w`` while searching, the characters from your buffer are appended to your search string.
-    * If your search is currently failing, you can type ``ctrl+g`` to go back to the last point your search was succeeding. If you type ``ctrl+g`` when your search is  succeeding, the search is aborted and you go back to the start.
+    * While searching, ``meta+d`` is like ``ctrl+s`` except the current match is kept as a future
+      cursor (for when you finish the search).
+    * If you change your mind about a ``meta+d`` or ``ctrl+s``, you can press ``Backspace`` to undo
+      it.
+    * When you type ``meta+a`` all remaining matches from your current position to the end of the
+      file (or beginning if you're doing a reverse search) are added to the kept matches.
+    * When you type ``Backspace`` you are restored you to your previous search state. It will go
+      back to a previous match or delete a character from your search string  or remove the last
+      kept match.
+    * When you type ``ctrl+w`` while searching, the characters from your cursor are appended to your
+      search string.
+    * If your search is currently failing, you can type ``ctrl+g`` to go back to the last point your
+      search was succeeding. If you type ``ctrl+g`` when your search is  succeeding, the search is
+      aborted and you go back to the start.
     * Clicking the mouse will end the search at the current location, as will opening an overlay.
-    * You can end your search by typing many regular emacs commands, e.g., ``ctrl+a``, ``meta+f``, ``ctrl+l``, ``meta+<``, ``meta+>``.
+    * You can end your search by typing many regular emacs commands, e.g., ``ctrl+a``, ``meta+f``,
+      ``ctrl+l``, ``meta+<``, ``meta+>``. The kept items will be intact.
     * Press ``Return`` to end your search with all the kept items as multi-cursors.
     * When you complete (as opposed to abort) a search your mark is set to where you started from.
   * Rectangular cut and insert using ``C-x r t`` and ``C-x r d``
   * ``alt+/`` is used for tab completion since ``tab`` is bound to reindent
-  * ``alt+z`` zap-to-char, delete from current point until next occurrence of character
+  * Zap and Jump to Char and String
+    * ``alt+z`` zap-to-char, delete from current point to the next occurrence of a character
+    * ``shift+alt+z`` zap-up-to-char, delete from current point up to but not including the next
+      occurrence of a character
+    * ``ctrl+x z`` zap-to-string, delete from current point until next occurrence of a character
+    * ``ctrl+x Z`` zap-up-to-string, delete from current point up to but not including the next
+      occurrence of a character
+    * ``ctrl+x j c`` jump-to-char, move past the next occurrence of a character
+    * ``ctrl+x j C`` jump-up-to-char, move up to the next occurrence of a character
+    * ``ctrl+x j s`` jump-to-string, move past next occurrence of a character
+    * ``ctrl+x j S`` jump-up-to-string, move up to but not including the next
+      occurrence of a character
+
   * ``ctrl+x, ctrl+b`` will present a list of open buffers
-  * ``ctrl+x, (`` and ``ctrl+x, )`` will toggle macro recording and execution is done by ``ctrl+x, e``
+  * ``ctrl+x, (`` and ``ctrl+x, )`` will toggle macro recording and execution is done by ``ctrl+x,
+    e``
   * ``ctrl+alt+[`` and ``ctrl+alt+]`` for paragraph navigation
   * Named registers to store data using ``C-x r s [register]`` and ``C-x r i
      [register]``

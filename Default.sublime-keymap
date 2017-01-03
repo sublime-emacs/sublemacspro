@@ -123,8 +123,6 @@
 
     {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_alt_bindings"}]},
-
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},
     {"keys": ["alt+-"], "command": "sbp_universal_argument", "args": {"value": "negative"}, "context": [ {"key": "sbp_alt+digit_inserts", "operand": false}]},
@@ -222,7 +220,7 @@
     {"keys": ["ctrl+x", "2"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
     {"keys": ["ctrl+x", "3"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
 
-    // Modifying the Pane Sies
+    // Modifying the Pane Sizes
     {"keys": ["ctrl+shift+i"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
     {"keys": ["ctrl+shift+k"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
     {"keys": ["ctrl+shift+j"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
@@ -242,9 +240,9 @@
     {"keys": ["ctrl+x", "right"], "command": "next_view" },
     {"keys": ["ctrl+x", "left"], "command": "prev_view" },
 
-    //////////////////////////////////////////////////////////////////////////////
-    // Other settings/bindings to complete the Emacs picture for me personally. //
-    //////////////////////////////////////////////////////////////////////////////
+    //////////////////////////
+    // Basic Emacs commands //
+    //////////////////////////
 
     {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "hardbol", "extend": false }},
     {"keys": ["ctrl+e"], "command": "move_to", "args": {"to": "hardeol", "extend": false }},
@@ -254,6 +252,19 @@
 
     {"keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true }},
     {"keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false }, "context": [ {"key": "sbp_use_alt_bindings"}]},
+
+    {"keys": ["ctrl+x", "j", "c"], "command": "sbp_jump_to_char", "args": {"include_char": true}},
+    {"keys": ["ctrl+x", "j", "C"], "command": "sbp_jump_to_char", "args": {"include_char": false}},
+    {"keys": ["ctrl+x", "j", "s"], "command": "sbp_jump_to_string", "args": {"include_string": true}},
+    {"keys": ["ctrl+x", "j", "S"], "command": "sbp_jump_to_string", "args": {"include_string": false}},
+    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": true},
+        "context": [{"key": "sbp_use_alt_bindings"}]
+    },
+    {"keys": ["shift+alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": false},
+        "context": [{"key": "sbp_use_alt_bindings"}]
+    },
+    {"keys": ["ctrl+x", "z"], "command": "sbp_zap_to_string", "args": {"include_char": true}},
+    {"keys": ["ctrl+x", "Z"], "command": "sbp_zap_to_string", "args": {"include_char": false}},
 
     {"keys": ["alt+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "k"], "command": "sbp_close_current_view"},
@@ -348,6 +359,13 @@
     {"keys": ["ctrl+super+["], "command": "sbp_move_to_paragraph", "args": {"direction": -1} , "context": [ {"key": "sbp_use_super_bindings"}]},
     {"keys": ["ctrl+super+]"], "command": "sbp_move_to_paragraph", "args": {"direction": 1} , "context": [ {"key": "sbp_use_super_bindings"}]},
 
+    {"keys": ["super+z"], "command": "sbp_zap_to_char", "args": {"include_char": true},
+        "context": [{"key": "sbp_use_super_bindings"}]
+    },
+    {"keys": ["shift+super+z"], "command": "sbp_zap_to_char", "args": {"include_char": false},
+        "context": [{"key": "sbp_use_super_bindings"}]
+    },
+
     // commands that move and set the mark first
     {"keys": ["super+shift+."], "command": "sbp_move_to", "args": {"to": "eof"}, "context": [ {"key": "sbp_use_super_bindings"}]},
     {"keys": ["super+shift+,"], "command": "sbp_move_to", "args": {"to": "bof"}, "context": [ {"key": "sbp_use_super_bindings"}]},
@@ -373,8 +391,6 @@
     {"keys": ["ctrl+super+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
 
     {"keys": ["super+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_super_bindings"}]},
-
-    {"keys": ["super+z"], "command": "sbp_zap_to_char", "context": [ {"key": "sbp_use_super_bindings"}]},
 
     // emacs-style numeric argument handling
     {"keys": ["ctrl+u"], "command": "sbp_universal_argument", "args": {"value": "by_four"}},

@@ -69,4 +69,14 @@
     {"caption": "Sublemacs - Next Tab", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "right"}},
 
     {"caption": "Sublemacs - Quit All Open Panels, Overlays and Selections", "command": "sbp_quit"},
+
+    {"caption": "Sublemacs - Jump To Char", "command": "sbp_jump_to_char", "args": {"include_char": true}},
+    {"caption": "Sublemacs - Jump Up To Char", "command": "sbp_jump_to_char", "args": {"include_char": false}},
+    {"caption": "Sublemacs - Jump To String", "command": "sbp_jump_to_string", "args": {"include_string": true}},
+    {"caption": "Sublemacs - Jump Up To String", "command": "sbp_jump_to_string", "args": {"include_string": false}},
+    {"caption": "Sublemacs - Zap To Char", "command": "sbp_zap_to_char", "args": {"include_char": true}},
+    {"caption": "Sublemacs - Zap Up To Char", "command": "sbp_zap_to_char", "args": {"include_char": false}},
+    {"caption": "Sublemacs - Zap To String", "command": "sbp_zap_to_string", "args": {"include_char": true}},
+    {"caption": "Sublemacs - Zap Up To String", "command": "sbp_zap_to_string", "args": {"include_char": false}},
+
 ]
