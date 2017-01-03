@@ -105,10 +105,14 @@
     {"keys": ["ctrl+space"], "command": "sbp_set_mark"},
 
     {"keys": ["ctrl+x", "ctrl+x"], "command": "sbp_swap_point_and_mark"},
+    // Example binding for toggling the mark mode
+    // {"keys": ["ctrl+m"], "command": "sbp_swap_point_and_mark", "args": {"toggle_active_mark_mode": true}},
+
     {"keys": ["ctrl+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_for_kill_line"}},
     {"keys": ["ctrl+w"], "command": "sbp_kill_region"},
 
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
+    {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
     {"keys": ["super+v"], "command": "sbp_yank"},
     {"keys": ["alt+w"], "command": "sbp_kill_region", "args": {"is_copy": true}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["super+c"], "command": "sbp_kill_region", "args": {"is_copy": true}},
@@ -268,6 +272,7 @@
 
     {"keys": ["alt+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "k"], "command": "sbp_close_current_view"},
+    {"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows": 5}},
 
     {"keys": ["ctrl+d"], "command": "right_delete"},
 
@@ -328,9 +333,11 @@
     // Registers
     {"keys": ["ctrl+x", "r", "s"], "command": "sbp_register_store" },
     {"keys": ["ctrl+x", "r", "i"], "command": "sbp_register_insert" },
+    {"keys": ["ctrl+x", "r", "r"], "command": "sbp_choose_and_yank_register"},
 
     {"keys": ["ctrl+x", "r", " "], "command": "sbp_point_to_register" },
     {"keys": ["ctrl+x", "r", "j"], "command": "sbp_point_from_register" },
+    {"keys": ["ctrl+x", "r", "p"], "command": "sbp_choose_and_yank_point"},
 
 
     //
