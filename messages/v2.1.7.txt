@@ -40,7 +40,6 @@ New: All View Auto Complete
 
         "sbp_use_internal_complete_all_buffers": true,
 
-
 Fix: Quit Command (ctrl+g)
 
     The ctrl+g command was dismissing popups and panels AND disabling multi-cursors at the same
@@ -65,7 +64,7 @@ New: Close Older Views Commands
     least recently used views. This is a good way to trim the current number of views if you feel
     like things are getting out of hand.
 
-    Here's a possible binding.
+    Here is the default binding:
 
     {"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows": 5}},
 
@@ -76,6 +75,10 @@ Improve: Choose and Yank Command
 
     Also this command pulls in the external clipboard before showing you the choices. It used to be
     the case that only the yank command pulled in the external clipboard.
+
+    Here is the default bindings:
+
+    {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
 
 Improve: Move To Paragraph Command
 
@@ -93,25 +96,38 @@ New: Jump to Char/String and Zap to Char/String Commands
     optional argument decides whether the character your jump to is included (e.g., jumped over) or
     not. The same applies for the zap commands.
 
-    Here are some example bindings:
+    Here are the default bindings:
 
-
-    {"keys": ["ctrl+j", "c"], "command": "sbp_jump_to_char", "args": {"include_char": true}},
-    {"keys": ["ctrl+j", "C"], "command": "sbp_jump_to_char", "args": {"include_char": false}},
-    {"keys": ["ctrl+j", "s"], "command": "sbp_jump_to_string", "args": {"include_char": true}},
-    {"keys": ["ctrl+c", "ctrl+j", "S"], "command": "sbp_jump_to_string", "args": {"include_char": false}},
-    {"keys": ["ctrl+c", "ctrl+z", "c"], "command": "sbp_zap_to_char", "args": {"include_char": true}},
-    {"keys": ["ctrl+c", "ctrl+z", "C"], "command": "sbp_zap_to_char", "args": {"include_char": false}},
+    {"keys": ["ctrl+x", "j", "c"], "command": "sbp_jump_to_char", "args": {"include_char": true}},
+    {"keys": ["ctrl+x", "j", "C"], "command": "sbp_jump_to_char", "args": {"include_char": false}},
+    {"keys": ["ctrl+x", "j", "s"], "command": "sbp_jump_to_string", "args": {"include_string": true}},
+    {"keys": ["ctrl+x", "j", "S"], "command": "sbp_jump_to_string", "args": {"include_string": false}},
+    {"keys": ["alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": true},
+        "context": [{"key": "sbp_use_alt_bindings"}]
+    },
+    {"keys": ["shift+alt+z"], "command": "sbp_zap_to_char", "args": {"include_char": false},
+        "context": [{"key": "sbp_use_alt_bindings"}]
+    },
+    {"keys": ["ctrl+x", "z"], "command": "sbp_zap_to_string", "args": {"include_char": true}},
+    {"keys": ["ctrl+x", "Z"], "command": "sbp_zap_to_string", "args": {"include_char": false}},
 
 New: Choose and Yank Register Command
 
     There is now a choose and yank feature for text registers that mirrors the choose and yank
     command for the kill ring.
 
+    Here are the default bindings:
+
+    {"keys": ["ctrl+x", "r", "r"], "command": "sbp_choose_and_yank_register"},
+
 New: Choose and Yank Point Command
 
     There is now a choose and yank feature for point registers that mirrors the choose and yank
     command for the kill ring.
+
+    Here are the default bindings:
+
+    {"keys": ["ctrl+x", "r", "p"], "command": "sbp_choose_and_yank_point"},
 
 Fix: Upper/Lower Case Region Command
 
@@ -122,9 +138,9 @@ Fix: Upper/Lower Case Region Command
     OR, there must be an emacs region or regions (e.g., a region defined by mark and point).
 
     The name of the command has changed so if you have your own bindings the new command name and
-    bindings are:
+    default bindings are:
 
-    {"keys": ["alt+c"], "command": "sbp_case_word", "args": {"direction": 1, "mode": "title"},
+    {"keys": ["alt+c"], "command": "sbp_change_case", "args": {"direction": 1, "mode": "title"},
         "context": [ {"key": "sbp_use_alt_bindings"}]
     },
 
@@ -138,7 +154,16 @@ Fix: Upper/Lower Case Region Command
     {"keys": ["ctrl+x", "ctrl+u"], "command": "sbp_change_case", "args": {"mode": "upper", "use_region": true}},
     {"keys": ["ctrl+x", "ctrl+l"], "command": "sbp_change_case", "args": {"mode": "lower", "use_region": true}},
 
+New: Convert Between camelCase and Underscores
 
+    The command to perform upper and lower case changes for regions described above also
+    includes a (mode="camel") which converts from underscores to camelCase and
+    (mode="underscore") which converts from camelCase to underscores.
+
+    The default bindings are shown below:
+
+    {"keys": ["ctrl+x", "ctrl+super+u"], "command": "sbp_change_case", "args": {"mode": "underscore", "use_region": true}},
+    {"keys": ["ctrl+x", "ctrl+super+c"], "command": "sbp_change_case", "args": {"mode": "camel", "use_region": true}},
 
 Credits
 
