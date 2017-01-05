@@ -224,11 +224,17 @@
     {"keys": ["ctrl+x", "2"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "h"}},
     {"keys": ["ctrl+x", "3"], "command": "sbp_pane_cmd", "args": {"cmd": "split", "stype": "v"}},
 
-    // Modifying the Pane Sizes
+    // Modifying the Window Pane Sizes (kept for backwards compatibility)
     {"keys": ["ctrl+shift+i"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
     {"keys": ["ctrl+shift+k"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
     {"keys": ["ctrl+shift+j"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
     {"keys": ["ctrl+shift+l"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
+
+    // Modifying the Window Pane Size (Mimics emacs window resize commands)
+    {"keys": ["ctrl+x", "^"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "g"}},
+    {"keys": ["ctrl+x", "-"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "s"}},
+    {"keys": ["ctrl+x", "}"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "gh"}},
+    {"keys": ["ctrl+x", "{"], "command": "sbp_pane_cmd", "args": {"cmd": "grow", "direction": "sh"}},
 
     {"keys": ["ctrl+x", "d"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
     {"keys": ["ctrl+x", "0"], "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "self"}},
@@ -243,6 +249,11 @@
     {"keys": ["ctrl+x", "b"], "command": "next_view" },
     {"keys": ["ctrl+x", "right"], "command": "next_view" },
     {"keys": ["ctrl+x", "left"], "command": "prev_view" },
+
+    // Close and open new windows (Mimics emacs frame commands)
+    {"keys": ["ctrl+x", "5", "2"], "command": "new_window"},
+    {"keys": ["ctrl+x", "5", "0"], "command": "close_window"},
+
 
     //////////////////////////
     // Basic Emacs commands //
@@ -297,7 +308,6 @@
     {"keys": ["ctrl+x", "e"], "command": "run_macro" },
 
     {"keys": ["alt+j"], "command": "wrap_lines", "args": {"width": 100}, "context": [ {"key": "sbp_use_alt_bindings"}]},
-    {"keys": ["shift+super+-"], "command": "decrease_font_size"},
 
     {"keys": ["ctrl+c", ">"], "command": "indent" },
     {"keys": ["ctrl+c", "<"], "command": "unindent" },
@@ -412,6 +422,8 @@
     {"keys": ["super+8"], "command": "sbp_universal_argument", "args": {"value": 8}, "context": [ {"key": "sbp_use_super_bindings"}]},
     {"keys": ["super+9"], "command": "sbp_universal_argument", "args": {"value": 9}, "context": [ {"key": "sbp_use_super_bindings"}]},
     {"keys": ["super+0"], "command": "sbp_universal_argument", "args": {"value": 0}, "context": [ {"key": "sbp_use_super_bindings"}]},
+    // Changed beause now super+- is used for negative argument
+    {"keys": ["shift+super+-"], "command": "decrease_font_size", "context": [ {"key": "sbp_use_super_bindings"}]},
 
 
     {"keys": ["super+["], "command": "sbp_shift_region", "args": {"direction": -1}, "context": [ {"key": "sbp_use_super_bindings"}]},
