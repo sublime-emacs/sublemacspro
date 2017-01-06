@@ -50,9 +50,11 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
   * ``ctrl+u``: Emacs universal argument command (so 4^n where n is the number of times
     ``ctrl+u`` has been pressed) E.g., ``ctrl+u ctrl+u ctrl+f`` means go forward 16
     characters.
-  * ``meta+0`` ... ``meta+9``: Emacs numeric arguments - you provide a prefix using the numeric arguments before a command to run it that many times. E.g., ``meta+2 meta+3 ctrl+f``
-    means go forward 23 characters.
-  * ``alt+-``: Emacs negative argument command - reverses the direction of the command. E.g., ``meta+2 meta+3 alt+- ctrl+f`` means go backward 23 characters.
+  * ``meta+0`` ... ``meta+9``: Emacs numeric arguments - you provide a prefix using the numeric
+    arguments before a command to run it that many times. E.g., ``meta+2 meta+3 ctrl+f`` means go
+    forward 23 characters.
+  * ``alt+-``: Emacs negative argument command - reverses the direction of the command. E.g.,
+    ``meta+2 meta+3 alt+- ctrl+f`` means go backward 23 characters.
 
 #### Emacs-style Kill Ring with Multi-cursor Support and Sublime Quick Panel Selection
   * *Commands that utilize the kill ring
@@ -60,7 +62,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+y``: Yank (Paste) from the last entry put into the kill ring.
     * ``meta+y`` and ``shift+meta+y``: Yank-pop forward and backward on the kill ring, but
       requires a yank command before running either one.
-    * ``ctrl+k``: Kill to the end of line. 
+    * ``ctrl+k``: Kill to the end of line.
       * Mimics emacs almost exactly (it does not support a 0 numeric argument to delete to the
         beginning of the line). Providing a numeric argument means "delete that many lines"
         which is different from typing ``ctrl+k`` that many times.
@@ -70,7 +72,8 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``meta+d`` and ``meta+backspace``: Kill word forward and backward and append deleted
       text to the kill ring.
       * Supports emacs universal and numeric arguments.
-    * ``ctrl+x ctrl+y``: Displays a Sublime quick panel menu of all the kills and allows you to choose which one to yank.
+    * ``ctrl+x ctrl+y``: Displays a Sublime quick panel menu of all the kills and allows you to
+      choose which one to yank.
   * *Kill ring implementation details*
     * 64 entries by default, but settable with ``sbp_kill_ring_size`` setting in the
       ``sublemacspro .sublime-settings`` file.
@@ -87,7 +90,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       cursors than your kill, the kill will be repeated until you have enough. If you have
       fewer cursors than your kill, it will use just as many as it needs.
 
-#### Emacs-style Mark Ring with Multi-cursor Support 
+#### Emacs-style Mark Ring with Multi-cursor Support
   * *Commands that utilize the kill ring*
     * ``ctrl+space``: Push a new mark onto the ring
     * ``ctrl+x ctrl+x``: Switch point and mark
@@ -108,7 +111,10 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * If you use the mouse to make a selection, it will set the mark and it will become the
       emacs region as well.
   * *Multi-cursor support*
-    * You can set the mark with multiple cursors and pop off the mark ring to marks with multiple cursors. Furthermore, you can kill and copy using those cursors, and then yank them later as well. All the above commands for manipulating the mark ring (and kill ring) will continue to work with multiple cursors.
+    * You can set the mark with multiple cursors and pop off the mark ring to marks with multiple
+      cursors. Furthermore, you can kill and copy using those cursors, and then yank them later as
+      well. All the above commands for manipulating the mark ring (and kill ring) will continue to
+      work with multiple cursors.
 
 #### Emacs-style Incremental Search with History (regular and regex supported)
   * *Commands to initiate a search*
@@ -222,10 +228,12 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 
 #### Zap/Jump to Char and String
   * *Zap and Jump Commands*
-    * ``alt+z``: Zap-to-char, delete from current point to the next occurrence of a character and includes deleting the character.
+    * ``alt+z``: Zap-to-char, delete from current point to the next occurrence of a character and
+      includes deleting the character.
     * ``shift+alt+z`` zap-up-to-char, delete from current point up to but not including the next
       occurrence of a character.
-    * ``ctrl+x z`` zap-to-string, delete from current point until next occurrence of the string and includes deleting the string.
+    * ``ctrl+x z`` zap-to-string, delete from current point until next occurrence of the string and
+      includes deleting the string.
     * ``ctrl+x Z`` zap-up-to-string, delete from current point up to but not including the next
       occurrence of the string.
     * ``ctrl+x j c`` jump-to-char, move past the next occurrence of a character.
@@ -233,8 +241,10 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+x j s`` jump-to-string, move past next occurrence of a string.
     * ``ctrl+x j S`` jump-up-to-string, move up to the next occurrence of a string.
   * *Implementation Details*
-    * The char jump and zap commands have an optional argument ``include_char`` that is set to ``true`` by default.
-    * The string jump and zap commands have an optional argument ``include_string`` that is set to ``true`` by default.
+    * The char jump and zap commands have an optional argument ``include_char`` that is set to
+      ``true`` by default.
+    * The string jump and zap commands have an optional argument ``include_string`` that is set to
+      ``true`` by default.
 
 #### Rectangle and Text/Point Register Commands (not Multi-cursor aware)
   * *Text and Point Register Commands*
@@ -246,7 +256,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``C-x r r``: Choose a text register to insert from the sublime quick panel menu.
     * ``C-x r p``: Choose a point register to jump to from the sublime quick panel menu.
   * *Rectangle Commands*
-    * ``C-x r t``: Rectangular cut (as in emacs). 
+    * ``C-x r t``: Rectangular cut (as in emacs).
     * ``C-x r d``: Rectangular insert (as in emacs).
 
 #### Emacs Navigation Commands
@@ -283,8 +293,9 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
         window view.
     * ``ctrl+v``: Page down.
     * ``alt+v``: Page up.
-    * ``ctrl+l``: Center current line in view. 
-      * Used with numeric arguments, put the current line at the Nth line in the view (E.g. ``meta+5 ctrl+l`` moves the current line to the 5th line in the view.
+    * ``ctrl+l``: Center current line in view.
+      * Used with numeric arguments, put the current line at the Nth line in the view (E.g. ``meta+5
+        ctrl+l`` moves the current line to the 5th line in the view.
   * *File Level*
     * ``meta+<`` and ``meta+>``: Move to beginning and end of file, respectively.
     * ``meta+g`` also bound to ``ctrl+x g``: Goto line via numeric argument or via quick panel
@@ -292,11 +303,11 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       * Numeric argument e.g., ``meta+4 meta+3 meta+5 meta+g`` goes to line 435.
 
 #### All View Auto Complete
-  * Similar to All Autocomplete plugin but fixed two bugs I was having with that code in the
-    limit of 20 views to search and symbols not being found due to errors in some syntaxes.
+  * Similar to All Autocomplete plugin but fixed two issues with that plugin: the limit of 20 views
+    to search and completions not being found due to errors in some syntax definitions.
   * Disabled by default.
   * Enable by setting ``sbp_use_internal_complete_all_buffers`` to ``true`` in the
-    ``sublemacspro .sublime-settings`` file.
+    ``sublemacspro.sublime-settings`` file.
 
 #### Miscellaneous Commands
   * *Undo/Redo*
@@ -348,13 +359,24 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 #### Use Alt Bindings (as well as alt+ for digits) or Super (Command on Mac) Bindings
   * Default is ``sbp_use_alt_bindings`` set to ``true`` and ``sbp_use_super_bindings`` to false.
     - If you prefer super bindings swap these.
-  * To insert digits as their normal characters instead of using Emacs-style numeric arguments, change ``sbp_alt+digit_inserts`` to ``true``.
+  * To insert digits as their normal characters instead of using Emacs-style numeric arguments,
+    change ``sbp_alt+digit_inserts`` to ``true``.
 
-#### Trim Trailing White Space and Ensure New Line at End of File 
-  * *Optional settings that if set to true in the ``sublemacspro.sublime-settings`` will occur on saving a file.
+#### Trim Trailing White Space and Ensure New Line at End of File
+  * Optional settings that if set to true in the ``sublemacspro.sublime-settings`` will occur on
+    saving a file.
 
 #### All View Auto Complete
   * Set ``sbp_use_internal_complete_all_buffers`` to ``true``.
+
+## Known Bugs/Issues
+
+  * If you're running an incremental search and you invoke another command that opens an input panel
+    (replacing the incremental search) things can get a little confusing. Unfortunately the
+    incremental search code still thinks its in control, and that causes unexpected behavior. If you
+    find that you cannot type any characters into the new input panel, trying clicking the mouse
+    anywhere in the main window to reset.
+
 
 ## Future
 
