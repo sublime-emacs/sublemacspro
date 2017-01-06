@@ -480,7 +480,7 @@ class SbpMoveSexprCommand(SbpTextCommand):
                         break
                     else:
                         ch = view.substr(point)
-                        if ch in "({['\"":
+                        if ch in "({[`'\"":
                             next_point = util.to_other_end(point, direction)
                             if next_point is not None:
                                 point = next_point
@@ -493,7 +493,7 @@ class SbpMoveSexprCommand(SbpTextCommand):
                         break
                     else:
                         ch = view.substr(point - 1)
-                        if ch in ")}]'\"":
+                        if ch in ")}]`\"":
                             next_point = util.to_other_end(point, direction)
                             if next_point is not None:
                                 point = next_point

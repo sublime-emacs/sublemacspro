@@ -536,13 +536,14 @@ class CmdUtil:
         # A version which uses the bracket highlighter package when available.
         #
         def goto_bracket_highlighter():
-            brac = "([{\"\'"
-            kets = ")]}\"\'"
             view = self.view
             scope_name = view.scope_name(point)
             if scope_name.find("comment") >= 0:
                 # we don't handle this brackets inside comments so just keep going
                 return None
+
+            brac = "([{'`\""
+            kets = ")]}'`\""
 
             if direction > 0:
                 ch = view.substr(point)
@@ -552,7 +553,7 @@ class CmdUtil:
                     return point + 2
                 self.set_point(point + 1)
                 self.run_command("bh_key", {
-                                     "lines": True, "no_block_mode": None, "no_outside_adj": None,
+                                     "lines": True, "no_block_mode": True, "no_outside_adj": True,
                                      "plugin": {
                                          "args": {"select": "right"},
                                          "command": "bh_modules.bracketselect", "type": ["__all__"]
@@ -567,7 +568,7 @@ class CmdUtil:
                     return point - 2
                 self.set_point(point - 1)
                 self.run_command("bh_key", {
-                                     "lines": True, "no_block_mode": None, "no_outside_adj": None,
+                                     "lines": True, "no_block_mode": True, "no_outside_adj": True,
                                      "plugin": {
                                          "args": {"select": "left"},
                                          "command": "bh_modules.bracketselect", "type": ["__all__"]
