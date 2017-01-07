@@ -5,8 +5,14 @@ I-Search
 
     Fixed a bug where using the previous search string would fail.
 
-    Added support for remembering previous searches. You can access previous searches with the up and
-    down arrow keys after you initiate a search.
+    Added support for remembering previous searches. You can access previous searches with the up
+    and down arrow keys after you initiate a search. The number of remembered searches is 64 by
+    default and can be set with the following plugin setting:
+
+        "sbp_isearch_history_size": 64,
+
+    In addition, your search history is preserved when you quit and restart sublime.
+
 
 New: Switch to View Command
 

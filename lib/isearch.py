@@ -9,6 +9,40 @@ import sublime, sublime_plugin
 
 from sublemacspro.lib.misc import *
 
+# preserved isearch settings
+isearch_history_settings = None
+ISEARCH_SETTINGS_FILE = "sublemacspro_isearch_history.sublime-settings"
+
+# ring buffer of saved searches - actual values loaded from settings
+isearch_history_size = 64
+
+# most recently added item
+isearch_current = 0
+
+# most recently accessed via up/down arrows
+isearch_index = 0
+
+def plugin_loaded():
+    global isearch_history_settings, isearch_history, isearch_current, isearch_history_size
+
+    isearch_history_size = SettingsHelper().get("sbp_isearch_history_size", 64)
+
+    isearch_history_settings = sublime.load_settings(ISEARCH_SETTINGS_FILE)
+    if isearch_history_settings.get("isearch_current") is None:
+        isearch_history_settings.set("isearch_current", 0)
+        isearch_history = [None] * isearch_history_size
+        isearch_history_settings.set("items", isearch_history)
+    else:
+        isearch_current = isearch_history_settings.get("isearch_current")
+        isearch_history = isearch_history_settings.get("items")
+        if len(isearch_history) > isearch_history_size:
+            isearch_history = isearch_history[:isearch_history_size]
+            save_search_settings()
+        elif len(isearch_history) < isearch_history_size:
+            isearch_history = isearch_history + [None] * (isearch_history_size - len(isearch_history))
+            save_search_settings()
+
+
 isearch_info = dict()
 def isearch_info_for(view):
     if isinstance(view, sublime.Window):
@@ -30,34 +64,30 @@ def clear_isearch_info_for(view):
     window = view.window()
     del(isearch_info[window.id()])
 
-# ring buffer of saved searches
-ISEARCH_SAVED_ITEMS_SIZE = 64
-isearch_history = [None] * ISEARCH_SAVED_ITEMS_SIZE
-
-# most recently added item
-isearch_current = 0
-
-# most recently accessed via up/down arrows
-isearch_index = 0
-
 #
 # Save the search string to the ring buffer if it's different from the most recent entry.
 #
 def save_search(search):
     global isearch_current, isearch_index
-    current = isearch_history[(isearch_current - 1) % ISEARCH_SAVED_ITEMS_SIZE]
+    current = isearch_history[(isearch_current - 1) % isearch_history_size]
     if search != current:
         isearch_history[isearch_current] = search
-        isearch_current = (isearch_current + 1) % ISEARCH_SAVED_ITEMS_SIZE
+        isearch_current = (isearch_current + 1) % isearch_history_size
 
         # reset the index to the new current whenever one is added
         isearch_index = isearch_current
+        save_search_settings()
+
+def save_search_settings():
+    isearch_history_settings.set("isearch_current", isearch_current)
+    isearch_history_settings.set("items", isearch_history)
+    sublime.save_settings(ISEARCH_SETTINGS_FILE)
 
 #
 # Get the most recently saved search string.
 #
 def get_saved_search():
-    return isearch_history[(isearch_current - 1) % ISEARCH_SAVED_ITEMS_SIZE]
+    return isearch_history[(isearch_current - 1) % isearch_history_size]
 
 #
 # Cycle through history searching for the next search string.
@@ -66,7 +96,7 @@ def cycle_history(dir):
     global isearch_index
     start = isearch_index
     while True:
-        isearch_index = (isearch_index + dir) % ISEARCH_SAVED_ITEMS_SIZE
+        isearch_index = (isearch_index + dir) % isearch_history_size
         if isearch_index == start:
             return None
         if isearch_history[isearch_index] is not None:
@@ -85,13 +115,18 @@ class ISearchInfo():
         self.forward = forward
         self.regex = regex
 
+        # This helps us treat a series of individual characters appended at once with Ctrl-W as a
+        # single item when deleting, if desired. This way we support adding a whole word with ctrl-w
+        # and then deleting one character, OR, adding a whole word and then deleting it all at once.
+        self.append_group_id = 1
+        self.in_append_from_cursor = False
+
         # REMIND: this is to help us identify when the input panel has been taken over by someone
         # else
         self.view_change_count = 0
 
     def is_valid(self):
         if self.view_change_count != self.input_view.change_count():
-            print("INVALID", self.view_change_count, self.input_view.change_count())
             return False
         return True
 
@@ -158,7 +193,9 @@ class ISearchInfo():
             index = self.find_closest(regions, pos, self.forward)
 
             # push this new state onto the stack
-            self.push(StackItem(val, regions, [], index, self.forward, self.current.wrapped))
+            group_id = self.append_group_id if self.in_append_from_cursor else None
+            si = StackItem(val, regions, [], index, self.forward, self.current.wrapped, group_id)
+            self.push(si)
         else:
             regions = None
             index = -1
@@ -174,14 +211,22 @@ class ISearchInfo():
     #
     # Pop one state of the stack and restore everything to the state at that time.
     #
-    def pop(self):
-        if self.current.prev:
-            self.current = self.current.prev
-            self.set_text(self.current.search)
-            self.forward = self.current.forward
-            self.update()
+    def pop(self, is_group=False):
+        if not self.current.prev:
+            return
+
+        if is_group and self.current.group_id is not None:
+            id = self.current.group_id
+            item = self.current.prev
+            while item.prev and item.group_id == id:
+                item = item.prev
         else:
-            print("Nothing to pop so not updating!")
+            item = self.current.prev
+
+        self.current = item
+        self.set_text(self.current.search)
+        self.forward = self.current.forward
+        self.update()
 
     def hide_panel(self):
         # close the panel which should trigger an on_done
@@ -338,6 +383,9 @@ class ISearchInfo():
         separators = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
         case_sensitive = re.search(r'[A-Z]', search) is not None
 
+        self.in_append_from_cursor = True
+        self.append_group_id += 1
+
         def append_one(ch):
             if not case_sensitive:
                 ch = ch.lower()
@@ -347,17 +395,36 @@ class ISearchInfo():
 
         if point < limit:
             # append at least one character, word character or not
-            search += append_one(view.substr(point))
+            ch = view.substr(point)
+            search += append_one(ch)
             point += 1
             self.on_change(search)
 
-            # now insert word characters
-            while point < limit and helper.is_word_char(point, True, separators):
-                ch = view.substr(point)
-                search += append_one(ch)
-                self.on_change(search)
-                point += 1
+            # If we started on whitespace, and the next character is whitespace, consume all the
+            # whitespace. Otherwise, if the next character is a word char, consume that word.
+            # Otherwise, we're done.
+
+            whitespace = '\t '
+
+            if point < limit:
+                if ch in whitespace and view.substr(point) in whitespace:
+                    while point < limit:
+                        ch = view.substr(point)
+                        if ch not in whitespace:
+                            break
+                        search += append_one(ch)
+                        self.on_change(search)
+                        point += 1
+                else:
+                    # now insert word characters
+                    while point < limit and helper.is_word_char(point, True, separators):
+                        ch = view.substr(point)
+                        search += append_one(ch)
+                        self.on_change(search)
+                        point += 1
+
         self.set_text(self.current.search)
+        self.in_append_from_cursor = False
 
     def quit(self):
         close = False
@@ -397,7 +464,7 @@ class ISearchInfo():
             return len(regions) - 1
 
 class StackItem():
-    def __init__(self, search, regions, selected, current_index, forward, wrapped):
+    def __init__(self, search, regions, selected, current_index, forward, wrapped, group_id=None):
         self.prev = None
         self.search = search
         self.regions = regions
@@ -406,6 +473,7 @@ class StackItem():
         self.forward = forward
         self.try_wrapped = False
         self.wrapped = wrapped
+        self.group_id = group_id
         if current_index >= 0 and regions:
             # add the new one to selected
             selected.append(regions[current_index])

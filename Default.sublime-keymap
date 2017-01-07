@@ -165,7 +165,10 @@
     {"keys": ["ctrl+r"], "command": "sbp_inc_search", "args": {"cmd": "next", "keep": false, "forward": false},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
-    {"keys": ["backspace"], "command": "sbp_inc_search", "args": {"cmd": "pop"},
+    {"keys": ["backspace"], "command": "sbp_inc_search", "args": {"cmd": "pop_group"},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    {"keys": ["shift+backspace"], "command": "sbp_inc_search", "args": {"cmd": "pop_one"},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
     {"keys": ["super+a"], "command": "sbp_inc_search", "args": {"cmd": "keep_all"},

@@ -1189,8 +1189,10 @@ class SbpIncSearchCommand(SbpTextCommand):
         else:
             if cmd == "next":
                 info.next(**kwargs)
-            elif cmd == "pop":
+            elif cmd == "pop_one":
                 info.pop()
+            elif cmd == "pop_group":
+                info.pop(True)
             elif cmd == "append_from_cursor":
                 info.append_from_cursor()
             elif cmd == "keep_all":

@@ -135,6 +135,9 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       * Will undo any of the above commands moving backwards in the commands run during the
         search one at a time. For example, it will go back to a previous match, delete a
         character from your search string, or remove the last kept match.
+      * When undoing a ``ctrl+w`` append from cursor command, the entire set of characters are
+        removed at once. However, if you use ``shift+backspace`` instead, it will remove just one
+        character at a time.
     * ``ctrl+g``: If your search is currently failing, takes you back to the last point your
       search was succeeding. When your search is succeeding, the search is
       aborted and you go back to the start.
