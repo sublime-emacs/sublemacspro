@@ -371,12 +371,9 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 
 ## Known Bugs/Issues
 
-  * If you're running an incremental search and you invoke another command that opens an input panel
-    (replacing the incremental search) things can get a little confusing. Unfortunately the
-    incremental search code still thinks its in control, and that causes unexpected behavior. If you
-    find that you cannot type any characters into the new input panel, trying clicking the mouse
-    anywhere in the main window to reset.
-
+  * If you're running an incremental search and you invoke another command that opens the overlay,
+    such as "Goto Anything..." or "Command Palette...", the search can get into a weird state. In
+    that situation, it's best to quit the command, cancel the search and then try again.
 
 ## Future
 

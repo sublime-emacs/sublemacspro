@@ -16,7 +16,11 @@ def isearch_info_for(view):
     else:
         window = view.window()
     if window:
-        return isearch_info.get(window.id(), None)
+        info = isearch_info.get(window.id(), None)
+        if info is not None and not info.is_valid():
+            info.finish(abort=False, input_panel_hack=True)
+            info = None
+        return info
     return None
 def set_isearch_info_for(view, info):
     window = view.window()
@@ -81,6 +85,16 @@ class ISearchInfo():
         self.forward = forward
         self.regex = regex
 
+        # REMIND: this is to help us identify when the input panel has been taken over by someone
+        # else
+        self.view_change_count = 0
+
+    def is_valid(self):
+        if self.view_change_count != self.input_view.change_count():
+            print("INVALID", self.view_change_count, self.input_view.change_count())
+            return False
+        return True
+
     #
     # Restart the search.
     #
@@ -97,6 +111,7 @@ class ISearchInfo():
         window = self.view.window()
         self.input_view = window.show_input_panel("%sI-Search:" % ("Regexp " if self.regex else "", ),
                                                   "", self.on_done, self.on_change, self.on_cancel)
+        self.view_change_count = self.input_view.change_count()
 
     def on_done(self, val):
         # on_done: stop the search, keep the cursors intact
@@ -107,6 +122,9 @@ class ISearchInfo():
         self.finish(abort=True)
 
     def on_change(self, val):
+        if self.input_view is None:
+            return
+        self.view_change_count = self.input_view.change_count()
         if self.in_changes > 0:
             # When we pop back to an old state, we have to replace the search string with what was
             # in effect at that state. We do that by deleting all the text and inserting the value
@@ -202,9 +220,9 @@ class ISearchInfo():
             si = si.prev
         return si
 
-    def finish(self, abort=False):
+    def finish(self, abort=False, input_panel_hack=False):
         util = self.util
-        if isearch_info_for(self.view) != self:
+        if not input_panel_hack and isearch_info_for(self.view) != self:
             return
         if self.current and self.current.search:
             save_search(self.current.search)
@@ -238,7 +256,8 @@ class ISearchInfo():
         self.view.erase_regions(REGION_FIND)
         self.view.erase_regions(REGION_SELECTED)
         clear_isearch_info_for(self.view)
-        self.hide_panel()
+        if not input_panel_hack:
+            self.hide_panel()
 
     def update(self):
         si = self.current
