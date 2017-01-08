@@ -2,14 +2,18 @@
 
 The reasoning behind writing these set of functions is that we love Emacs. On the other hand,
 we cannot move to another editor, since many of those hyped editors share that they don't
-provide the keybindings that we love and have embraced over time.
+provide the key bindings that we love and have embraced over time.
 
 Then, we found Sublime Text. A completely customizable editor allowing you to easily modify
 all default behaviors so that they suit your editing style and can be made Emacs awesome.
 
-So, sublemacspro bridges the gap. Thus, it brings Emacs keybindings and sugar to Sublime Text.
-Even though Emacs lives from the plugins, we believe it is way easier to write new plugins in
-Python and inte them in an Emacs-ish way to Sublime Text than writing them in Lisp.
+The goal is to bring "emacs essentials" to Sublime Text. This includes things like the using classic
+emacs key bindings, subtle differences in word and line motion, the behavior of the ctrl+k command,
+etc. But we have also embraced Sublime's multi-cursor editing while making these changes, so that
+the Emacs mark and kill/yank commands are fully multi-cursor aware. Incremental search is another
+example, where you can keep or skip matches along the way so that when you're done the kept matches
+are available as cursors for further editing.
+
 
 ## Installation
 
@@ -375,8 +379,22 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 ## Known Bugs/Issues
 
   * If you're running an incremental search and you invoke another command that opens the overlay,
-    such as "Goto Anything..." or "Command Palette...", the search can get into a weird state. In
-    that situation, it's best to quit the command, cancel the search and then try again.
+    such as "Goto Anything..." or "Command Palette...", the search can get into a weird state and
+    interfere with the overlay. To deal with that, we override the default key bindings for those
+    commands and handle them properly. If you have your own bindings for those commands, you should
+    copy this:
+
+    ```json
+    {"keys": ["super+shift+p"], "command": "sbp_inc_search_escape",
+        "args": {"next_cmd": "show_overlay", "next_args": {"overlay": "command_palette"}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    {"keys": ["super+t"], "command": "sbp_inc_search_escape",
+        "args": {"next_cmd": "show_overlay", "next_args": {"overlay": "goto", "show_files": true}},
+        "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
+    },
+    ```
+
 
 ## Future
 
@@ -396,8 +414,8 @@ and make this a fast and beautiful Emacs replacement.
     and yank command for the kill ring.
 
 ### Authors and Contributors
-2012-2017 Martin Grund (@grundprinzip), Brian M. Clapper (@bmc), Jonathan Payne (@canoeberry),
-Jeff Spencer (@excetara2)
+2012-2017 Jonathan Payne (@canoeberry), Jeff Spencer (@excetara2), Martin Grund (@grundprinzip),
+Brian M. Clapper (@bmc)
 
 * @dustym - focus groups
 * @phildopus - for goto-open-file

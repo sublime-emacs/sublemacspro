@@ -83,13 +83,15 @@ class CmdWatcher(sublime_plugin.EventListener):
         view.erase_status(JOVE_STATUS)
 
     def on_window_command(self, window, cmd, args):
-        # Some window commands take us to new view. Here's where we abort the isearch if that happens.
         info = isearch_info_for(window)
+        if info is None:
+            return None
+
+        # Some window commands take us to new view. Here's where we abort the isearch if that happens.
         def check():
-            if info is not None and window.active_view() != info.view:
+            if window.active_view() != info.view:
                 info.done()
-        if info is not None:
-            sublime.set_timeout(check, 0)
+        sublime.set_timeout(check, 0)
 
     #
     # Override some commands to execute them N times if the numberic argument is supplied.
@@ -1223,7 +1225,10 @@ class SbpIncSearchEscapeCommand(SbpTextCommand):
     def run_cmd(self, util, next_cmd, next_args):
         info = isearch_info_for(self.view)
         info.done()
-        info.view.run_command(next_cmd, next_args)
+        if next_cmd in ("show_overlay",):
+            sublime.active_window().run_command(next_cmd, next_args)
+        else:
+            info.view.run_command(next_cmd, next_args)
 
 #
 # Indent for tab command. If the cursor is not within the existing indent, just call reindent. If
