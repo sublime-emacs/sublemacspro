@@ -1,19 +1,24 @@
 # Welcome to SublemacsPro.
 
-The reasoning behind writing these set of functions is that we love Emacs. On the other hand,
-we cannot move to another editor, since many of those hyped editors share that they don't
-provide the key bindings that we love and have embraced over time.
+We love Emacs and some of us have been using Emacs for 30 years or more! Our motivation for this
+project is to bring the right amount of the Emacs experience to Sublime, while also recognizing that
+Sublime has some excellent ideas of its own. We appreciate the careful thought the Emacs creator put
+into such basic things as cursor motion, kill and mark rings, incremental search, etc. However,
+Sublime brings with it an extremely powerful multi-cursor concept which is worth embracing. This
+package tries to marry the two where possible and appropriate.
 
-Then, we found Sublime Text. A completely customizable editor allowing you to easily modify
-all default behaviors so that they suit your editing style and can be made Emacs awesome.
+The hope is that when you fire up this plugin, your fingers will find many of the key bindings and
+associated behavior completely familiar. We've implemented the universal argument concept (ctrl+u
+and meta-Digit), and made all the character, word, line and s-expression commands behave very close
+to the original Emacs. The ctrl+k command is identical to Emacs in almost every way, except it now
+includes a powerful multi-cursor implementation that makes sense. Incremental search also is very
+familiar, except it has additional features for keeping or skipping matches along the way, so that
+when you're done the "kept matches" are available as multi-cursors for further editing.
 
-The goal is to bring "emacs essentials" to Sublime Text. This includes things like the using classic
-emacs key bindings, subtle differences in word and line motion, the behavior of the ctrl+k command,
-etc. But we have also embraced Sublime's multi-cursor editing while making these changes, so that
-the Emacs mark and kill/yank commands are fully multi-cursor aware. Incremental search is another
-example, where you can keep or skip matches along the way so that when you're done the kept matches
-are available as cursors for further editing.
+Everything else is still Sublime and all that that implies: silky smooth performance, great built-in
+automatic function tagging, great single-file, multi-language support, and so on.
 
+See below for details.
 
 ## Installation
 
@@ -382,7 +387,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     such as "Goto Anything..." or "Command Palette...", the search can get into a weird state and
     interfere with the overlay. To deal with that, we override the default key bindings for those
     commands and handle them properly. If you have your own bindings for those commands, you should
-    copy this:
+    copy these examples:
 
     ```json
     {"keys": ["super+shift+p"], "command": "sbp_inc_search_escape",

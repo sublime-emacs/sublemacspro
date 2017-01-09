@@ -209,6 +209,10 @@
         "args": {"next_cmd": "move", "next_args": {"by": "lines", "forward": false}},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
+
+    //
+    // Command palette commands that need help escaping isearch.
+    //
     {"keys": ["super+shift+p"], "command": "sbp_inc_search_escape",
         "args": {"next_cmd": "show_overlay", "next_args": {"overlay": "command_palette"}},
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
