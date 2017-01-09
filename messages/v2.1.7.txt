@@ -44,12 +44,12 @@ New: Switch to View Command
 
 New: All View Auto Complete
 
-    I have been using the All Autocomplete plugin for a while but occasionally couldn't understand why
-    strings were not being found. I discovered that there are two reasons: one is it has a built-in
-    limit of 20 views to search, and the other was that there are issues with some syntaxes which
-    prevent some symbols from being found. The issues with specific syntaxes can be considered bugs with
-    those syntaxes, but it doesn't help since I am not going to fix those syntaxes. So I have fixed both
-    those problems to the best of my ability by writing my own completion.
+    I have been using the All Autocomplete plugin for a while but occasionally couldn't understand
+    why strings were not being found. I discovered that there are two reasons: one is it has a
+    built-in limit of 20 views to search, and the other was that there are issues with some syntaxes
+    which prevent some symbols from being found. The issues with specific syntaxes can be considered
+    bugs with those syntaxes, but it doesn't help since I am not going to fix those syntaxes. So I
+    have fixed both those problems to the best of my ability by writing my own completion.
 
     It is disabled by default.
 
@@ -68,12 +68,12 @@ Fix: Quit Command (ctrl+g)
     or last cursor.
 
     If the start AND the end of the current selection or the set of cursors is NOT currently
-    visible, the plugin automatically chooses the end closest to the current view.
+    visible, the plugin automatically chooses the end closest to the current visible area.
 
 New: Close Current View
 
-    This command bound closes the current view but then selects the most recently used view (like
-    emacs) rather than one of the adjacent views.
+    This command closes the current view but then selects the most recently used view (like emacs)
+    rather than one of the adjacent views.
 
 New: Close Older Views Commands
 
@@ -93,7 +93,7 @@ Improve: Choose and Yank Command
     Also this command pulls in the external clipboard before showing you the choices. It used to be
     the case that only the yank command pulled in the external clipboard.
 
-    Here is the default bindings:
+    Here is the default binding:
 
     {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
 
@@ -103,9 +103,9 @@ Improve: Move To Paragraph Command
 
     It is also now multi-cursor aware.
 
-    WARNING: The direction argument was reversed from what it was supposed to be so if you have your
-    own bindings for this command you will have to change direction=1 to direction=-1 and vice
-    versa.
+    WARNING: The direction argument was reversed from what it was supposed to be, and has been
+    fixed, so if you have your own bindings for this command you will have to change direction=1 to
+    direction=-1 and vice versa.
 
 New: Jump to Char/String and Zap to Char/String Commands
 
