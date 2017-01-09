@@ -1,6 +1,17 @@
 Sublemacs Pro v2.1.7 Update
 =============================
 
+This is a huge update. The details are below.
+
+Meanwhile, we have updated the Readme at the github repo with details on all the key bindings and
+functionality of our Emacs plugin and hope that you find it useful:
+
+    https://github.com/grundprinzip/sublemacspro/blob/master/README.md
+
+Read on for all the changes in this release.
+
+
+
 I-Search
 
     Fixed a bug where using the previous search string would fail.
