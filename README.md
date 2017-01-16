@@ -1,11 +1,26 @@
-# Welcome to SublemacsPro.
+# Welcome to Emacs Pro Essentials (formerly Sublemacspo)
 
-We love Emacs and some of us have been using Emacs for 30 years or more! Our motivation for this
-project is to bring the right amount of the Emacs experience to Sublime, while also recognizing that
-Sublime has some excellent ideas of its own. We appreciate the careful thought the Emacs creator put
-into such basic things as cursor motion, kill and mark rings, incremental search, etc. However,
-Sublime brings with it an extremely powerful multi-cursor concept which is worth embracing. This
-package tries to marry the two where possible and appropriate.
+We are huge fans of Emacs and Sublime Text. Our motivation for this project has been to bring the
+right amount of the Emacs experience to Sublime, while also recognizing that Sublime has some
+excellent ideas of its own. We appreciate the careful thought the Emacs creator put into such basic
+things as cursor motion, kill and mark rings, incremental search, etc. However, Sublime brings with
+it an extremely powerful multi-cursor concept and others which are worth embracing as well. Here we
+have produced a careful implementation of Emacs semantics and enhanced them with modern Sublime
+concepts where possible and appropriate.
+
+### Key Features Overview
+  * Navigation and Kill Commands for Characters/Words/Lines/S-Expressions with Multi-cursor Support
+  * Universal, Numeric, and Negative Argument Handling
+  * Kill Ring with Multi-cursor and Sublime Quick Panel Support
+  * Mark Ring with Multi-cursor Support
+  * Incremental Search with History (regular and regex supported) and Multi-cursor
+    Features
+  * Frame (Window), Window (Window Pane), and Buffer (View) Commands
+  * Switch to Buffer (View) Command
+  * Change Case Commands (upper/lower/title/camelCase/under_score supported)
+  * Zap/Jump to Char and String with Multi-cursor Support
+  * Rectangle and Text/Point Register Commands (not Multi-cursor aware yet)
+  * All Buffers (Views) Auto Complete
 
 The hope is that when you fire up this plugin, your fingers will find many of the key bindings and
 associated behavior completely familiar. We've implemented the universal argument concept (ctrl+u
@@ -16,44 +31,31 @@ familiar, except it has additional features for keeping or skipping matches alon
 when you're done the "kept matches" are available as multi-cursors for further editing.
 
 Everything else is still Sublime and all that that implies: silky smooth performance, great built-in
-automatic function tagging, great single-file, multi-language support, and so on.
+automatic function tagging, great single-file/multi-language support, and so on.
 
 See below for details.
 
 ## Installation
 
-To install SublemacsPro you have to install [Package Control]
+To install Emacs Pro Essentials you have to install [Package Control]
 (http://wbond.net/sublime_packages/package_control) as an automatic package manager for
-Sublime Text. Now, you can easily install SublemacsPro and your installation will never be
+Sublime Text. Now, you can easily install Emacs Pro Essentials and your installation will never be
 outdated. After you install Package Control, hit ``[CMD]-Shift P`` on Mac or ``[Ctrl]-Shift
 P`` on Windows\Linux to open up the command palette and type ``install``. Now select ``Package
 Control: Install Package``. This will load all packages from the remote repository and you can
-select ``sublemacspro`` from the drop-down list.
+select ``Emacs Pro Essentials`` from the drop-down list.
 
 ## Sublime Text 2 and 3 Support
 
-The main development for Sublemacs is now Sublime Text 3 only. However, there is still the
-branch using the earlier codebase for ST2.
+The main development for Emacs Pro Essentials is now Sublime Text 3 only. There is still the branch
+using the earlier codebase for ST2 but it honestly doesn't have most of the features mentioned.
 
-[https://github.com/grundprinzip/sublemacspro/tree/st2](https://github.com/grundprinzip/sublemacspro/tree/st2)
+[https://github.com/sublime-emacs/sublemacspro/tree/st2](https://github.com/sublime-emacs/sublemacspro/tree/st2)
 
 ## Features and Key Bindings
 The following features have largely been implemented from scratch and are only supported with
-Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/Linux or
-``option`` on the Mac. ``super`` is the ``Command`` key on the Mac.
-
-### Key Features Overview
-  * Emacs-style Universal, Numeric, and Negative Argument Handling
-  * Emacs-style Kill Ring with Multi-cursor Support and Sublime Quick Panel Selection
-  * Emacs-style Mark Ring with Multi-cursor Support
-  * Emacs-style Incremental Search with History (regular and regex supported)
-  * Emacs-style Frame (Window), Window (Window Pane), and Buffer (View) Commands
-  * Emacs-style Switch to Buffer (View) Command (remembers most recent views)
-  * Change Case Commands (upper,lower,title,camelCase, and Underscore supported)
-  * Zap/Jump to Char and String with Multi-cursor Support
-  * Rectangle and Text/Point Register Commands (not Multi-cursor aware)
-  * Emacs Navigation Commands
-  * All Buffers (Views) Auto Complete
+Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/Linux or the
+``option`` key on the Mac. ``super`` is the ``Command`` key on the Mac.
 
 #### Emacs-style Universal, Numeric, and Negative Argument Handling
   * ``ctrl+u``: Emacs universal argument command (so 4^n where n is the number of times
@@ -62,11 +64,11 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
   * ``meta+0`` ... ``meta+9``: Emacs numeric arguments - you provide a prefix using the numeric
     arguments before a command to run it that many times. E.g., ``meta+2 meta+3 ctrl+f`` means go
     forward 23 characters.
-  * ``alt+-``: Emacs negative argument command - reverses the direction of the command. E.g.,
-    ``meta+2 meta+3 alt+- ctrl+f`` means go backward 23 characters.
+  * ``meta+-``: Emacs negative argument command - reverses the direction of the command. E.g.,
+    ``meta+- meta+2 meta+3 ctrl+f`` means go backward 23 characters.
 
 #### Emacs-style Kill Ring with Multi-cursor Support and Sublime Quick Panel Selection
-  * *Commands that utilize the kill ring
+  * *Commands that utilize the kill ring*
     * ``ctrl+w`` and ``meta+w``: Kill (cut) and copy to the top of the kill ring.
     * ``ctrl+y``: Yank (Paste) from the last entry put into the kill ring.
     * ``meta+y`` and ``shift+meta+y``: Yank-pop forward and backward on the kill ring, but
@@ -100,7 +102,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       fewer cursors than your kill, it will use just as many as it needs.
 
 #### Emacs-style Mark Ring with Multi-cursor Support
-  * *Commands that utilize the kill ring*
+  * *Commands that utilize the mark ring*
     * ``ctrl+space``: Push a new mark onto the ring
     * ``ctrl+x ctrl+x``: Switch point and mark
     * ``ctrl+space ctrl+space``: Push a new mark and activate the mark, which means *highlight
@@ -114,15 +116,17 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+u ctrl+space``: Pop off the mark/s at the top of the mark ring (most recent
       entry). This will move the cursor to the mark and put the current active mark at that
       location.
-  * *Kill ring implementation details*
-    * Commands such as ``ctrl+y``, ``meta+y``, ``meta+<``, and ``meta+>`` set the mark
-      automatically as they do (and must) in emacs.
+  * *Mark ring implementation details*
+    * ``ctrl+y`` sets the mark automatically as it does (and must for ``meta+y`` to work properly)
+      in emacs.
+    * Commands like ``meta+<`` and ``meta+>`` also set the mark automatically.
     * If you use the mouse to make a selection, it will set the mark and it will become the
       emacs region as well.
   * *Multi-cursor support*
     * You can set the mark with multiple cursors and pop off the mark ring to marks with multiple
       cursors. Furthermore, you can kill and copy using those cursors, and then yank them later as
-      well. All the above commands for manipulating the mark ring (and kill ring) will continue to
+      well.
+    * All the above commands for manipulating the mark ring (and kill ring) will continue to
       work with multiple cursors.
 
 #### Emacs-style Incremental Search with History (regular and regex supported)
@@ -137,9 +141,10 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+r``: Move to previous match.
     * ``meta+d``: Keep current match as a future cursor and move to next.
     * ``ctrl+w``: The characters in front of your cursor are appended to your search string.
-    * ``meta+a``: Keep all remaining matches from your current position to the end of the file
-      (or beginning if you're doing a reverse search) are added to the kept matches.
-      * Pressing ``meta+a meta+a`` will wraparound so select all the matches in the whole file.
+    * ``meta+a``: Keep all remaining matches from your current position to the end of the file (or
+      beginning if you're doing a reverse search). Kept matches are are saved as future cursors when
+      isearch is done.
+      * Pressing a second ``meta+a`` will wraparound, selecting all the matches in the whole file.
     * ``backspace``: Move backward in the search history (undo).
       * Will undo any of the above commands moving backwards in the commands run during the
         search one at a time. For example, it will go back to a previous match, delete a
@@ -147,9 +152,9 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       * When undoing a ``ctrl+w`` append from cursor command, the entire set of characters are
         removed at once. However, if you use ``shift+backspace`` instead, it will remove just one
         character at a time.
-    * ``ctrl+g``: If your search is currently failing, takes you back to the last point your
-      search was succeeding. When your search is succeeding, the search is
-      aborted and you go back to the start.
+    * ``ctrl+g``: If your search is currently failing, takes you back to the last point your search
+      was succeeding. When your search is succeeding, the search is aborted and you go back to the
+      start.
     * ``up``: Access previous history in the search history.
     * ``down``: Access next history in the search history.
     * ``enter``: End your search with all the kept items as multi-cursors.
@@ -164,8 +169,16 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * I-search has support for remembering previous searches. You can access previous searches
       with the up and down arrow keys after you initiate a search.
   * *Find and Replace*
-    * ``alt+r``: Not implemented in Sublemacspro so this brings up the default find and
+    * ``meta+r``: Not implemented in Emacs Pro Essentials so this brings up the default find and
       replace of sublime text.
+  * *Increased Efficiencies*
+    * If you use ``alt`` for the meta binding, then setting ``alt+s`` to move to next match and
+      ``alt+r`` to move to previous match with ``alt+d`` already set to keep match can make moving
+      through iSearch quicker when selecting matches.
+     * Example binding for ``alt+r`` is below (for ``alt+s`` set ``forward`` to ``true``:  
+       {"keys": ["alt+r"], "command": "sbp_inc_search", "args": {"cmd":
+       "next", "keep": false, "forward": false}, "context": [ {"key": "i_search_active"}, {"key":
+       "panel_has_focus"} ] },
 
 #### Emacs Frame (Window), Window (Window Pane), and Buffer (View) Commands
   * *Frame (Window) Commands*
@@ -186,7 +199,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+x }`` or ``ctrl+shift+j``: Make selected window pane narrower.
     * ``ctrl+x {`` or ``ctrl+shift+l``: Make selected window pane shorter.
       * Resize window pane commands accept universal, numeric, and negative arguments so
-        ``alt+5 ctrl+x ^`` will make the selected window taller by 5 times.
+        ``meta+5 ctrl+x ^`` will make the selected window taller by 5 times.
   * *View Commands*
     * ``ctrl+x k``: Delete current view from this window pane.
     * ``ctrl+x K``: Delete oldest n views.
@@ -221,7 +234,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 
 #### Go to File or Symbol
   * ``ctrl+x ctrl+f``: Go to file in a quick panel as implemented by Sublime.
-  * ``ctrl+alt+g``: Go to symbol in the quick panel as implemented by Sublime.
+  * ``ctrl+meta+g``: Go to symbol in the quick panel as implemented by Sublime.
 
 #### Change Case Commands
   * ``meta+c``, ``meta+l``, ``meta+u``: capitalize, lower case, upper case words using the
@@ -233,16 +246,16 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     region/s or the emacs region/s if nothing is highlighted.
     * This use the same ``sbp_change_case`` command as above with the ``use_region`` argument
       set to ``true``, therefor, no ``direction`` argument is needed.
-  * ``ctrl+x ctrl+super+c``, ``ctrl+x ctrl+super+u``: Convert from Underscores to camelCase
+  * ``ctrl+x ctrl+meta+c``, ``ctrl+x ctrl+meta+u``: Convert from Underscores to camelCase
     and vice versa. They operate on highlighted region/s or emacs region/s as ``ctrl+x
     ctrl+u`` above and use the same ``sbp_change_case`` command setting the ``mode`` to
     ``camel`` or ``underscore``.
 
 #### Zap/Jump to Char and String
   * *Zap and Jump Commands*
-    * ``alt+z``: Zap-to-char, delete from current point to the next occurrence of a character and
+    * ``meta+z``: Zap-to-char, delete from current point to the next occurrence of a character and
       includes deleting the character.
-    * ``shift+alt+z`` zap-up-to-char, delete from current point up to but not including the next
+    * ``shift+meta+z`` zap-up-to-char, delete from current point up to but not including the next
       occurrence of a character.
     * ``ctrl+x z`` zap-to-string, delete from current point until next occurrence of the string and
       includes deleting the string.
@@ -291,12 +304,12 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+p``: Move up a line.
     * ``ctrl+a``: Go to beginning of line (ignores wrapped lines always goes to very
       beginning).
-    * ``alt+m``: Go back to the indentation at the beginning of the line (same as ``ctrl+a``
+    * ``meta+m``: Go back to the indentation at the beginning of the line (same as ``ctrl+a``
       except moves back to the indentation instead of the very start of the line).
     * ``ctrl+e``: Go to end of line (ignores wrapped lines always goes to very end).
-    * ``alt+a``: Go back to soft beginning of the line (doesn't ignore wrapped lines).
+    * ``meta+a``: Go back to soft beginning of the line (doesn't ignore wrapped lines).
   * *Paragraph Level*
-    * ``ctrl+alt+]`` and ``ctrl+alt+[``: Navigate forward and backward paragraphs.
+    * ``ctrl+meta+]`` and ``ctrl+meta+[``: Navigate forward and backward paragraphs.
   * *Page Level*
     * ``meta+,`` and ``meta+.``: Move to beginning and end of the current window view,
       respectively.
@@ -304,7 +317,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
         to ``true`` and will push the mark before going to the beginning or end of the current
         window view.
     * ``ctrl+v``: Page down.
-    * ``alt+v``: Page up.
+    * ``meta+v``: Page up.
     * ``ctrl+l``: Center current line in view.
       * Used with numeric arguments, put the current line at the Nth line in the view (E.g. ``meta+5
         ctrl+l`` moves the current line to the 5th line in the view.
@@ -339,11 +352,11 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+d``: Right delete.
     * ``backspace``: Left delete.
   * *Wrap Lines*
-    * ``alt+j``: Wrap lines using sublime built in function to 100 characters.
+    * ``meta+j``: Wrap lines using sublime built in function to 100 characters.
   * *Indent/Unindent*
     * ``ctrl+c, >``: Indent.
     * ``ctrl+c, <``: Unindent.
-    * ``alt+i``: Insert tab character at cursor ("\t").
+    * ``meta+i``: Insert tab character at cursor ("\t").
   * *Macros*
     * ``ctrl+x, (``: Toggle macro recording.
     * ``ctrl+x, )``: Toggle macro recording.
@@ -351,26 +364,27 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
   * *Exit*
     * ``ctrl+x, ctrl+c``: Save this file.
   * *Shift Indentation of Regions*
-    * ``alt+]``: Shift active mark region or current highlighted region to the right one
+    * ``meta+]``: Shift active mark region or current highlighted region to the right one
     indentation.
-    * ``alt+[``: Shift active mark region or current highlighted region to the left one
+    * ``meta+[``: Shift active mark region or current highlighted region to the left one
     indentation.
   * *White Space Removal*
     * ``meta+backslash``: Delete white space around point.
   * *Auto Complete*
-    * ``alt+/``: Used to bring up Sublime's Auto Complete window.
-    * ``alt+h``: Used to bring up Sublime's Auto Complete window.
+    * ``meta+/``: Used to bring up Sublime's Auto Complete window.
+    * ``meta+h``: Used to bring up Sublime's Auto Complete window.
   * *Find and Replace*
-    * ``alt+r``: Not implemented so brings up default find and replace of sublime.
+    * ``meta+r``: Not implemented so brings up default find and replace of sublime.
 
 ## Important Settings File Options
 
 #### Kill Ring Size
   * Settable by ``sbp_kill_ring_size``.
 
-#### Use Alt Bindings (as well as alt+ for digits) or Super (Command on Mac) Bindings
-  * Default is ``sbp_use_alt_bindings`` set to ``true`` and ``sbp_use_super_bindings`` to false.
-    - If you prefer super bindings swap these.
+#### Use Alt Bindings (as well as meta+ for digits) or Super (Command on Mac) Bindings
+  * Default is ``sbp_use_alt_bindings`` set to ``true`` and ``sbp_use_super_bindings`` to ``false``.
+    - If you prefer to use super bindings then swap these or if you prefer to have both super
+      and alt bindings then set both to ``true``.
   * To insert digits as their normal characters instead of using Emacs-style numeric arguments,
     change ``sbp_alt+digit_inserts`` to ``true``.
 
@@ -408,7 +422,8 @@ and make this a fast and beautiful Emacs replacement.
 
 #### Possible Future Package Additions
   * Supplying a numeric argument to ``ctrl+d`` and ``Backspace`` should append to the kill
-    ring.
+    ring. Furthermore, adding killing and yanking a line backwards to append to the kill ring
+    (``meta+0 ctrl+k`` or ``ctrl+u 0 ctrl+k``).
   * Turn the last n marks into multiple cursors.
   * Switch to view works across windows (frames) and not just within a single window.
   * Make the registers work with multi-cursors.

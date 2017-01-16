@@ -1,17 +1,17 @@
-Thank you for installing Sublemacs Pro
-======================================
+Thank you for installing Emacs Pro Essentials
+=============================================
 
-Sublemacspro is an Emacs-like integration into Sublime and as a consequence
+Emacs Pro Essentials is an Emacs-like integration into Sublime and as a consequence
 CHANGES A LOT OF KEYBOARD SHORTCUTS or even OVERWRITES shortcuts of other
 plugins.
 
-To learn more about the features of Sublemacs, go to the Github page
+To learn more about the features of Emacs Pro Essentials, go to the Github page:
 
-https://github.com/grundprinzip/sublemacspro
+    https://github.com/sublime-emacs/sublemacspro
 
 and checkout the README file.
 
 If you find bugs or request features, do not hesitate to drop us a line or
 leave an issue request at Github.
 
-Thanks for using Sublemacs!
+Thanks for using Emacs Pro Essentials!

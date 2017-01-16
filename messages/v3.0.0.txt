@@ -1,5 +1,13 @@
-Sublemacs Pro v2.1.7 Update
-=============================
+Emacs Pro Essentials v3.0.0 Update
+==================================
+
+This version of the plugin contains a name change from Sublemacspro to Emacs Pro Essentials.
+
+This change contains a bunch of features that were first released very recently in 2.1.7, but there
+was a bug with the messages which caused this list of changes not to appear. So here they are again,
+with the addition of the name change.
+
+----------
 
 This is a huge update. The details are below.
 
@@ -9,6 +17,7 @@ functionality of our Emacs plugin and hope that you find it useful:
     https://github.com/sublime-emacs/sublemacspro/blob/master/README.md
 
 Read on for all the changes in this release.
+
 
 
 I-Search
@@ -96,7 +105,7 @@ Improve: Choose and Yank Command
 
     {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
 
-Improve: Move By Paragraph Command
+Improve: Move To Paragraph Command
 
     This command has been improved in the way it moves over paragraphs.
 
@@ -180,6 +189,16 @@ New: Convert Between camelCase and Underscores
 
     {"keys": ["ctrl+x", "ctrl+super+u"], "command": "sbp_change_case", "args": {"mode": "underscore", "use_region": true}},
     {"keys": ["ctrl+x", "ctrl+super+c"], "command": "sbp_change_case", "args": {"mode": "camel", "use_region": true}},
+
+
+
+Notes On The Name Change
+
+    We felt it was time to put Emacs in the name of this plugin and we wanted to get the point
+    across that we've included essential features of Emacs. The github repo name, however, is still
+    sublemacspro so that all the existing settings files continue to work and there is no
+    unnecessary confusion. Also all the command names are still prefixed with "sbp_" so all your
+    private key bindings will also continue to work.
 
 Credits
 

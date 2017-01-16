@@ -2,10 +2,13 @@ import re
 import sublime, sublime_plugin
 from sublemacspro.lib.misc import SettingsHelper
 
-# initialized in plugin_loaded
+# initialized below
 kill_ring_size = kill_index = pop_index = entries = None
 
-def plugin_loaded():
+#
+# Called from JOVE when the plugin has loaded.
+#
+def initialize():
     global kill_ring, kill_ring_size, kill_index, pop_index, entries
 
     settings_helper = SettingsHelper()
@@ -67,6 +70,10 @@ def get_popup_sample(view):
             break
     return result
 
+#
+# Sets the current kill ring index. Normally this is managed within this file, but choose and yank
+# sets the index to the chosen index from the overlay.
+#
 def set_current(index):
     global kill_index
 

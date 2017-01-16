@@ -21,17 +21,18 @@ settings_helper = None
 default_sbp_sexpr_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
 default_sbp_word_separators = "./\\()\"'-_:,.;<>~!@#$%^&*|+=[]{}`~?";
 
-bracket_highlighter_installed = None
+is_bracket_highlighter_installed = None
 
-def plugin_loaded():
-    global bracket_highlighter_installed
-    if bracket_highlighter_installed == None:
+def bracket_highlighter_installed():
+    global is_bracket_highlighter_installed
+    if is_bracket_highlighter_installed is None:
         try:
             import BracketHighlighter.bh_core as bh_core
         except ImportError as e:
-            bracket_highlighter_installed = False
+            is_bracket_highlighter_installed = False
         else:
-            bracket_highlighter_installed = True
+            is_bracket_highlighter_installed = True
+    return is_bracket_highlighter_installed
 
 def pluralize(string, count, es="s"):
     if count == 1:
@@ -578,7 +579,7 @@ class CmdUtil:
 
             return None
 
-        return goto_bracket_highlighter() if bracket_highlighter_installed else goto_orig()
+        return goto_bracket_highlighter() if bracket_highlighter_installed() else goto_orig()
 
     #
     # Run the specified command and args in the current view. If point is specified set point in the

@@ -9,7 +9,7 @@ from copy import copy
 
 from sublemacspro.lib.misc import *
 from sublemacspro.lib import kill_ring
-from sublemacspro.lib.isearch import *
+from sublemacspro.lib import isearch
 
 import Default.paragraph as paragraph
 from . import sbp_layout as ll
@@ -29,7 +29,7 @@ class ViewWatcher(sublime_plugin.EventListener):
         CmdUtil(view).toggle_active_mark_mode(False)
 
     def on_activated_async(self, view):
-        info = isearch_info_for(view)
+        info = isearch.info_for(view)
         if info and not view.settings().get("is_widget"):
             # stop the search if we activated a new view in this window
             info.done()
@@ -43,7 +43,7 @@ class ViewWatcher(sublime_plugin.EventListener):
             return False
 
         if key == "i_search_active":
-            return test(isearch_info_for(view) is not None)
+            return test(isearch.info_for(view) is not None)
         if key == "sbp_has_visible_mark":
             return CmdUtil(view).state.active_mark
         if key == "sbp_use_alt_bindings":
@@ -83,7 +83,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         view.erase_status(JOVE_STATUS)
 
     def on_window_command(self, window, cmd, args):
-        info = isearch_info_for(window)
+        info = isearch.info_for(window)
         if info is None:
             return None
 
@@ -97,7 +97,7 @@ class CmdWatcher(sublime_plugin.EventListener):
     # Override some commands to execute them N times if the numberic argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
-        if isearch_info_for(view) is not None:
+        if isearch.info_for(view) is not None:
             if cmd not in ('sbp_inc_search', 'sbp_inc_search_escape'):
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
             return
@@ -118,7 +118,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         #  Process events that create a selection. The hard part is making it work with the emacs region.
         #
         if cmd == 'drag_select':
-            info = isearch_info_for(view)
+            info = isearch.info_for(view)
             if info:
                 info.done()
 
@@ -1181,12 +1181,12 @@ class SbpIncSearchFromMenuCommand(SbpTextCommand):
 
 class SbpIncSearchCommand(SbpTextCommand):
     def run_cmd(self, util, cmd=None, **kwargs):
-        info = isearch_info_for(self.view)
+        info = isearch.info_for(self.view)
         if info is None or cmd is None:
             regex = kwargs.get('regex', False)
             if util.state.argument_supplied:
                 regex = not regex
-            info = set_isearch_info_for(self.view, ISearchInfo(self.view, kwargs['forward'], regex))
+            info = isearch.set_info_for(self.view, isearch.ISearchInfo(self.view, kwargs['forward'], regex))
             info.open()
         else:
             if cmd == "next":
@@ -1223,7 +1223,7 @@ class SbpIncSearchCommand(SbpTextCommand):
 class SbpIncSearchEscapeCommand(SbpTextCommand):
     # unregistered = True
     def run_cmd(self, util, next_cmd, next_args):
-        info = isearch_info_for(self.view)
+        info = isearch.info_for(self.view)
         info.done()
         if next_cmd in ("show_overlay",):
             sublime.active_window().run_command(next_cmd, next_args)
@@ -1506,5 +1506,8 @@ def dedup_views(window):
     window.focus_group(group)
 
 def plugin_loaded():
+    kill_ring.initialize()
+    isearch.initialize()
+
     # preprocess this module
     preprocess_module(sys.modules[__name__])

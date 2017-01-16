@@ -22,7 +22,7 @@ isearch_current = 0
 # most recently accessed via up/down arrows
 isearch_index = 0
 
-def plugin_loaded():
+def initialize():
     global isearch_history_settings, isearch_history, isearch_current, isearch_history_size
 
     isearch_history_size = SettingsHelper().get("sbp_isearch_history_size", 64)
@@ -44,7 +44,7 @@ def plugin_loaded():
 
 
 isearch_info = dict()
-def isearch_info_for(view):
+def info_for(view):
     if isinstance(view, sublime.Window):
         window = view
     else:
@@ -56,11 +56,11 @@ def isearch_info_for(view):
             info = None
         return info
     return None
-def set_isearch_info_for(view, info):
+def set_info_for(view, info):
     window = view.window()
     isearch_info[window.id()] = info
     return info
-def clear_isearch_info_for(view):
+def clear_info_for(view):
     window = view.window()
     del(isearch_info[window.id()])
 
@@ -267,7 +267,7 @@ class ISearchInfo():
 
     def finish(self, abort=False, input_panel_hack=False):
         util = self.util
-        if not input_panel_hack and isearch_info_for(self.view) != self:
+        if not input_panel_hack and info_for(self.view) != self:
             return
         if self.current and self.current.search:
             save_search(self.current.search)
@@ -300,7 +300,7 @@ class ISearchInfo():
         # erase our regions
         self.view.erase_regions(REGION_FIND)
         self.view.erase_regions(REGION_SELECTED)
-        clear_isearch_info_for(self.view)
+        clear_info_for(self.view)
         if not input_panel_hack:
             self.hide_panel()
 

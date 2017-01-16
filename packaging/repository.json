@@ -1,17 +1,17 @@
 [
-	{
-		"name": "Emacs Essentials",
-		"previous_names": ["sublemacspro"],
-		"details": "https://github.com/sublime-emacs/emacs-essentials",
-		"releases": [
-			{
-				"sublime_text": "<3000",
-				"details": "https://github.com/grundprinzip/sublemacspro/tree/st2"
-			},
-			{
-				"sublime_text": ">=3000",
-				"details": "https://github.com/grundprinzip/sublemacspro/tags"
-			}
-		]
-	}
+		{
+			"name": "Emacs Pro Essentials",
+			"previous_names": ["sublemacspro"],
+			"details": "https://github.com/sublime-emacs/sublemacspro",
+			"releases": [
+				{
+					"sublime_text": "<3000",
+					"branch": "st2"
+				},
+				{
+					"sublime_text": ">=3000",
+					"tags": true
+				}
+			]
+		},
 ]

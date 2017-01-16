@@ -15,4 +15,4 @@ Here are the awesome new features:
 
 If you are looking for all the glory details please go to:
 
-https://github.com/grundprinzip/sublemacspro
+https://github.com/sublime-emacs/sublemacspro
