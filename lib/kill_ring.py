@@ -1,6 +1,6 @@
 import re
 import sublime, sublime_plugin
-from sublemacspro.lib.misc import SettingsHelper
+from .misc import SettingsHelper
 
 # initialized below
 kill_ring_size = kill_index = pop_index = entries = None

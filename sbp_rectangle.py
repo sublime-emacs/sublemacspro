@@ -2,7 +2,7 @@ import functools as fu
 import sublime
 import sublime_plugin
 
-from sublemacspro.lib.misc import *
+from .lib.misc import *
 
 class SbpRectangleDelete(SbpTextCommand):
   """

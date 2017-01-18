@@ -7,9 +7,9 @@ import functools as fu
 import sublime, sublime_plugin
 from copy import copy
 
-from sublemacspro.lib.misc import *
-from sublemacspro.lib import kill_ring
-from sublemacspro.lib import isearch
+from .lib.misc import *
+from .lib import kill_ring
+from .lib import isearch
 
 import Default.paragraph as paragraph
 from . import sbp_layout as ll
@@ -389,15 +389,15 @@ class SbpChangeCaseCommand(SbpTextCommand):
         # as mode="regions". Otherwise, we generate regions by applying a word motion command.
         selection = view.sel()
         regions = list(selection)
-        empty = util.all_empty_regions(regions)
-        if empty and use_region:
+        empty_cursors = util.all_empty_regions(regions)
+        if empty_cursors and use_region:
             emacs_regions = util.get_regions()
             if emacs_regions and not util.all_empty_regions(emacs_regions):
-                empty = False
+                empty_cursors = False
                 selection.clear()
                 selection.add_all(emacs_regions)
 
-        if empty:
+        if empty_cursors:
             if use_region:
                 return
 
@@ -440,14 +440,14 @@ class SbpChangeCaseCommand(SbpTextCommand):
             print("Unknown case setting:", mode)
             return
 
-        if empty and count > 0:
+        if empty_cursors and count > 0:
             # was a word-based execution
             for r in new_regions:
                 r.a = r.b = r.end()
             selection.clear()
             selection.add_all(new_regions)
         else:
-            # we the selection or the emacs regions
+            # we used the selection or the emacs regions
             selection.clear()
             selection.add_all(regions)
 
@@ -1040,7 +1040,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
 class SbpCloseOlderViewsCommand(SbpWindowCommand):
     def run_cmd(self, util, n_windows=10):
         window = sublime.active_window()
-        sorted = ViewState.sorted_views(window)
+        sorted = ViewState.sorted_views(window, window.active_group())
         while n_windows > 0 and len(sorted) > 1:
             view = sorted.pop()
             if view.is_dirty():
@@ -1061,7 +1061,7 @@ class SbpCloseOlderViewsCommand(SbpWindowCommand):
 class SbpCloseCurrentViewCommand(SbpWindowCommand):
     def run_cmd(self, util, n_windows=10):
         window = sublime.active_window()
-        sorted = ViewState.sorted_views(window)
+        sorted = ViewState.sorted_views(window, window.active_group())
         if len(sorted) > 0:
             view = sorted.pop(0)
             window.focus_view(view)
@@ -1482,26 +1482,24 @@ class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
 # whenever a file is saved in order to dedup them then when it's safe.
 #
 def dedup_views(window):
+    # remember the current group so we can focus back to it when we're done
     group = window.active_group()
     for g in range(window.num_groups()):
-        found = dict()
-        views = window.views_in_group(g)
+        # get views for current group sorted by most recently used
         active = window.active_view_in_group(g)
+        views = ViewState.sorted_views(window, g)
+        view_by_buffer_id = dict()
         for v in views:
             if v.is_dirty():
                 # we cannot nuke a dirty buffer or we'll get an annoying popup
                 continue
             id = v.buffer_id()
-            if id in found:
-                if v == active:
-                    # oops - nuke the one that's already been seen and put this one in instead
-                    before = found[id]
-                    found[id] = v
-                    v = before
+            if id in view_by_buffer_id:
+                # already have a view with this buffer - so nuke this one - it's older
                 window.focus_view(v)
                 window.run_command('close')
             else:
-                 found[id] = v
+                 view_by_buffer_id[id] = v
         window.focus_view(active)
     window.focus_group(group)
 

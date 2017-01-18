@@ -3,7 +3,7 @@ import sublime
 import sublime_plugin
 import re
 
-from sublemacspro.lib.misc import *
+from .lib.misc import *
 
 class SbpRegisterStore:
     """

@@ -7,7 +7,7 @@ from copy import copy
 
 import sublime, sublime_plugin
 
-from sublemacspro.lib.misc import *
+from .misc import *
 
 # preserved isearch settings
 isearch_history_settings = None

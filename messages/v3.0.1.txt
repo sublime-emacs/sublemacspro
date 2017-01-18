@@ -1,0 +1,6 @@
+Sublemacs Pro v3.0.1 Update
+=============================
+
+Fixed nasty mistake which prevented the new 3.0.0 plugin from working at all.
+
+Hopefully this sorts out that disaster.

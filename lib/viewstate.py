@@ -48,10 +48,11 @@ class ViewState():
         return ViewState.current
 
     @classmethod
-    def sorted_views(cls, window, group_only=False):
-        views = window.views_in_group(window.active_group()) if group_only else window.views()
+    def sorted_views(cls, window, group=None):
+        views = window.views_in_group(group) if group is not None else window.views()
         states = [cls.find_or_create(view) for view in views]
         sorted_states = sorted(states, key=lambda state: state.touched, reverse=True)
+        print("Sorted views for group", group, len(sorted_states))
         return [state.view for state in sorted_states]
 
     def reset(self):
@@ -86,5 +87,5 @@ class ViewState():
         return count
 
     def last_was_kill_cmd(self):
-        from sublemacspro.lib.misc import kill_cmds
+        from .misc import kill_cmds
         return self.last_cmd in kill_cmds

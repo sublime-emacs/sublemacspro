@@ -1,6 +1,6 @@
 import sublime, sublime_plugin, time, re
 
-from sublemacspro.lib.misc import *
+from .lib.misc import *
 
 #
 # Switch buffer command. "C-x b" equiv in emacs. This limits the set of files in a chooser to the
@@ -13,9 +13,9 @@ class SbpSwitchToViewCommand(SbpTextCommand):
         self.display_components = display_components
         window = self.window = sublime.active_window()
         self.group = window.active_group()
-        self.views = ViewState.sorted_views(window, current_group_only)
+        self.views = ViewState.sorted_views(window, window.active_group() if current_group_only else None)
         if window.num_groups() > 1 and not current_group_only:
-            self.group_views = set(view.id() for view in ViewState.sorted_views(window, True))
+            self.group_views = set(view.id() for view in ViewState.sorted_views(window, window.active_group()))
         else:
             self.group_views = None
         self.roots = get_project_roots()

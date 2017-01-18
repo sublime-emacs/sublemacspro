@@ -1,6 +1,6 @@
 import sublime, sublime_plugin, time, re
 
-from sublemacspro.lib.misc import *
+from .lib.misc import *
 
 #
 # Called when the system is initialized.
