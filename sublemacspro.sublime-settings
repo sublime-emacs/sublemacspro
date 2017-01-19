@@ -33,11 +33,15 @@
   /* a built-in version of all auto-complete that fixes some bugs and improves performance */
   "sbp_use_internal_complete_all_buffers": false,
 
-  // extra word characters for certain syntaxes
+  // extra word characters for certain syntaxes in the context of the internal all complete
   "sbp_syntax_specific_extra_word_characters": {
     "Packages/Better CoffeeScript/CoffeeScript.tmLanguage": "$",
     "Packages/Rails/HTML (Rails).sublime-syntax": ".-",
     "Packages/HTML/HTML.sublime-syntax": ".-",
     "Packages/Ruby/Ruby.sublime-syntax": "!?",
   },
+
+  // text to display in status area to indicate pinned tab: couldn't figure out how to encode this
+  // as unicode-32 with json: "\U0001F4CC"
+  "sbp_pinned_tab_status_text": "📌"
 }

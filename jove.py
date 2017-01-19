@@ -78,13 +78,17 @@ class ViewWatcher(sublime_plugin.EventListener):
 class CmdWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
         super(CmdWatcher, self).__init__(*args, **kwargs)
+        self.pinned_text = None
 
     def on_anything(self, view):
         if view.settings().get("pinned"):
-
             # view.set_status("jove_pinned", "Tab Pinned")
-            view.set_status("jove_pinned", "\U0001F4CC")
-        else:
+            # view.set_status("jove_pinned", "\U0001F4CC")
+            if self.pinned_text is None:
+                self.pinned_text = settings_helper.get("sbp_pinned_tab_status_text", False)
+            if self.pinned_text:
+                view.set_status("jove_pinned", self.pinned_text)
+        elif self.pinned_text:
             view.erase_status("jove_pinned")
         view.erase_status(JOVE_STATUS)
 
@@ -98,6 +102,9 @@ class CmdWatcher(sublime_plugin.EventListener):
             if window.active_view() != info.view:
                 info.done()
         sublime.set_timeout(check, 0)
+
+    def on_post_window_command(self, window, cmd, args):
+        self.on_anything(window.active_view())
 
     #
     # Override some commands to execute them N times if the numberic argument is supplied.
@@ -641,10 +648,10 @@ class SbpGotoLineCommand(SbpTextCommand):
 # Emacs delete-white-space command.
 #
 class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
-    def run_cmd(self, util):
-        util.for_each_cursor(self.delete_white_space, util, can_modify=True)
+    def run_cmd(self, util, **kwargs):
+        util.for_each_cursor(self.delete_white_space, util, can_modify=True, **kwargs)
 
-    def delete_white_space(self, cursor, util, one_space=False, **kwargs):
+    def delete_white_space(self, cursor, util, keep_spaces=0):
         view = self.view
         line = view.line(cursor.a)
         data = view.substr(line)
@@ -656,10 +663,10 @@ class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
         limit = len(data)
         while end + 1 < limit and data[end:end+1] in (" \t"):
             end += 1
-        if one_space:
-            end -= 1
-        if end > start:
-            view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
+        if end - start > keep_spaces:
+            end -= keep_spaces
+            if end > start:
+                view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
 
         return None
 

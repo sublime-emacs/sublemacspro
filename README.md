@@ -202,11 +202,16 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
         ``meta+5 ctrl+x ^`` will make the selected window taller by 5 times.
   * *View Commands*
     * ``ctrl+x k``: Delete current view from this window pane.
-    * ``ctrl+x K``: Delete oldest n views.
-      * n is set by default to ``5``. This can be changed by overriding the binding in your
-        user bindings file by changing the argument ``n_windows``. The default binding is:
+    * ``ctrl+x K``: Delete most stale n views, that is, the views that haven't been touched in the
+      longest time.
+      * n is set by default to ``5``. This can be changed by overriding the binding in your user
+        bindings file by changing the argument ``n_windows``. If the value is null or not specified,
+        the numeric argument will be used to determine how many to close. The default binding is:
         ``{"keys": ["ctrl+x", "K"], "command": "sbp_close_stale_views", "args": {"n_windows":
         5}}``
+    * ``ctrl+x P``: Pin tab. A pinned tab will never be automatically closed by the ``ctrl+x K``
+      command. A small pin icon (by default) will appear in the status area, settable the
+      ``sbp_pinned_tab_status_text`` variable.
     * ``ctrl+x b``: Go to next view (keeps scrolling through all the views (tabs to the right
       in each window pane) and ignores window pane boundaries going into the next pane when it
       reaches the last view on the right).
@@ -369,8 +374,8 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``meta+[``: Shift active mark region or current highlighted region to the left one
     indentation.
   * *White Space Removal*
-    * ``meta+backslash``: Delete white space around point. If ``one_space`` is True, it will leave
-      at exactly one space instead of deleting all the white space.
+    * ``meta+backslash``: Delete white space around point. If ``keep_space`` is > 0, it will leave
+      at that many spaces instead of deleting all the white space.
   * *Auto Complete*
     * ``meta+/``: Used to bring up Sublime's Auto Complete window.
     * ``meta+h``: Used to bring up Sublime's Auto Complete window.

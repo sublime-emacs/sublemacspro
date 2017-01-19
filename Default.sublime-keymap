@@ -125,7 +125,9 @@
 
     {"keys": ["ctrl+alt+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}, "context": [ {"key": "sbp_use_alt_bindings"}]},
 
-    {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_alt_bindings"}]},
+    {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "args": {"keep_spaces": 0},
+        "context": [ {"key": "sbp_use_alt_bindings"}]
+    },
     {"keys": ["alt+x"], "command": "show_overlay", "args": {"overlay": "command_palette"},
         "context": [{"key": "sbp_use_alt_bindings"} ]
     },
@@ -205,7 +207,9 @@
 
     {"keys": ["ctrl+super+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}, "context": [ {"key": "sbp_use_super_bindings"}]},
 
-    {"keys": ["super+\\"], "command": "sbp_delete_white_space", "context": [ {"key": "sbp_use_super_bindings"}]},
+    {"keys": ["super+\\"], "command": "sbp_delete_white_space", "args": {"keep_spaces": 0},
+        "context": [ {"key": "sbp_use_super_bindings"}]
+    },
     {"keys": ["super+x"], "command": "show_overlay", "args": {"overlay": "command_palette"},
         "context": [{"key": "sbp_use_super_bindings"} ]
     },
