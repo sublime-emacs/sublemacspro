@@ -299,7 +299,7 @@ class CmdUtil:
     #
     def is_blank(self, a, b):
         text = self.view.substr(sublime.Region(a, b))
-        return re.match(r'[ \t]*$', text) is not None
+        return re.match(r'^[ \t]*$', text) is not None
 
     #
     # Returns the current indent of the line containing the specified POS and the column of POS.

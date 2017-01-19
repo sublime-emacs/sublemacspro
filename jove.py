@@ -82,8 +82,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 
     def on_anything(self, view):
         if view.settings().get("pinned"):
-            # view.set_status("jove_pinned", "Tab Pinned")
-            # view.set_status("jove_pinned", "\U0001F4CC")
             if self.pinned_text is None:
                 self.pinned_text = settings_helper.get("sbp_pinned_tab_status_text", False)
             if self.pinned_text:
@@ -644,32 +642,6 @@ class SbpGotoLineCommand(SbpTextCommand):
         else:
             util.run_window_command("show_overlay", {"overlay": "goto", "text": ":"})
 
-#
-# Emacs delete-white-space command.
-#
-class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
-    def run_cmd(self, util, **kwargs):
-        util.for_each_cursor(self.delete_white_space, util, can_modify=True, **kwargs)
-
-    def delete_white_space(self, cursor, util, keep_spaces=0):
-        view = self.view
-        line = view.line(cursor.a)
-        data = view.substr(line)
-        row,col = view.rowcol(cursor.a)
-        start = col
-        while start - 1 >= 0 and data[start-1: start] in (" \t"):
-            start -= 1
-        end = col
-        limit = len(data)
-        while end + 1 < limit and data[end:end+1] in (" \t"):
-            end += 1
-        if end - start > keep_spaces:
-            end -= keep_spaces
-            if end > start:
-                view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
-
-        return None
-
 class SbpUniversalArgumentCommand(SbpTextCommand):
     def run_cmd(self, util, value):
         state = util.state
@@ -852,9 +824,13 @@ class SbpMoveToCommand(SbpTextCommand):
 class SbpOpenLineCommand(SbpTextCommand):
     def run_cmd(self, util):
         view = self.view
-        for point in view.sel():
-            view.insert(util.edit, point.b, "\n")
-        view.run_command("move", {"by": "characters", "forward": False})
+        count = util.get_count()
+        if count > 0:
+            for point in view.sel():
+                view.insert(util.edit, point.b, "\n" * count)
+            while count > 0:
+                view.run_command("move", {"by": "characters", "forward": False})
+                count -= 1
 
 class SbpKillRegionCommand(SbpTextCommand):
     is_kill_cmd = True

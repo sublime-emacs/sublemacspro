@@ -128,6 +128,9 @@
     {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "args": {"keep_spaces": 0},
         "context": [ {"key": "sbp_use_alt_bindings"}]
     },
+    {"keys": ["ctrl+x", "ctrl+o"], "command": "sbp_delete_blank_lines",
+        "context": [ {"key": "sbp_use_alt_bindings"}]
+    },
     {"keys": ["alt+x"], "command": "show_overlay", "args": {"overlay": "command_palette"},
         "context": [{"key": "sbp_use_alt_bindings"} ]
     },
