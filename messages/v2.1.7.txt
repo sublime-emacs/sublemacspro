@@ -82,7 +82,7 @@ New: Close Older Views Commands
 
     Here is the default binding:
 
-    {"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows": 5}},
+    {"keys": ["ctrl+x", "K"], "command": "sbp_close_stale_views", "args": {"n_windows": 5}},
 
 Improve: Choose and Yank Command
 

@@ -21,6 +21,8 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
         if settings_helper.get("sbp_use_internal_complete_all_buffers") != True:
             return None
+        if view.settings().get("inhibit_all_complete"):
+            return None
 
         # This happens if you type a non-word character. We don't want to process any completions in
         # this case because there are too many.

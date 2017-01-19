@@ -153,6 +153,14 @@ class SbpTextCommand(sublime_plugin.TextCommand):
                 util.reset_target_column()
 
 #
+# Simple wrapper for window commands.
+#
+class SbpWindowCommand(sublime_plugin.WindowCommand):
+    def run(self, **kwargs):
+        self.util = CmdUtil(self.window.active_view(), state=ViewState.get(self.window.active_view()))
+        self.run_cmd(self.util, **kwargs)
+
+#
 # A helper class which provides a bunch of useful functionality on a view.
 #
 class CmdUtil:

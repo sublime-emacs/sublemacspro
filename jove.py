@@ -80,6 +80,12 @@ class CmdWatcher(sublime_plugin.EventListener):
         super(CmdWatcher, self).__init__(*args, **kwargs)
 
     def on_anything(self, view):
+        if view.settings().get("pinned"):
+
+            # view.set_status("jove_pinned", "Tab Pinned")
+            view.set_status("jove_pinned", "\U0001F4CC")
+        else:
+            view.erase_status("jove_pinned")
         view.erase_status(JOVE_STATUS)
 
     def on_window_command(self, window, cmd, args):
@@ -103,7 +109,6 @@ class CmdWatcher(sublime_plugin.EventListener):
             return
 
         vs = ViewState.get(view)
-        self.on_anything(view)
 
         if args is None:
             args = {}
@@ -156,6 +161,7 @@ class CmdWatcher(sublime_plugin.EventListener):
     # Post command processing: deal with active mark and resetting the numeric argument.
     #
     def on_post_text_command(self, view, cmd, args):
+        self.on_anything(view)
         vs = ViewState.get(view)
         cm = CmdUtil(view)
         if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
@@ -229,12 +235,6 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
             args["next_pane"] = pos
             return cmd, args
-
-class SbpWindowCommand(sublime_plugin.WindowCommand):
-
-    def run(self, **kwargs):
-        self.util = CmdUtil(self.window.active_view(), state=ViewState.get(self.window.active_view()))
-        self.run_cmd(self.util, **kwargs)
 
 class SbpChainCommand(SbpTextCommand):
     """A command that easily runs a sequence of other commands."""
@@ -644,7 +644,7 @@ class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
     def run_cmd(self, util):
         util.for_each_cursor(self.delete_white_space, util, can_modify=True)
 
-    def delete_white_space(self, cursor, util, **kwargs):
+    def delete_white_space(self, cursor, util, one_space=False, **kwargs):
         view = self.view
         line = view.line(cursor.a)
         data = view.substr(line)
@@ -656,7 +656,11 @@ class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
         limit = len(data)
         while end + 1 < limit and data[end:end+1] in (" \t"):
             end += 1
-        view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
+        if one_space:
+            end -= 1
+        if end > start:
+            view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
+
         return None
 
 class SbpUniversalArgumentCommand(SbpTextCommand):
@@ -1037,13 +1041,15 @@ class SbpPaneCmdCommand(SbpWindowCommand):
 #
 # Close the N least recently touched views, leaving at least one view remaining.
 #
-class SbpCloseOlderViewsCommand(SbpWindowCommand):
-    def run_cmd(self, util, n_windows=10):
+class SbpCloseStaleViewsCommand(SbpWindowCommand):
+    def run_cmd(self, util, n_windows=None):
         window = sublime.active_window()
         sorted = ViewState.sorted_views(window, window.active_group())
+        if n_windows is None or util.has_prefix_arg():
+            n_windows = util.get_count()
         while n_windows > 0 and len(sorted) > 1:
             view = sorted.pop()
-            if view.is_dirty():
+            if view.is_dirty() or view.settings().get("pinned"):
                 continue
             window.focus_view(view)
             window.run_command('close')
@@ -1051,6 +1057,16 @@ class SbpCloseOlderViewsCommand(SbpWindowCommand):
 
         # go back to the original view
         window.focus_view(util.view)
+
+#
+# Close the N least recently touched views, leaving at least one view remaining.
+#
+class SbpPinCurrentViewCommand(SbpTextCommand):
+    def run_cmd(self, util, n_windows=None):
+        view = self.view
+        settings = view.settings()
+        pinned = settings.get("pinned", False)
+        settings.set("pinned", not pinned)
 
 #
 # Closes the current view and selects the most recently used one in its place. This is almost like

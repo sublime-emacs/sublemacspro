@@ -10,13 +10,13 @@
         "children":
         [
           {
-            "caption": "Sublemacs",
+            "caption": "Emacs Pro Essentials",
             "children":
             [
               {
                 "command": "open_file", "args":
                 {
-                  "file": "${packages}/sublemacspro/sublemacspro.sublime-settings"
+                  "file": "${packages}/Emacs Pro Essentials/sublemacspro.sublime-settings"
                 },
                 "caption": "Settings - Default"
               },
@@ -31,7 +31,7 @@
               {
                 "command": "open_file", "args":
                 {
-                  "file": "${packages}/sublemacspro/Default.sublime-keymap",
+                  "file": "${packages}/Emacs Pro Essentials/Default.sublime-keymap",
                 },
                 "caption": "Key Bindings - Default"
               },

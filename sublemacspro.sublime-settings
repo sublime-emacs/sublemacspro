@@ -33,6 +33,7 @@
   /* a built-in version of all auto-complete that fixes some bugs and improves performance */
   "sbp_use_internal_complete_all_buffers": false,
 
+  // extra word characters for certain syntaxes
   "sbp_syntax_specific_extra_word_characters": {
     "Packages/Better CoffeeScript/CoffeeScript.tmLanguage": "$",
     "Packages/Rails/HTML (Rails).sublime-syntax": ".-",

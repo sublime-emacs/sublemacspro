@@ -175,7 +175,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * If you use ``alt`` for the meta binding, then setting ``alt+s`` to move to next match and
       ``alt+r`` to move to previous match with ``alt+d`` already set to keep match can make moving
       through iSearch quicker when selecting matches.
-     * Example binding for ``alt+r`` is below (for ``alt+s`` set ``forward`` to ``true``:  
+     * Example binding for ``alt+r`` is below (for ``alt+s`` set ``forward`` to ``true``:
        {"keys": ["alt+r"], "command": "sbp_inc_search", "args": {"cmd":
        "next", "keep": false, "forward": false}, "context": [ {"key": "i_search_active"}, {"key":
        "panel_has_focus"} ] },
@@ -205,7 +205,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+x K``: Delete oldest n views.
       * n is set by default to ``5``. This can be changed by overriding the binding in your
         user bindings file by changing the argument ``n_windows``. The default binding is:
-        ``{"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows":
+        ``{"keys": ["ctrl+x", "K"], "command": "sbp_close_stale_views", "args": {"n_windows":
         5}}``
     * ``ctrl+x b``: Go to next view (keeps scrolling through all the views (tabs to the right
       in each window pane) and ignores window pane boundaries going into the next pane when it
@@ -369,7 +369,8 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``meta+[``: Shift active mark region or current highlighted region to the left one
     indentation.
   * *White Space Removal*
-    * ``meta+backslash``: Delete white space around point.
+    * ``meta+backslash``: Delete white space around point. If ``one_space`` is True, it will leave
+      at exactly one space instead of deleting all the white space.
   * *Auto Complete*
     * ``meta+/``: Used to bring up Sublime's Auto Complete window.
     * ``meta+h``: Used to bring up Sublime's Auto Complete window.
@@ -428,7 +429,7 @@ and make this a fast and beautiful Emacs replacement.
   * Switch to view works across windows (frames) and not just within a single window.
   * Make the registers work with multi-cursors.
   * Add a popup window asking how many of the n oldest windows to remove if called with
-    popup=true argument to close_older_views command.
+    popup=true argument to close_stale_views command.
   * [Emacs marking of textual objects](https://www.gnu.org/software/emacs/manual/html_node/emacs/Marking-Objects.html)
   * Quick Panel selection to scroll through the mark ring and pop a previous mark like choose
     and yank command for the kill ring.

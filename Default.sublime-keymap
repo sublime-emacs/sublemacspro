@@ -409,7 +409,8 @@
 
     {"keys": ["alt+;"], "command": "toggle_comment", "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["ctrl+x", "k"], "command": "sbp_close_current_view"},
-    {"keys": ["ctrl+x", "K"], "command": "sbp_close_older_views", "args": {"n_windows": 5}},
+    {"keys": ["ctrl+x", "K"], "command": "sbp_close_stale_views", "args": {"n_windows": 5}},
+    {"keys": ["ctrl+x", "P"], "command": "sbp_pin_current_view"},
 
     {"keys": ["ctrl+d"], "command": "right_delete"},
 
