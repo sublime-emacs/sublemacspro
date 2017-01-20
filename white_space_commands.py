@@ -12,8 +12,10 @@ from .lib.misc import *
 # Emacs delete-white-space command.
 #
 class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
-    def run_cmd(self, util, **kwargs):
-        util.for_each_cursor(self.delete_white_space, util, can_modify=True, **kwargs)
+    def run_cmd(self, util, keep_spaces=0):
+        if util.has_prefix_arg():
+            keep_spaces = util.get_count()
+        util.for_each_cursor(self.delete_white_space, util, can_modify=True, keep_spaces=keep_spaces)
 
     def delete_white_space(self, cursor, util, keep_spaces=0):
         view = self.view
@@ -31,6 +33,10 @@ class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
             end -= keep_spaces
             if end > start:
                 view.erase(util.edit, sublime.Region(line.begin() + start, line.begin() + end))
+                if keep_spaces > 0:
+                    # this is more expensive so we only do it if keep_spaces > 0, in which case we
+                    # want the cursor to be on the right side of the kept spaces
+                    return sublime.Region(line.begin() + start + keep_spaces)
 
         return None
 

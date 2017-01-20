@@ -431,23 +431,35 @@ class CmdUtil:
 
         # REMIND: for delete-white-space and other commands that change the size of the
         # buffer, you need to keep the cursors in a named set of cursors (like the mark
-        # ring) so that they are adjusted properly. Also if the function returns None,
-        # grab the cursor from the selection.
+        # ring) so that they are adjusted properly.
         can_modify = kwargs.pop('can_modify', False)
 
         if can_modify:
             key = "tmp_cursors"
             view.add_regions(key, regions, "tmp", "", sublime.HIDDEN)
             for i in range(len(regions)):
-                # Grab the region (whose position has been maintained/adjusted by
-                # sublime). Unfortunately we need to assume one region might merge into
-                # another at any time, and reload all regions to check.
+                # Grab the region (whose position has been maintained/adjusted by sublime).
+                # Unfortunately we need to assume one region might merge into another at any time,
+                # and reload all regions to check. Also, if the function returns a cursor, we need
+                # to use it rather than relying on the default location of that cursor as managed by
+                # sublime. (That is rather expensive but we hardly use this feature.)
                 regions = view.get_regions(key)
                 if i >= len(regions):
                     # we've deleted some cursors along the way - we're done
                     break
                 selection.add(regions[i])
                 cursor = function(regions[i], *args, **kwargs)
+                if cursor is not None:
+                    # grab adjusted regions
+                    regions = view.get_regions(key)
+
+                    # stick our value in
+                    regions[i] = cursor
+
+                    # reset the regions
+                    view.erase_regions(key)
+                    view.add_regions(key, regions, "tmp", "", sublime.HIDDEN)
+
                 selection.clear()
             cursors = view.get_regions(key)
             view.erase_regions(key)

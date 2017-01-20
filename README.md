@@ -374,11 +374,13 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``meta+[``: Shift active mark region or current highlighted region to the left one
     indentation.
   * *White Space Removal*
-    * ``meta+backslash``: Delete white space around point. If ``keep_space`` is > 0, it will leave
-      at that many spaces instead of deleting all the white space.
+    * ``meta+backslash``: Delete white space around point. If ``keep_spaces`` is > 0, it will leave
+      at that many spaces instead of deleting all the white space. If a numeric argument is
+      supplied, it overrides the keep_spaces argument.
+    * ``ctrl+x ctrl+o``: Delete blank lines around point.
   * *Auto Complete*
-    * ``meta+/``: Used to bring up Sublime's Auto Complete window.
-    * ``meta+h``: Used to bring up Sublime's Auto Complete window.
+    * ``meta+/``: Brings up Sublime's Auto Complete window.
+    * ``meta+h``: Brings up Sublime's Auto Complete window.
   * *Find and Replace*
     * ``meta+r``: Not implemented so brings up default find and replace of sublime.
 
