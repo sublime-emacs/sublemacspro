@@ -15,8 +15,8 @@ concepts where possible and appropriate.
   * Mark Ring with Multi-cursor Support
   * Incremental Search with History (regular and regex supported) and Multi-cursor
     Features
-  * Frame (Window), Window (Window Pane), and Buffer (View) Commands
-  * Switch to Buffer (View) Command
+  * Frame (Window) and Window (Window Pane) Commands
+  * Switch to Buffer (View), Kill the Oldest Buffers, and Pinned Tabs Commands
   * Change Case Commands (upper/lower/title/camelCase/under_score supported)
   * Zap/Jump to Char and String with Multi-cursor Support
   * Rectangle and Text/Point Register Commands (not Multi-cursor aware yet)
@@ -203,7 +203,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
   * *View Commands*
     * ``ctrl+x k``: Delete current view from this window pane.
     * ``ctrl+x K``: Delete most stale n views, that is, the views that haven't been touched in the
-      longest time.
+      longest time (supports numeric argument input).
       * n is set by default to ``5``. This can be changed by overriding the binding in your user
         bindings file by changing the argument ``n_windows``. If the value is null or not specified,
         the numeric argument will be used to determine how many to close. The default binding is:
@@ -374,9 +374,9 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``meta+[``: Shift active mark region or current highlighted region to the left one
     indentation.
   * *White Space Removal*
-    * ``meta+backslash``: Delete white space around point. If ``keep_spaces`` is > 0, it will leave
-      at that many spaces instead of deleting all the white space. If a numeric argument is
-      supplied, it overrides the keep_spaces argument.
+    * ``meta+backslash``: Delete white space around point (supports numeric arguments). If
+      ``keep_spaces`` is > 0, it will leave at that many spaces instead of deleting all the white
+      space. If a numeric argument is supplied, it overrides the keep_spaces argument.
     * ``ctrl+x ctrl+o``: Delete blank lines around point.
   * *Auto Complete*
     * ``meta+/``: Brings up Sublime's Auto Complete window.
