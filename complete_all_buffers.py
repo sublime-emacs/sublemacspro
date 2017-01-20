@@ -84,7 +84,9 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
                 else:
                     trigger = "%s\t%s" % (word, file_name)
                 words.append((trigger, word.replace("$", "\\$")))
-        print("COMPLETE in", time.time() - start)
+        tm = time.time() - start
+        if tm > 0.20:
+            print("COMPLETE in", time.time() - start)
         return (words, sublime.INHIBIT_WORD_COMPLETIONS)
 
     def extract_from_view(self, view, prefix, point):
