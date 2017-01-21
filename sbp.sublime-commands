@@ -76,6 +76,7 @@
     {"caption": "Emacs Pro Essentials - Destroy Other Windows", "command": "sbp_pane_cmd", "args": {"cmd": "destroy", "pane": "others"}},
     {"caption": "Emacs Pro Essentials - Close Current View", "command": "sbp_close_current_view"},
     {"caption": "Emacs Pro Essentials - Destroy Stale Views", "command": "sbp_close_stale_views", "args": {"n_windows": 5}},
+    {"caption": "Emacs Pro Essentials - Toggle View Pinned State", "command": "sbp_toggle_view_pinned"},
     {"caption": "Emacs Pro Essentials - Go to Next Window", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "next"}},
     {"caption": "Emacs Pro Essentials - Go to Previous Window", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "prev"}},
     {"caption": "Emacs Pro Essentials - Previous Tab", "command": "sbp_pane_cmd", "args": {"cmd": "move", "direction": "left"}},

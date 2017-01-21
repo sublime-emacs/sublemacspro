@@ -1042,10 +1042,10 @@ class SbpCloseStaleViewsCommand(SbpWindowCommand):
         window.focus_view(util.view)
 
 #
-# Close the N least recently touched views, leaving at least one view remaining.
+# Toggle the pinned state of the current view.
 #
-class SbpPinCurrentViewCommand(SbpTextCommand):
-    def run_cmd(self, util, n_windows=None):
+class SbpToggleViewPinnedCommand(SbpTextCommand):
+    def run_cmd(self, util):
         view = self.view
         settings = view.settings()
         pinned = settings.get("pinned", False)
