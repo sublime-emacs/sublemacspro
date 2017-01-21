@@ -1078,12 +1078,8 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
         view = self.view
         state = util.state
 
-        if state.argument_supplied:
-            # we don't support negative arguments for kill-line
-            count = abs(util.get_count())
-            line_mode = True
-        else:
-            line_mode = False
+        line_mode = state.argument_supplied
+        count = util.get_count()
 
         def advance(cursor):
             start = cursor.b
@@ -1092,12 +1088,12 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
             if line_mode:
                 # go down N lines
                 for i in range(abs(count)):
-                    view.run_command("move", {"by": "lines", "forward": True})
+                    view.run_command("move", {"by": "lines", "forward": count > 0})
 
                 end = util.get_point()
-                if region.contains(end):
+                if count != 0 and region.contains(end):
                     # same line we started on - must be on the last line of the file
-                    end = region.end()
+                    end = region.end() if count > 0 else region.begin()
                 else:
                     # beginning of the line we ended up on
                     end = view.line(util.get_point()).begin()

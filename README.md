@@ -430,13 +430,10 @@ and make this a fast and beautiful Emacs replacement.
 
 #### Possible Future Package Additions
   * Supplying a numeric argument to ``ctrl+d`` and ``Backspace`` should append to the kill
-    ring. Furthermore, adding killing and yanking a line backwards to append to the kill ring
-    (``meta+0 ctrl+k`` or ``ctrl+u 0 ctrl+k``).
+    ring.
   * Turn the last n marks into multiple cursors.
   * Switch to view works across windows (frames) and not just within a single window.
   * Make the registers work with multi-cursors.
-  * Add a popup window asking how many of the n oldest windows to remove if called with
-    popup=true argument to close_stale_views command.
   * [Emacs marking of textual objects](https://www.gnu.org/software/emacs/manual/html_node/emacs/Marking-Objects.html)
   * Quick Panel selection to scroll through the mark ring and pop a previous mark like choose
     and yank command for the kill ring.

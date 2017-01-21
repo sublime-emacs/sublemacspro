@@ -1,0 +1,18 @@
+Emacs Pro Essentials v3.1.0 Update
+==================================
+
+New feature: Pinned Tabs. When you pin a tab, it will never automatically be closed with the Close
+Stale Views command. A pinned tab displays a pushpin icon in the message area. The default binding
+is "ctrl+x P".
+
+New Feature: Delete Blank Lines command. This is the Emacs "ctrl+x ctrl+o" command, which deletes
+extra blank lines around point.
+
+Enhancement: Open Line command. The ctrl+o command now honors the numeric argument.
+
+Enhancement: Delete White Space command. This command now supports an argument for the number of
+spaces to keep. The default is 0. This value can be overridden by supplying a numeric argument. So
+"meta+2 meta+backslash" would leave 2 spaces.
+
+Enhancement: Negative and 0 arguments to the ``ctrl+k`` command now work properly. An argument of 0
+means "kill to the beginning of the line" and a negative argument means "kill the previous N lines".
