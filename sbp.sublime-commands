@@ -9,8 +9,8 @@
     {"caption": "Emacs Pro Essentials - Capitalize Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "title"}},
     {"caption": "Emacs Pro Essentials - Uppercase Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "upper"}},
     {"caption": "Emacs Pro Essentials - Lowercase Word", "command": "sbp_change_case", "args": {"use_region": true, "mode": "lower"}},
-    {"caption": "Emacs Pro Essentials - Convert Under_scores to camelCase", "command": "sbp_change_case", "args": {"use_region": true, "mode": "camel"}},
-    {"caption": "Emacs Pro Essentials - Convert camelCase to Under_scores", "command": "sbp_change_case", "args": {"use_region": true, "mode": "underscore"}},
+    {"caption": "Emacs Pro Essentials - Underscore Region", "command": "sbp_change_case", "args": {"use_region": true, "mode": "underscore"}},
+    {"caption": "Emacs Pro Essentials - Camel Case Region", "command": "sbp_change_case", "args": {"use_region": true, "mode": "camel"}},
 
 
     {"caption": "Emacs Pro Essentials - Go to Beginning of File", "command": "sbp_move_to", "args": {"to": "bof"}},
