@@ -113,6 +113,10 @@
 
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
     {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
+    {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank", "args": {"all_cursors": true},
+        "context": [{"key": "sbp_has_prefix_argument"}]
+    },
+
     {"keys": ["super+v"], "command": "sbp_yank"},
     {"keys": ["alt+w"], "command": "sbp_kill_region", "args": {"is_copy": true}, "context": [ {"key": "sbp_use_alt_bindings"}]},
     {"keys": ["super+c"], "command": "sbp_kill_region", "args": {"is_copy": true}},

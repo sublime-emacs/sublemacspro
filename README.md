@@ -84,7 +84,8 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       text to the kill ring.
       * Supports emacs universal and numeric arguments.
     * ``ctrl+x ctrl+y``: Displays a Sublime quick panel menu of all the kills and allows you to
-      choose which one to yank.
+      choose which one to yank. If you supply a numeric argument, that means yank all the cursors
+      into new cursors. (See below)
   * *Kill ring implementation details*
     * 64 entries by default, but settable with ``sbp_kill_ring_size`` setting in the
       ``sublemacspro .sublime-settings`` file.
@@ -100,6 +101,13 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       will work as expected if you still have the same number of cursors. If you have more
       cursors than your kill, the kill will be repeated until you have enough. If you have
       fewer cursors than your kill, it will use just as many as it needs.
+    * If you know you want to yank all the cursors, there's a new command which will automatically
+      create the number of cursors you need for the kill ring entry just before it performs the
+      yank. This is useful if you currently have just 1 cursor but want back all the data from a
+      previous multi-cursor kill command. This new command is called *Yank All Cursors*.
+      Furthermore, when you supply a numeric argument to the ``ctrl+x ctrl+y`` command, it will let
+      you choose which item to yank all cursors for. And now the choose command shows you which
+      entries have more than one cursor.
 
 #### Emacs-style Mark Ring with Multi-cursor Support
   * *Commands that utilize the mark ring*
