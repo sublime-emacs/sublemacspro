@@ -103,6 +103,8 @@ def add_external_clipboard():
 # move backwards or forwards once in the kill ring and return that data instead. If the number
 # of regions doesn't match, we either truncate or duplicate the regions to make a match.
 #
+# If n_regions is 0, the caller doesn't care how many regions there are: just return them all.
+#
 def get_current(n_regions, pop):
     global pop_index
 
@@ -133,9 +135,11 @@ def get_current(n_regions, pop):
 
     # make sure we have enough data for the specified number of regions
     if result:
-        while len(result) < n_regions:
-            result *= 2
-        return result[0:n_regions]
+        if n_regions > 0:
+            while len(result) < n_regions:
+                result *= 2
+            return result[0:n_regions]
+        return result
     return None
 
 class Kill(object):
@@ -166,6 +170,7 @@ class Kill(object):
         # approximate number of chars we can show
         max_chars = (view.viewport_extent()[0] / view.em_width()) * .9
         text = self.regions[0]
+        n_regions = len(self.regions)
 
         # stripe newlines, spaces and tabs from the beginning and end
         text = text.strip("\n \t")
@@ -182,6 +187,9 @@ class Kill(object):
         if len(text) > max_chars:
             half = int(max_chars / 2)
             text = text[:half] + "\u27FA" + text[-half:] + "   "
+
+        if n_regions > 1:
+            text = "[%d]: %s" % (n_regions, text)
         return text
 
     #

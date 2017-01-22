@@ -27,8 +27,9 @@ class SbpDeleteWhiteSpaceCommand(SbpTextCommand):
             start -= 1
         end = col
         limit = len(data)
-        while end + 1 < limit and data[end:end+1] in (" \t"):
+        while end < limit and data[end:end+1] in (" \t"):
             end += 1
+
         if end - start > keep_spaces:
             end -= keep_spaces
             if end > start:

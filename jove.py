@@ -81,33 +81,24 @@ class CmdWatcher(sublime_plugin.EventListener):
         self.pinned_text = None
 
     def on_anything(self, view):
-        if view.settings().get("pinned"):
-            if self.pinned_text is None:
-                self.pinned_text = settings_helper.get("sbp_pinned_tab_status_text", False)
-            if self.pinned_text:
-                view.set_status("jove_pinned", self.pinned_text)
-        elif self.pinned_text:
-            view.erase_status("jove_pinned")
         view.erase_status(JOVE_STATUS)
 
-    def on_window_command(self, window, cmd, args):
+    def on_post_window_command(self, window, cmd, args):
+        update_pinned_status(window.active_view())
         info = isearch.info_for(window)
         if info is None:
             return None
 
         # Some window commands take us to new view. Here's where we abort the isearch if that happens.
-        def check():
-            if window.active_view() != info.view:
-                info.done()
-        sublime.set_timeout(check, 0)
-
-    def on_post_window_command(self, window, cmd, args):
-        self.on_anything(window.active_view())
+        if window.active_view() != info.view:
+            info.done()
 
     #
     # Override some commands to execute them N times if the numberic argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
+        # escape the current isearch if one is in progress, unless the command is already related to
+        # isearch
         if isearch.info_for(view) is not None:
             if cmd not in ('sbp_inc_search', 'sbp_inc_search_escape'):
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
@@ -118,6 +109,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         if args is None:
             args = {}
 
+        self.on_anything(view)
 
         # first keep track of this_cmd and last_cmd (if command starts with "sbp_" it's handled
         # elsewhere)
@@ -125,7 +117,8 @@ class CmdWatcher(sublime_plugin.EventListener):
             vs.this_cmd = cmd
 
         #
-        #  Process events that create a selection. The hard part is making it work with the emacs region.
+        # Process events that create a selection. The hard part is making it work with the emacs
+        # region.
         #
         if cmd == 'drag_select':
             info = isearch.info_for(view)
@@ -166,7 +159,6 @@ class CmdWatcher(sublime_plugin.EventListener):
     # Post command processing: deal with active mark and resetting the numeric argument.
     #
     def on_post_text_command(self, view, cmd, args):
-        self.on_anything(view)
         vs = ViewState.get(view)
         cm = CmdUtil(view)
         if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
@@ -182,14 +174,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         if vs.active_mark:
             cm.set_cursors(cm.get_regions())
-
-        # if vs.active_mark:
-        #     if len(view.sel()) > 1:
-        #         # allow the awesomeness of multiple cursors to be used: the selection will disappear
-        #         # after the next command
-        #         vs.active_mark = False
-        #     else:
-        #         cm.set_selection(cm.get_mark(), cm.get_point())
 
         if cmd in ensure_visible_cmds and cm.just_one_cursor():
             cm.ensure_visible(cm.get_last_cursor())
@@ -573,29 +557,38 @@ class MoveThenDeleteHelper():
         selection = self.selection
         orig_cursors = self.orig_cursors
 
-        # extend each cursor so we can delete the bytes, and only if there is only one region will
-        # we add the data to the kill ring
-        new_cursors = [s for s in selection]
+        # extend all cursors so we can delete the bytes
+        new_cursors = list(selection)
 
-        selection.clear()
-        for old,new in zip(orig_cursors, new_cursors):
-            if old < new:
-                selection.add(sublime.Region(old.begin(), new.end()))
-            else:
-                selection.add(sublime.Region(new.begin(), old.end()))
+        # but first check to see how many regions collapsed as a result of moving the cursors (e.g.,
+        # if they pile up at the end of the buffer)
+        collapsed_regions = len(orig_cursors) - len(new_cursors)
+        if collapsed_regions == 0:
+            # OK - so now check to see how many collapse after we combine the beginning and end
+            # points of each region. We do that by creating the selection object, which disallows
+            # overlapping regions by collapsing them.
+            selection.clear()
+            for old,new in zip(orig_cursors, new_cursors):
+                if old < new:
+                    selection.add(sublime.Region(old.begin(), new.end()))
+                else:
+                    selection.add(sublime.Region(new.begin(), old.end()))
 
-        # check to see if any regions will overlap each other after we perform the kill
-        cursors = list(selection)
-        regions_overlap = False
-        for i, c in enumerate(cursors[1:]):
-            if cursors[i].contains(c.begin()):
-                regions_overlap = True
-                break
+            collapsed_regions = len(orig_cursors) - len(selection)
 
-        if regions_overlap:
-            # restore everything to previous state
+            # OK one final check to see if any regions will overlap each other after we perform the
+            # kill.
+            if collapsed_regions == 0:
+                cursors = list(selection)
+                for i, c in enumerate(cursors[1:]):
+                    if cursors[i].contains(c.begin()):
+                        collapsed_regions += 1
+
+        if collapsed_regions != 0:
+            # restore everything to previous state and display a popup error
             selection.clear()
             selection.add_all(orig_cursors)
+            sublime.error_message("Couldn't perform kill operation because %d regions would have collapsed into adjacent regions!" % collapsed_regions)
             return
 
         # copy the text into the kill ring
@@ -607,12 +600,9 @@ class MoveThenDeleteHelper():
             view.erase(util.edit, region)
 
 
-
 #
 # This command remembers all the current cursor positions, executes a command on all the cursors,
 # and then deletes all the data between the two.
-#
-# If there's only one selection, the deleted data is added to the kill ring appropriately.
 #
 class SbpMoveThenDeleteCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
@@ -1050,6 +1040,7 @@ class SbpToggleViewPinnedCommand(SbpTextCommand):
         settings = view.settings()
         pinned = settings.get("pinned", False)
         settings.set("pinned", not pinned)
+        update_pinned_status(view)
 
 #
 # Closes the current view and selects the most recently used one in its place. This is almost like
@@ -1149,19 +1140,47 @@ class SbpYankCommand(SbpTextCommand):
 # yank.
 #
 class SbpChooseAndYank(SbpTextCommand):
-    def run_cmd(self, util):
+    def run_cmd(self, util, all_cursors=False):
         # items is an array of (index, text) pairs
         items = kill_ring.get_popup_sample(util.view)
 
         def on_done(idx):
             if idx >= 0:
                 kill_ring.set_current(items[idx][0])
-                util.run_command("sbp_yank", {})
+
+                if all_cursors:
+                    util.run_command("sbp_yank_all_cursors")
+                else:
+                    util.run_command("sbp_yank", {})
 
         if items:
             sublime.active_window().show_quick_panel([item[1] for item in items], on_done)
         else:
-            sublime.status_message('Nothing in history')
+            util.set_status('Nothing in history')
+
+#
+# Like the yank command except this automatically creates the number of cursors you need to handle
+# the yanked text. For example, if there are 10 yanked regions in the most recent kill, this command
+# will automatically create 10 cursors on 10 lines, and then perform the yank.
+#
+class SbpChooseAndYankAllCursorsCommand(SbpTextCommand):
+    def run_cmd(self, util):
+        view = self.view
+
+        # request the regions of text from the current kill
+        texts = kill_ring.get_current(0, 0)
+        if texts is None:
+            util.set_status("Nothing to yank")
+
+        # insert the right number of lines
+        point = util.get_point()
+        view.insert(util.edit, point, "\n" * len(texts))
+        regions = (sublime.Region(point + p) for p in range(len(texts)))
+        selection = view.sel()
+        selection.clear()
+        selection.add_all(regions)
+
+        view.run_command("sbp_yank")
 
 
 #

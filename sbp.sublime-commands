@@ -35,8 +35,10 @@
     {"caption": "Emacs Pro Essentials - Kill Region", "command": "sbp_kill_region"},
     {"caption": "Emacs Pro Essentials - Copy Region", "command": "sbp_kill_region", "args": {"is_copy": true}},
     {"caption": "Emacs Pro Essentials - Yank", "command": "sbp_yank"},
+    {"caption": "Emacs Pro Essentials - Yank All Cursors", "command": "sbp_yank_all_cursors"},
     {"caption": "Emacs Pro Essentials - Yank Pop", "command": "sbp_yank", "args": {"pop": 1}},
     {"caption": "Emacs Pro Essentials - Yank Pop Backwards", "command": "sbp_yank", "args": {"pop": -1}},
+
     {"caption": "Emacs Pro Essentials - Kill Word Forward", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": 1}},
     {"caption": "Emacs Pro Essentials - Kill Word Backward", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_word", "direction": -1}},
     {"caption": "Emacs Pro Essentials - Kill S-expression", "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_sexpr", "direction": 1}},
@@ -110,7 +112,10 @@
     {"caption": "Emacs Pro Essentials - Switch To View", "command": "sbp_switch_to_view"},
 
     // Choose and Yank Kill Ring / Choose Text and Point Registers
-    {"caption": "Emacs Pro Essentials - Choose and Yank Kill Ring", "command": "sbp_choose_and_yank"},
+    {"caption": "Emacs Pro Essentials - Choose and Yank", "command": "sbp_choose_and_yank"},
+    {"caption": "Emacs Pro Essentials - Choose and Yank All Cursors", "command": "sbp_choose_and_yank",
+        "args": {"all_cursors": true}
+    },
     {"caption": "Emacs Pro Essentials - Choose and Insert Text Register", "command": "sbp_choose_and_yank_register"},
     {"caption": "Emacs Pro Essentials - Choose and Jump To Point Register", "command": "sbp_choose_and_yank_point"},
 

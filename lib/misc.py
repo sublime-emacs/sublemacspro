@@ -9,7 +9,8 @@ REGION_FIND = "rf"
 REGION_SELECTED = "rs"
 
 # name we use to indicate jove-related status messages
-JOVE_STATUS = "jove"
+JOVE_STATUS = "1:jove"
+PINNED_STATUS = "0:jove_pinned"
 
 # ensure_visible commands
 ensure_visible_cmds = set(['move', 'move_to'])
@@ -39,6 +40,20 @@ def pluralize(string, count, es="s"):
         return "%d %s" % (count, string)
     else:
         return "%d %s%s" % (count, string, es)
+
+#
+# Handle displaying a view's pinned status.
+#
+pinned_text = None
+def update_pinned_status(view):
+    global pinned_text;
+    if view.settings().get("pinned"):
+        if pinned_text is None:
+            pinned_text = settings_helper.get("sbp_pinned_tab_status_text", False)
+        if pinned_text:
+            view.set_status(PINNED_STATUS, pinned_text)
+    elif pinned_text:
+        view.erase_status(PINNED_STATUS)
 
 #
 # Get the current set of project roots, sorted from longest to shortest. They are suitable for
