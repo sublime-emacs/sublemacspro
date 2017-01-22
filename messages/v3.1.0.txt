@@ -16,3 +16,21 @@ spaces to keep. The default is 0. This value can be overridden by supplying a nu
 
 Enhancement: Negative and 0 arguments to the ``ctrl+k`` command now work properly. An argument of 0
 means "kill to the beginning of the line" and a negative argument means "kill the previous N lines".
+
+New Feature: Yank All Cursors and Choose and Yank All Cursors. With these commands, we create as
+many cursors as needed for the kill ring entry before yanking it. Previously, if you have a kill
+ring entry with 20 cursors in it, but you only have 1 cursor now, you could only yank the first
+cursor. This allows you to yank all the cursors at once.
+
+There's also a Choose and Yank All Cursors command which allows you to choose the kill ring entry
+you want to yank the cursors for. And now the choose and yank popup shows in brackets the number of
+regions in a kill ring entry if it's not the normal 1.
+
+Bug Fix: Fixed issue with Delete White Space which left an extra space at the end of a line
+sometimes.
+
+Enhancement: When killing text with multiple cursors, we prevent kills which would result in cursors
+colliding and collapsing into each other. Otherwise, the kill ring gets into an unpredictable state
+that might confuse you later when you try to yank back some text. Now, instead of refusing to kill
+the text and display an easily missed status message, we instead popup an error message that you
+cannot possible miss.
