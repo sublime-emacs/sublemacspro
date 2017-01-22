@@ -1163,7 +1163,7 @@ class SbpChooseAndYank(SbpTextCommand):
 # the yanked text. For example, if there are 10 yanked regions in the most recent kill, this command
 # will automatically create 10 cursors on 10 lines, and then perform the yank.
 #
-class SbpChooseAndYankAllCursorsCommand(SbpTextCommand):
+class SbpYankAllCursorsCommand(SbpTextCommand):
     def run_cmd(self, util):
         view = self.view
 
