@@ -265,9 +265,7 @@ class SbpShowScopeCommand(SbpTextCommand):
         self.view.set_status(JOVE_STATUS, status)
 
 #
-# Advance to the beginning (or end if going backward) word unless already positioned at a word
-# character. This can be used as setup for commands like upper/lower/capitalize words. This ignores
-# the argument count.
+# Implements moving by words, emacs style.
 #
 class SbpMoveWordCommand(SbpTextCommand):
     should_reset_target_column = True

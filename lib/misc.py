@@ -381,10 +381,7 @@ class CmdUtil:
             self.set_status("No mark in this buffer")
 
     def get_cursors(self, begin=False):
-        return [sublime.Region(c.a if begin else c.b) if not c.empty() else c for c in self.view.sel()]
-
-    def count_cursors(self):
-        return len(self.view.sel())
+        return [sublime.Region(c.begin() if begin else c.end()) if not c.empty() else c for c in self.view.sel()]
 
     def get_last_cursor(self):
         return self.view.sel()[-1]

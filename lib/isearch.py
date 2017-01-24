@@ -108,7 +108,7 @@ class ISearchInfo():
         self.current = StackItem("", [], [], -1, forward, False)
         self.util = CmdUtil(view)
         self.window = view.window()
-        self.point = self.util.get_cursors()
+        self.point = self.util.get_cursors(True)
         self.update()
         self.input_view = None
         self.in_changes = 0
@@ -137,6 +137,7 @@ class ISearchInfo():
         item = self.current
         while item.prev != None:
             item = item.prev
+        self.util.set_cursors(self.point)
         self.current = item
         self.on_change(text)
         self.set_text(text, False)
@@ -147,6 +148,17 @@ class ISearchInfo():
         self.input_view = window.show_input_panel("%sI-Search:" % ("Regexp " if self.regex else "", ),
                                                   "", self.on_done, self.on_change, self.on_cancel)
         self.view_change_count = self.input_view.change_count()
+
+        # check if a single selection is present and if so, use it as the initial search string
+        sel = self.view.sel()
+        if len(sel) == 1:
+            region = sel[0]
+            init_text = self.view.substr(region)
+            self.point = [sublime.Region(region.begin())]
+            self.restart(init_text)
+
+        # search cancels after mark mode
+        self.util.toggle_active_mark_mode(False)
 
     def on_done(self, val):
         # on_done: stop the search, keep the cursors intact
