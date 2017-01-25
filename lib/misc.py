@@ -47,6 +47,10 @@ def pluralize(string, count, es="s"):
 pinned_text = None
 def update_pinned_status(view):
     global pinned_text;
+
+    if view.settings().get("is_widget"):
+        return
+
     if view.settings().get("pinned"):
         if pinned_text is None:
             pinned_text = settings_helper.get("sbp_pinned_tab_status_text", False)

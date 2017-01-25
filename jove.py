@@ -28,6 +28,9 @@ class ViewWatcher(sublime_plugin.EventListener):
     def on_modified(self, view):
         CmdUtil(view).toggle_active_mark_mode(False)
 
+    def on_activated(self, view):
+        update_pinned_status(view)
+
     def on_activated_async(self, view):
         info = isearch.info_for(view)
         if info and not view.settings().get("is_widget"):
@@ -84,7 +87,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         view.erase_status(JOVE_STATUS)
 
     def on_post_window_command(self, window, cmd, args):
-        update_pinned_status(window.active_view())
+        # update_pinned_status(window.active_view())
         info = isearch.info_for(window)
         if info is None:
             return None
