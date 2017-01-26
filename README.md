@@ -69,32 +69,30 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 
 #### Emacs-style Kill Ring with Multi-cursor Support and Sublime Quick Panel Selection
   * *Commands that utilize the kill ring*
-    * ``ctrl+w`` and ``meta+w``: Kill (cut) and copy to the top of the kill ring.
+    * ``ctrl+w`` and ``meta+w``: Kill (cut) and copy onto the kill ring.
     * ``ctrl+y``: Yank (Paste) from the last entry put into the kill ring.
-    * ``meta+y`` and ``shift+meta+y``: Yank-pop forward and backward on the kill ring, but
-      requires a yank command before running either one.
+    * ``meta+y`` and ``shift+meta+y``: Yank-pop forward and backward from the kill ring, and
+      requires a yank command before running either one as with Emacs.
     * ``ctrl+k``: Kill to the end of line.
-      * Mimics emacs almost exactly (it does not support a 0 numeric argument to delete to the
-        beginning of the line). Providing a numeric argument means "delete that many lines"
-        which is different from typing ``ctrl+k`` that many times.
-    * ``ctrl+meta+k``: Delete S-Expression and place on top of the kill ring.
-      * Supports emacs universal and numeric arguments.
+      * Mimics emacs almost exactly, killing lines and adding into the kill ring. With a
+        numeric argument, delete that many lines (which is different from typing ``ctrl+k``
+        that many times). Zero and negative numeric arguments also behave as expected.
+    * ``ctrl+meta+k``: Delete S-Expression and place onto the kill ring.
       * Can pass in a ``direction`` argument set to ``-1`` to delete backward.
-    * ``meta+d`` and ``meta+backspace``: Kill word forward and backward and append deleted
-      text to the kill ring.
-      * Supports emacs universal and numeric arguments.
+    * ``meta+d`` and ``meta+backspace``: Kill word forward and backward and add to the kill ring.
     * ``ctrl+x ctrl+y``: Displays a Sublime quick panel menu of all the kills and allows you to
       choose which one to yank. If you supply a numeric argument, that means yank all the cursors
       into new cursors. (See below)
   * *Kill ring implementation details*
     * 64 entries by default, but settable with ``sbp_kill_ring_size`` setting in the
       ``sublemacspro .sublime-settings`` file.
-    * Adjacent kill commands (``meta+d``,``ctrl+k``,etc...) are appended to the same entry at
-      the top of the kill ring.
+    * Consecutive kill commands (``meta+d``,``ctrl+k``, etc.) are appended to the same entry
+      on the kill ring so they can be yanked back as once.
     * The yank command will pull from the system clipboard if it finds it is not the same as
       the current kill-ring entry. This means you can go into a different application and copy
       something there. Then, paste it into Sublime using ``ctrl+y``.
-    * Anything you kill in Sublime will be placed on the clipboard for other apps to access.
+    * Anything you kill in Sublime will be placed on the clipboard for other apps to access. If a
+      kill ring entry has multiple cursors, just the first cursor is placed on the clipboard.
   * *Multi-cursor support*
     * If you had multiple cursors while appending to the kill ring, the kill entry will
       contain and remember those separate cursors. If you try to yank multiple cursors, it
@@ -111,7 +109,7 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
 
 #### Emacs-style Mark Ring with Multi-cursor Support
   * *Commands that utilize the mark ring*
-    * ``ctrl+space``: Push a new mark onto the ring
+    * ``ctrl+space``: Push a new mark onto the mark ring
     * ``ctrl+x ctrl+x``: Switch point and mark
     * ``ctrl+space ctrl+space``: Push a new mark and activate the mark, which means *highlight
       it as a selection*. It will stay highlighted until ``ctrl+g`` is pressed or certain
@@ -121,15 +119,16 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
       isn't highlighted or remove the highlighting (deactivate the mark) if it is highlighted.
       * Suggested additional binding for this: ``{"keys": ["ctrl+m"], "command":
         "sbp_swap_point_and_mark", "args": {"toggle_active_mark_mode": true}},``
-    * ``ctrl+u ctrl+space``: Pop off the mark/s at the top of the mark ring (most recent
-      entry). This will move the cursor to the mark and put the current active mark at that
-      location.
+    * ``ctrl+u ctrl+space``: This moves point to where the current mark is, but then rotates the
+      mark ring so that the NEW current mark is the previous one on the ring. This allows you to
+      move back through the mark history. Some marks are multi-cursors and they will be handled in
+      exactly the same way.
   * *Mark ring implementation details*
     * ``ctrl+y`` sets the mark automatically as it does (and must for ``meta+y`` to work properly)
       in emacs.
     * Commands like ``meta+<`` and ``meta+>`` also set the mark automatically.
-    * If you use the mouse to make a selection, it will set the mark and it will become the
-      emacs region as well.
+    * If you use the mouse to make a selection, it will set the mark at the beginning of your
+      selection point will be at the end, thus your emacs region and selection will be the same.
   * *Multi-cursor support*
     * You can set the mark with multiple cursors and pop off the mark ring to marks with multiple
       cursors. Furthermore, you can kill and copy using those cursors, and then yank them later as
