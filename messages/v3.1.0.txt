@@ -34,3 +34,7 @@ colliding and collapsing into each other. Otherwise, the kill ring gets into an 
 that might confuse you later when you try to yank back some text. Now, instead of refusing to kill
 the text and display an easily missed status message, we instead popup an error message that you
 cannot possible miss.
+
+Changes: context key "sbp_has_visible_mark" is now "sbp_has_active_mark". It is true when the emacs
+mark is active. An addition "sbp_has_visible_selection" context key is true if there is any visible
+selection, regardless of whether it's an active emacs mark or just a sublime selection.

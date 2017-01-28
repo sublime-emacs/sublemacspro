@@ -47,8 +47,10 @@ class ViewWatcher(sublime_plugin.EventListener):
 
         if key == "i_search_active":
             return test(isearch.info_for(view) is not None)
-        if key == "sbp_has_visible_mark":
-            return CmdUtil(view).state.active_mark
+        if key == "sbp_has_active_mark":
+            return test(CmdUtil(view).state.active_mark)
+        if key == "sbp_has_visible_selection":
+            return test(view.sel()[0].size() > 1)
         if key == "sbp_use_alt_bindings":
             return test(settings_helper.get("sbp_use_alt_bindings"))
         if key == "sbp_use_super_bindings":
@@ -1280,7 +1282,7 @@ class SbpQuitCommand(SbpTextCommand):
         # get all the regions
         regions = list(self.view.sel())
         if not util.all_empty_regions(regions):
-            util.make_cursors_empty()
+            util.make_cursors_empty(to_start=favor_side == "start")
             util.toggle_active_mark_mode(False)
             return
 

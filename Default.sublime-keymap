@@ -8,29 +8,25 @@
 
     // emacs catchall for ctrl+g also handles preferred "single selection" behavior
     {"keys": ["ctrl+g"], "command": "sbp_quit", "args": {"favor_side": "start"},
-        "context": [{"key": "sbp_catchall"}]
+        "context": [
+            {"key": "sbp_catchall"},
+            // inverse of all the "escape" key things found in Default plugin and elsewhere
+            { "key": "has_next_field", "operator": "equal", "operand": false },
+            { "key": "has_prev_field", "operator": "equal", "operand": false },
+            { "key": "panel_visible", "operator": "equal", "operand": false },
+            { "key": "overlay_visible", "operator": "equal", "operand": false },
+            { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+
+            // power cursors
+            { "key": "in_cursor_transition", "operator": "equal", "operand": false}
+        ]
     },
 
-    // cancel popups, input fields, panels, auto-complete
-    { "keys": ["ctrl+g"], "command": "clear_fields",
-        "context": [ { "key": "has_next_field", "operator": "equal" }]
-    },
-    { "keys": ["ctrl+g"], "command": "clear_fields",
-        "context": [ { "key": "has_prev_field", "operator": "equal" }]
-    },
-
-    { "keys": ["ctrl+g"], "command": "hide_panel", "args": {"cancel": true},
-        "context": [ { "key": "panel_visible", "operator": "equal" }]
-    },
-
-    { "keys": ["ctrl+g"], "command": "hide_overlay",
-        "context": [ { "key": "overlay_visible", "operator": "equal" }]
-    },
-    { "keys": ["ctrl+g"], "command": "hide_popup",
-        "context": [ { "key": "popup_visible", "operator": "equal" }]
-    },
-    { "keys": ["ctrl+g"], "command": "hide_auto_complete",
-        "context": [ { "key": "auto_complete_visible", "operator": "equal" }]
+    // prevent default ctrl+g goto line command from running
+    {"keys": ["ctrl+g"], "command": "cancel",
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true }
+        ]
     },
 
     // cancel isearch
@@ -38,8 +34,20 @@
         "context": [ {"key": "i_search_active"}, {"key": "panel_has_focus"} ]
     },
 
-    {"keys": ["escape"], "command": "sbp_cancel_mark",
-        "context": [ {"key": "sbp_has_visible_mark"}]
+    {"keys": ["escape"], "command": "sbp_quit", "args": {"favor_side": "start"},
+        "context": [
+            { "key": "sbp_catchall"},
+
+            // inverse of all the "escape" key things found in Default plugin and elsewhere
+            { "key": "num_selections", "operator": "equal", "operand": 1 },
+            { "key": "has_next_field", "operator": "equal", "operand": false },
+            { "key": "has_prev_field", "operator": "equal", "operand": false },
+            { "key": "panel_visible", "operator": "equal", "operand": false },
+            { "key": "overlay_visible", "operator": "equal", "operand": false },
+            { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+            // power cursors
+            { "key": "in_cursor_transition", "operator": "equal", "operand": false}
+        ]
     },
 
     //
@@ -132,9 +140,7 @@
     {"keys": ["alt+\\"], "command": "sbp_delete_white_space", "args": {"keep_spaces": 0},
         "context": [ {"key": "sbp_use_alt_bindings"}]
     },
-    {"keys": ["ctrl+x", "ctrl+o"], "command": "sbp_delete_blank_lines",
-        "context": [ {"key": "sbp_use_alt_bindings"}]
-    },
+    {"keys": ["ctrl+x", "ctrl+o"], "command": "sbp_delete_blank_lines"},
     {"keys": ["alt+x"], "command": "show_overlay", "args": {"overlay": "command_palette"},
         "context": [{"key": "sbp_use_alt_bindings"} ]
     },

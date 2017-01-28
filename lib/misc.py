@@ -400,9 +400,12 @@ class CmdUtil:
         if ensure_visible:
             self.ensure_visible(regions[-1])
 
-    def make_cursors_empty(self):
+    def make_cursors_empty(self, to_start=False):
         selection = self.view.sel()
-        cursors = [sublime.Region(c.b) for c in selection]
+        if to_start:
+            cursors = [sublime.Region(c.a) for c in selection]
+        else:
+            cursors = [sublime.Region(c.b) for c in selection]
         selection.clear()
         selection.add_all(cursors)
 
