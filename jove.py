@@ -227,12 +227,16 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 class SbpChainCommand(SbpTextCommand):
     """A command that easily runs a sequence of other commands."""
 
-    def run_cmd(self, util, commands):
+    def run_cmd(self, util, commands, ensure_point_visible=False):
         for c in commands:
             if 'window_command' in c:
                 util.run_window_command(c['window_command'], c['args'])
             elif 'command' in c:
                 util.run_command(c['command'], c['args'])
+
+        if ensure_point_visible:
+            util.ensure_visible(sublime.Region(util.get_point()))
+
 
 #
 # Calls run command a specified number of times.
@@ -623,6 +627,7 @@ class SbpMoveThenDeleteCommand(SbpTextCommand):
 # isn't specified.
 #
 class SbpGotoLineCommand(SbpTextCommand):
+    is_ensure_visible_cmd = True
     def run_cmd(self, util):
         if util.has_prefix_arg():
             util.goto_line(util.get_count())
@@ -811,6 +816,23 @@ class SbpMoveToCommand(SbpTextCommand):
                 util.push_mark_and_goto_position(pos)
             else:
                 util.set_cursors([sublime.Region(pos)])
+
+class SbpSelectAllCommand(SbpTextCommand):
+    def run_cmd(self, util, activate_mark=True):
+        # set mark at current position
+        util.set_mark()
+
+        # set a mark at end of file
+        util.set_mark(regions=[sublime.Region(self.view.size())])
+
+        # goto the top of the file
+        util.set_point(0)
+
+        if activate_mark:
+            util.toggle_active_mark_mode(True)
+        else:
+            util.ensure_visible(sublime.Region(0))
+
 
 class SbpOpenLineCommand(SbpTextCommand):
     def run_cmd(self, util):

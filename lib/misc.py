@@ -1,4 +1,4 @@
-import os, re, time
+import os, re, time, traceback
 import sublime, sublime_plugin
 
 from .viewstate import *
@@ -377,7 +377,7 @@ class CmdUtil:
 
         self.state.active_mark = value if value is not None else (not self.state.active_mark)
         if self.state.active_mark:
-            self.set_cursors(self.get_regions())
+            self.set_cursors(self.get_regions(), ensure_visible=False)
         else:
             self.make_cursors_empty()
 
@@ -524,7 +524,7 @@ class CmdUtil:
     def push_mark_and_goto_position(self, pos):
         if self.get_point() != pos:
             self.set_mark()
-        self.set_cursors([sublime.Region(pos)], ensure_visible=True)
+        self.set_cursors([sublime.Region(pos)], ensure_visible=False)
         if self.state.active_mark:
             self.set_cursors(self.get_regions())
 
