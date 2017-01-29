@@ -1,4 +1,4 @@
-import os, re
+import os, re, time
 import sublime, sublime_plugin
 
 from .viewstate import *
@@ -179,6 +179,19 @@ class SbpWindowCommand(sublime_plugin.WindowCommand):
         self.util = CmdUtil(self.window.active_view(), state=ViewState.get(self.window.active_view()))
         self.run_cmd(self.util, **kwargs)
 
+STATUS_MSG_DISPLAY_TIME = 3000
+status_msg_time = None
+def set_jove_status(view, msg, auto_erase):
+    global status_msg_time
+    # erase this message some time in the future, unless another message appears
+    view.set_status(JOVE_STATUS, msg)
+    status_msg_time = tm = time.time()
+    def doit():
+        if status_msg_time == tm:
+            view.erase_status(JOVE_STATUS)
+    if auto_erase:
+        sublime.set_timeout(doit, STATUS_MSG_DISPLAY_TIME)
+
 #
 # A helper class which provides a bunch of useful functionality on a view.
 #
@@ -193,8 +206,8 @@ class CmdUtil:
     #
     # Sets the status text on the bottom of the window.
     #
-    def set_status(self, msg):
-        self.view.set_status(JOVE_STATUS, msg)
+    def set_status(self, msg, auto_erase=True):
+        set_jove_status(self.view, msg, auto_erase)
 
     #
     # Returns point. Point is where the cursor is in the possibly extended region. If there are
@@ -368,9 +381,6 @@ class CmdUtil:
         else:
             self.make_cursors_empty()
 
-        # elif len(self.view.sel()) <= 1:
-        #     self.make_cursors_empty()
-
     def swap_point_and_mark(self):
         view = self.view
         mark_ring = self.state.mark_ring
@@ -385,7 +395,7 @@ class CmdUtil:
             self.set_status("No mark in this buffer")
 
     def get_cursors(self, begin=False):
-        return [sublime.Region(c.begin() if begin else c.end()) if not c.empty() else c for c in self.view.sel()]
+        return [sublime.Region(c.begin() if begin else c.b) if not c.empty() else c for c in self.view.sel()]
 
     def get_last_cursor(self):
         return self.view.sel()[-1]

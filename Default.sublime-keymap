@@ -445,7 +445,15 @@
     {"keys": ["ctrl+x", "ctrl+w"], "command": "prompt_save_as"},
     {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
 
-    {"keys": ["ctrl+x","h"], "command": "select_all"},
+    {"keys": ["ctrl+x", "h"], "command": "sbp_chain",
+        "args": {
+            "commands": [
+                {"command": "sbp_move_to", "args": {"to": "eof"}},
+                {"command": "sbp_move_to", "args": {"to": "bof"}},
+                {"command": "sbp_enable_active_mark", "args": {"enabled": true}}
+            ]
+        }
+    },
 
     {"keys": ["ctrl+x", "("], "command": "toggle_record_macro" },
     {"keys": ["ctrl+x", ")"], "command": "toggle_record_macro" },

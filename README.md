@@ -359,7 +359,8 @@ Sublime Text 3. For the bindings below, ``meta`` is the ``alt`` key on Windows/L
     * ``ctrl+x, s``: Save all files.
     * ``ctrl+x, ctrl+w``: Prompt for writing a new file to disk (Save As...).
   * *Selection*
-    * ``ctrl+x h``: Select All
+    * ``ctrl+x h``: Select All (works like emacs: setting a mark at the bottom and going to the
+      top of the file)
   * *Deletion*
     * ``ctrl+d``: Right delete.
     * ``backspace``: Left delete.

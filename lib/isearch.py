@@ -283,7 +283,7 @@ class ISearchInfo():
             return
         if self.current and self.current.search:
             save_search(self.current.search)
-        util.set_status("")
+        util.set_status("", False)
 
         point_set = False
         if not abort:
@@ -341,7 +341,7 @@ class ISearchInfo():
             n_cursors = min(len(si.selected), len(si.regions))
             status += " %s, %s" % (pluralize("match", len(si.regions), "es"), pluralize("cursor", n_cursors))
 
-        self.util.set_status(status)
+        self.util.set_status(status, False)
 
     #
     # Try to make progress with the current search string. Even if we're currently failing (in our

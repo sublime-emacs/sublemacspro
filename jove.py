@@ -85,9 +85,6 @@ class CmdWatcher(sublime_plugin.EventListener):
         super(CmdWatcher, self).__init__(*args, **kwargs)
         self.pinned_text = None
 
-    def on_anything(self, view):
-        view.erase_status(JOVE_STATUS)
-
     def on_post_window_command(self, window, cmd, args):
         # update_pinned_status(window.active_view())
         info = isearch.info_for(window)
@@ -113,8 +110,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         if args is None:
             args = {}
-
-        self.on_anything(view)
 
         # first keep track of this_cmd and last_cmd (if command starts with "sbp_" it's handled
         # elsewhere)
@@ -207,7 +202,6 @@ class CmdWatcher(sublime_plugin.EventListener):
     #
     def on_modified(self, view):
         ViewState.get(view).this_cmd = None
-        self.on_anything(view)
 
 
 class WindowCmdWatcher(sublime_plugin.EventListener):
@@ -233,7 +227,7 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 class SbpChainCommand(SbpTextCommand):
     """A command that easily runs a sequence of other commands."""
 
-    def run_cmd(self, util, commands, use_window=False):
+    def run_cmd(self, util, commands):
         for c in commands:
             if 'window_command' in c:
                 util.run_window_command(c['window_command'], c['args'])
@@ -267,7 +261,7 @@ class SbpShowScopeCommand(SbpTextCommand):
         region = self.view.extract_scope(point)
         status = "%d bytes: %s" % (region.size(), name)
         print(status)
-        self.view.set_status(JOVE_STATUS, status)
+        util.set_status(status)
 
 #
 # Implements moving by words, emacs style.
@@ -698,7 +692,7 @@ class SbpShiftRegionCommand(SbpTextCommand):
 
             # restore the region
             util.restore_cursors("shift")
-            sublime.set_timeout(lambda: util.set_status("Shifted %d of %d lines in the region" % (shifted, count)), 100)
+            util.set_status("Shifted %d of %d lines in the region" % (shifted, count))
 
 # Enum definition
 def enum(**enums):
@@ -798,6 +792,10 @@ class SbpSwapPointAndMarkCommand(SbpTextCommand):
             util.toggle_active_mark_mode()
         else:
             util.swap_point_and_mark()
+
+class SbpEnableActiveMarkCommand(SbpTextCommand):
+    def run_cmd(self, util, enabled):
+        util.toggle_active_mark_mode(enabled)
 
 class SbpMoveToCommand(SbpTextCommand):
     is_ensure_visible_cmd = True
