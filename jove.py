@@ -158,10 +158,11 @@ class CmdWatcher(sublime_plugin.EventListener):
     def on_post_text_command(self, view, cmd, args):
         vs = ViewState.get(view)
         cm = CmdUtil(view)
-        if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
-            # if we just finished a mouse drag, make sure active mark mode is off
-            if cmd != "context_menu":
-                cm.toggle_active_mark_mode(False)
+        select_text_commands = ['drag_select', 'word_highlight_click', 'context_menu']
+        if vs.active_mark and vs.this_cmd not in select_text_commands:
+            # if this commmand is not a selection-related command, turn off
+            # active mark mode if it is on.
+            cm.toggle_active_mark_mode(False)
 
         # reset numeric argument (if command starts with "sbp_" this is handled elsewhere)
         if not cmd.startswith("sbp_"):
