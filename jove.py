@@ -275,7 +275,6 @@ class SbpShowScopeCommand(SbpTextCommand):
 # Implements moving by words, emacs style.
 #
 class SbpMoveWordCommand(SbpTextCommand):
-    # should_reset_target_column = True
     is_ensure_visible_cmd = True
 
     def find_by_class_fallback(self, view, point, forward, classes, seperators):
@@ -339,8 +338,6 @@ class SbpMoveWordCommand(SbpTextCommand):
 # the argument count.
 #
 class SbpMoveBackToIndentation(SbpTextCommand):
-    # should_reset_target_column = True
-
     def run_cmd(self, util, direction=1):
         view = self.view
 
@@ -360,7 +357,6 @@ class SbpMoveBackToIndentation(SbpTextCommand):
 # regions and use_region=True, this command is a no-op.
 #
 class SbpChangeCaseCommand(SbpTextCommand):
-    # should_reset_target_column = True
     re_to_underscore = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
     re_to_camel = re.compile(r'(?!^)_([a-zA-Z])')
 

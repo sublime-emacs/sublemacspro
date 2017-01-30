@@ -1,0 +1,11 @@
+Emacs Pro Essentials v3.1.1 Update
+==================================
+
+Bug Fix: fixed silly mistake with ctrl+g bindings which caused ctrl+g not to work as advertised much
+of the time.
+
+Bug Fix: fixed problem where completing an i-search by invoking "meta->" or "meta-<" would not
+scroll to the new cursor location until after the next command.
+
+Performance Improvement: Discovered a nasty years-old work-around is no longer needed as often, and
+improved the performance of that work-around in the rare case that it is still needed.
