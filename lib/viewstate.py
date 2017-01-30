@@ -18,6 +18,7 @@ class ViewState():
         ViewState.view_state_dict[view.id()] = self
         self.view = view
         self.active_mark = False
+        self.should_reset_target_column = False
         self.touch()
 
         # a mark ring per view (should be per buffer)

@@ -1,7 +1,3 @@
-# REMIND: should_reset_target_column should be implemented as state in the view, which is set to
-# true until the first time next-line and prev-line are called (assuming we can trap that). That way
-# we don't do it after each command but only just before we issue a next/prev line command.
-
 import re, sys, time, os
 import functools as fu
 import sublime, sublime_plugin
@@ -111,6 +107,10 @@ class CmdWatcher(sublime_plugin.EventListener):
             return
 
         vs = ViewState.get(view)
+
+        if vs.should_reset_target_column and cmd == "move" and args["by"] == "lines":
+            vs.should_reset_target_column = False
+            return ('sbp_reset_target_column', {"next_cmd": cmd, "next_args": args})
 
         if args is None:
             args = {}
@@ -275,7 +275,7 @@ class SbpShowScopeCommand(SbpTextCommand):
 # Implements moving by words, emacs style.
 #
 class SbpMoveWordCommand(SbpTextCommand):
-    should_reset_target_column = True
+    # should_reset_target_column = True
     is_ensure_visible_cmd = True
 
     def find_by_class_fallback(self, view, point, forward, classes, seperators):
@@ -339,7 +339,7 @@ class SbpMoveWordCommand(SbpTextCommand):
 # the argument count.
 #
 class SbpMoveBackToIndentation(SbpTextCommand):
-    should_reset_target_column = True
+    # should_reset_target_column = True
 
     def run_cmd(self, util, direction=1):
         view = self.view
@@ -360,7 +360,7 @@ class SbpMoveBackToIndentation(SbpTextCommand):
 # regions and use_region=True, this command is a no-op.
 #
 class SbpChangeCaseCommand(SbpTextCommand):
-    should_reset_target_column = True
+    # should_reset_target_column = True
     re_to_underscore = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
     re_to_camel = re.compile(r'(?!^)_([a-zA-Z])')
 
@@ -1270,6 +1270,12 @@ class SbpIncSearchEscapeCommand(SbpTextCommand):
             sublime.active_window().run_command(next_cmd, next_args)
         else:
             info.view.run_command(next_cmd, next_args)
+
+class SbpResetTargetColumnCommand(SbpTextCommand):
+    def run_cmd(self, util, next_cmd, next_args):
+        util.reset_target_column()
+        util.run_command(next_cmd, next_args)
+
 
 #
 # Indent for tab command. If the cursor is not within the existing indent, just call reindent. If

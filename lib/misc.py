@@ -155,7 +155,6 @@ class SbpTextCommand(sublime_plugin.TextCommand):
         try:
             self.run_cmd(util, **kwargs)
             if self.is_ensure_visible_cmd and util.just_one_cursor():
-                print("ENSURE VISIBLE", self.__class__.__name__)
                 util.ensure_visible(util.get_last_cursor())
         finally:
             vs.entered -= 1
@@ -165,9 +164,8 @@ class SbpTextCommand(sublime_plugin.TextCommand):
             vs.argument_value = 0
             vs.argument_supplied = False
 
-            # this no-op ensures the next/prev line target column is reset to the new locations
             if self.should_reset_target_column:
-                util.reset_target_column()
+                vs.should_reset_target_column = True
 
 #
 # Simple wrapper for window commands.
@@ -230,7 +228,7 @@ class CmdUtil:
     #
     def reset_target_column(self):
         selection = self.view.sel()
-        if len(selection) == 1 and selection[0].empty() and selection[0].b < self.view.size():
+        if len(selection) > 0 and selection[-1].empty() and selection[-1].b < self.view.size():
             self.run_command("move", {"by": "characters", "forward": True})
             self.run_command("move", {"by": "characters", "forward": False})
 
