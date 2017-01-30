@@ -12,9 +12,6 @@ REGION_SELECTED = "rs"
 JOVE_STATUS = "1:jove"
 PINNED_STATUS = "0:jove_pinned"
 
-# ensure_visible commands
-ensure_visible_cmds = set(['move', 'move_to'])
-
 # initialized at the end of this file after all commands are defined
 kill_cmds = set()
 settings_helper = None
@@ -133,8 +130,6 @@ def preprocess_module(module):
             cls.jove_cmd_name = name
             if cls.is_kill_cmd:
                 kill_cmds.add(name)
-            if cls.is_ensure_visible_cmd:
-                ensure_visible_cmds.add(name)
 
 #
 # The baseclass for JOVE/SBP commands. This sets up state, creates a helper, processes the universal
@@ -159,6 +154,9 @@ class SbpTextCommand(sublime_plugin.TextCommand):
         util = CmdUtil(self.view, state=vs, edit=edit)
         try:
             self.run_cmd(util, **kwargs)
+            if self.is_ensure_visible_cmd and util.just_one_cursor():
+                print("ENSURE VISIBLE", self.__class__.__name__)
+                util.ensure_visible(util.get_last_cursor())
         finally:
             vs.entered -= 1
 

@@ -17,6 +17,10 @@ from . import sbp_layout as ll
 # repeatable commands
 repeatable_cmds = set(['move', 'left_delete', 'right_delete', 'undo', 'redo'])
 
+# built-in commands we need to do ensure_visible after being run
+# REMIND: I think we can delete this.
+built_in_ensure_visible_cmds = set(['move', 'move_to'])
+
 class ViewWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
         super(ViewWatcher, self).__init__(*args, **kwargs)
@@ -160,11 +164,11 @@ class CmdWatcher(sublime_plugin.EventListener):
     #
     def on_post_text_command(self, view, cmd, args):
         vs = ViewState.get(view)
-        cm = CmdUtil(view)
+        util = CmdUtil(view)
         if vs.active_mark and vs.this_cmd != 'drag_select' and vs.last_cmd == 'drag_select':
             # if we just finished a mouse drag, make sure active mark mode is off
             if cmd != "context_menu":
-                cm.toggle_active_mark_mode(False)
+                util.toggle_active_mark_mode(False)
 
         # reset numeric argument (if command starts with "sbp_" this is handled elsewhere)
         if not cmd.startswith("sbp_"):
@@ -173,10 +177,10 @@ class CmdWatcher(sublime_plugin.EventListener):
             vs.last_cmd = cmd
 
         if vs.active_mark:
-            cm.set_cursors(cm.get_regions())
+            util.set_cursors(util.get_regions())
 
-        if cmd in ensure_visible_cmds and cm.just_one_cursor():
-            cm.ensure_visible(cm.get_last_cursor())
+        # if cmd in built_in_ensure_visible_cmds and util.just_one_cursor():
+        #     util.ensure_visible(util.get_last_cursor())
 
     #
     # Process the selection if it was created from a drag_select (mouse dragging) command.
