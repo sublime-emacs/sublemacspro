@@ -1,6 +1,14 @@
 Emacs Pro Essentials v3.1.0 Update
 ==================================
 
+Note: We've started a wiki page which we plan on filling up with useful information about the
+features and settings of this plugin:
+
+    https://github.com/sublime-emacs/sublemacspro/wiki
+
+OK - 3.1.0 release details below.
+---------------------------------
+
 New feature: Pinned Tabs. When you pin a tab, it will never automatically be closed with the Close
 Stale Views command. A pinned tab displays a pushpin icon in the message area. The default binding
 is "ctrl+x P".
