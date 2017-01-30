@@ -30,6 +30,7 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
             return None
 
         seen = set()
+        seen_buffers = set()
         words = []
         re_by_syntax = {}
 
@@ -42,9 +43,12 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
         start = time.time()
         re_flags = sublime.IGNORECASE if prefix.lower() == prefix else 0
         for v in views:
-            if v.is_scratch():
+            if v.is_scratch() or v.buffer_id() in seen_buffers:
                 continue
 
+            # only check each buffer once, starting with the most recently accessed instance of that
+            # buffer
+            seen_buffers.add(v.buffer_id())
             point = 0
             sel = v.selection
             if len(sel) > 0:
@@ -93,11 +97,11 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
         return view.extract_completions(prefix, point)
 
     def extract_completions_from_view(self, view, regex, re_flags, point, current_view, seen):
-        regions = sorted(view.find_all(regex, re_flags),
-                         key=lambda r: abs(point - r.begin()))
+        regions = sorted(view.find_all(regex, re_flags), key=lambda r: abs(point - r.begin()))
         results = []
+        is_current_view = view == current_view or view.buffer_id() == current_view.buffer_id()
         for region in regions:
-            if view == current_view and region.contains(point):
+            if is_current_view and region.contains(point):
                 continue
             if MIN_AUTO_COMPLETE_WORD_SIZE <= region.size() <= MAX_AUTO_COMPLETE_WORD_SIZE:
                 word = view.substr(region)
