@@ -102,7 +102,7 @@ class CmdWatcher(sublime_plugin.EventListener):
         # escape the current isearch if one is in progress, unless the command is already related to
         # isearch
         if isearch.info_for(view) is not None:
-            if cmd not in ('sbp_inc_search', 'sbp_inc_search_escape'):
+            if cmd not in ('sbp_inc_search', 'sbp_inc_search_escape', 'drag_select'):
                 return ('sbp_inc_search_escape', {'next_cmd': cmd, 'next_args': args})
             return
 
