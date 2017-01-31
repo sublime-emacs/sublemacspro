@@ -59,8 +59,6 @@
             { "key": "panel_visible", "operator": "equal", "operand": false },
             { "key": "overlay_visible", "operator": "equal", "operand": false },
             { "key": "auto_complete_visible", "operator": "equal", "operand": false },
-            // power cursors
-            { "key": "in_cursor_transition", "operator": "equal", "operand": false}
         ]
     },
 

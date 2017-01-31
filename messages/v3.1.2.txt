@@ -1,0 +1,10 @@
+Emacs Pro Essentials v3.1.2 Update
+==================================
+
+Bug Fix: fixed another ctrl+g bindings issue that erroneously brought up the "goto line" overlay.
+
+Bug Fix: fixed issue with all complete that allowed the current word to be included in the choices
+when the view is duplicated.
+
+Bug Fix: fixed issue where terminating an isearch by clicking the mouse in a split view caused a
+large selection to be made.
