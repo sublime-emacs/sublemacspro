@@ -154,11 +154,12 @@ class ISearchInfo():
         if len(sel) == 1:
             region = sel[0]
             init_text = self.view.substr(region)
-            self.point = [sublime.Region(region.begin())]
-            self.restart(init_text)
+            if len(init_text) > 0:
+                self.point = [sublime.Region(region.begin())]
+                self.restart(init_text)
 
-        # search cancels after mark mode
-        self.util.toggle_active_mark_mode(False)
+                # when we start a search from the selection
+                self.util.toggle_active_mark_mode(False)
 
     def on_done(self, val):
         # on_done: stop the search, keep the cursors intact
