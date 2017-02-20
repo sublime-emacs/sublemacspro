@@ -5,7 +5,9 @@ import sublime, sublime_plugin
 from .mark_ring import MarkRing
 
 #
-# We store state about each view.
+# We store state about each view. In particular, the mark ring, whether active_mark is set, a
+# boolean to manage resetting the target column, the argument count, this and previous command
+# names, and the last touched time. Only last touched time is saved when sublime exits.
 #
 class ViewState():
     # per view state
@@ -19,7 +21,9 @@ class ViewState():
         self.view = view
         self.active_mark = False
         self.should_reset_target_column = False
-        self.touch()
+        self.touched = view.settings().get("touched")
+        if self.touched is None:
+            self.touch()
 
         # a mark ring per view (should be per buffer)
         self.mark_ring = MarkRing(view)
@@ -30,6 +34,9 @@ class ViewState():
         if view.id() in cls.view_state_dict:
             del(cls.view_state_dict[view.id()])
 
+    #
+    # Finds ot creates the state for the given view. This doesn't imply a touch().
+    #
     @classmethod
     def find_or_create(cls, view):
         state = cls.view_state_dict.get(view.id(), None)
@@ -37,6 +44,10 @@ class ViewState():
             state = ViewState(view)
         return state
 
+    #
+    # Find (or create) the state for the specified view, and touch() it. Also sets the current
+    # view_state to the one for this view.
+    #
     @classmethod
     def get(cls, view):
         # make sure current is set to this view
@@ -48,6 +59,10 @@ class ViewState():
         ViewState.current.touch()
         return ViewState.current
 
+    #
+    # Returns a list of views from a given window sorted by most recently accessed/touched. If group
+    # is specified, uses only views in that group.
+    #
     @classmethod
     def sorted_views(cls, window, group=None):
         views = window.views_in_group(group) if group is not None else window.views()
@@ -55,6 +70,9 @@ class ViewState():
         sorted_states = sorted(states, key=lambda state: state.touched, reverse=True)
         return [state.view for state in sorted_states]
 
+    #
+    # Reset the state for this view.
+    #
     def reset(self):
         self.this_cmd = None
         self.last_cmd = None
@@ -64,8 +82,12 @@ class ViewState():
         self.drag_count = 0
         self.entered = 0
 
+    #
+    # Touch this view.
+    #
     def touch(self):
         self.touched = time.time()
+        self.view.settings().set("touched", self.touched)
 
     #
     # Get the argument count and reset it for the next command (unless peek is True).
