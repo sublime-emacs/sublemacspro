@@ -1,0 +1,9 @@
+Emacs Pro Essentials v3.1.3 Update
+==================================
+
+Bug Fix: Don't disable active mark mode when starting a search, unless the search was started with a
+selection. E.g., if you activate the mark and perform a search, the mark will be active when you
+finish the search. But if you double click a word to highlight it and then start a search, the mark
+will not be active.
+
+Enhancement: Remember the buffer last access time between sessions.
