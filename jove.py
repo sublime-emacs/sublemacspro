@@ -548,6 +548,10 @@ class MoveThenDeleteHelper():
         # remember the current cursor positions
         self.orig_cursors = [s for s in self.selection]
 
+        # Remember if previous was a kill command now, because if we check in self.finish() it's too
+        # late and the answer is always yes (because of this command we're "helping").
+        self.last_was_kill_cmd = util.state.last_was_kill_cmd()
+
     #
     # Finish the operation. Sometimes we're called later with a new util object, because the whole
     # thing was done asynchronously (see the zap code).
@@ -594,7 +598,7 @@ class MoveThenDeleteHelper():
 
         # copy the text into the kill ring
         regions = [view.substr(r) for r in view.sel()]
-        kill_ring.add(regions, forward=self.forward, join=util.state.last_was_kill_cmd())
+        kill_ring.add(regions, forward=self.forward, join=self.last_was_kill_cmd)
 
         # erase the regions
         for region in selection:

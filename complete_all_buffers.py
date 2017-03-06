@@ -10,7 +10,7 @@ def plugin_loaded():
 
     settings_helper = SettingsHelper()
     extra_word_characters = settings_helper.get("sbp_syntax_specific_extra_word_characters")
-    separator_characters = settings_helper.get("sbp_word_separators", default_sbp_word_separators)
+    separator_characters = settings_helper.get("sbp_sexpr_separators", default_sbp_sexpr_separators)
 
 #
 # Switch buffer command that sorts buffers by last access and displays file name as well.
@@ -57,20 +57,36 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
             # Determine regex by syntax. Rewrite the prefix so it does fuzzy matching rather than
             # strict prefix matching.
             syntax_name = v.settings().get("syntax")
-            regex = re_by_syntax.get(syntax_name, None)
-            if regex is None:
+            regex_info = re_by_syntax.get(syntax_name, None)
+            if regex_info is None:
                 extra = extra_word_characters.get(syntax_name) or ""
                 word_re = r'[\w' + extra + r']'
-                re_prefix = (word_re + '*').join(re.escape(p) for p in prefix)
+                not_word_re = r'[^\w' + extra + r']+'
+
+                # If the prefix starts with non-word characters, we need to strip them out now,
+                # perform the match without them, and then add them back in at the end.
+                match = re.match(not_word_re, prefix)
+                if match:
+                    stripped_prefix = match.group(0)
+                    if stripped_prefix == prefix:
+                        continue
+                    this_prefix = prefix[len(stripped_prefix):]
+                else:
+                    this_prefix = prefix
+                    stripped_prefix = ""
+
+                re_prefix = (word_re + '*').join(re.escape(p) for p in this_prefix)
 
                 # If our starting character is not considered a word character, we cannot use '\b'
                 # to start this regex.
-                if prefix[0] in separator_characters:
+                if this_prefix[0] in separator_characters:
                     regex = ""
                 else:
                     regex = r'\b'
                 regex += re_prefix + word_re + r'+\b'
-                re_by_syntax[syntax_name] = regex
+                re_by_syntax[syntax_name] = (regex, stripped_prefix)
+            else:
+                regex, stripped_prefix = regex_info
 
             view_words = self.extract_completions_from_view(v, regex, re_flags, point, view, seen)
             if len(view_words) == 0:
@@ -83,10 +99,13 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
                 file_name = get_relative_path(roots, v.file_name())
 
             for word in view_words:
+                # add the stripped prefix back in to the trigger and the word
+                if len(stripped_prefix) > 0:
+                    word = stripped_prefix + word
                 if v == view:
-                    trigger = word + "\t[HERE]"
+                    trigger = "%s\t  [HERE]" % (word,)
                 else:
-                    trigger = "%s\t%s" % (word, file_name)
+                    trigger = "%s\t  %s" % (word, file_name)
                 words.append((trigger, word.replace("$", "\\$")))
         tm = time.time() - start
         if tm > 0.20:
