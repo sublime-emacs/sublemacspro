@@ -130,6 +130,7 @@
 
     {"keys": ["ctrl+k"], "command": "sbp_move_then_delete", "args": {"move_cmd": "sbp_move_for_kill_line"}},
     {"keys": ["ctrl+w"], "command": "sbp_kill_region"},
+    {"keys": ["super+x"], "command": "sbp_kill_region"},
 
     {"keys": ["ctrl+y"], "command": "sbp_yank"},
     {"keys": ["ctrl+x", "ctrl+y"], "command": "sbp_choose_and_yank"},
