@@ -1,0 +1,11 @@
+Emacs Pro Essentials v3.1.4 Update
+==================================
+
+Improvements to the All Complete functionality, for when identifiers start with
+non-word characters, e.g., "@" in ruby or coffeescript.
+
+Bug fix: Fixed a problem with zap to char command which caused the zapped
+characters to ALWAYS be appended to the most recent kill ring entry.
+
+Bug fix: Fix to the camel case/underscore command which caused the selection to
+drift after a conversion in either direction between underscore and camel case.
