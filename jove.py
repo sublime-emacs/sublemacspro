@@ -415,17 +415,21 @@ class SbpChangeCaseCommand(SbpTextCommand):
                 util.view.replace(util.edit, r, view.substr(r).title())
         elif mode in ("underscore", "camel"):
             fcn = self.underscore if mode == "underscore" else self.camel
+            delta = 0
             for r, s in zip(regions, selection):
                 orig = view.substr(s)
                 replace = fcn(orig)
+                this_delta = len(orig) - len(replace)
                 util.view.replace(util.edit, s, replace)
-                # if the point > mark, we need to adjust point forward by the difference in size
-                # between the original and the replacement
+                # We need to adjust the size of regions by this_delta, and the position of each
+                # region by the accumulated delta for when we put the selection back at the end.
                 if s.b > s.a:
-                    if r.a == r.b:
-                        r.a = r.b = r.a + len(replace) - len(orig)
-                    else:
-                        r.b += len(replace) - len(orig)
+                    r.b -= this_delta
+                else:
+                    r.a -= this_delta
+                r.b -= delta
+                r.a -= delta
+                delta += this_delta
         else:
             print("Unknown case setting:", mode)
             return

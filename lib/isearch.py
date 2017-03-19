@@ -9,6 +9,11 @@ import sublime, sublime_plugin
 
 from .misc import *
 
+# Region names we use for i-search. Using our own names means that there is no interference from
+# Sublime in terms of messages it displays regarding regions and matches, etc.
+REGION_FIND = "rf"
+REGION_SELECTED = "rs"
+
 # preserved isearch settings
 isearch_history_settings = None
 ISEARCH_SETTINGS_FILE = "sublemacspro_isearch_history.sublime-settings"

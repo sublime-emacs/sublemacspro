@@ -3,11 +3,6 @@ import sublime, sublime_plugin
 
 from .viewstate import *
 
-# Region names we use for i-search. Using our own names means that there is no interference from
-# Sublime in terms of messages it displays regarding regions and matches, etc.
-REGION_FIND = "rf"
-REGION_SELECTED = "rs"
-
 # name we use to indicate jove-related status messages
 JOVE_STATUS = "1:jove"
 PINNED_STATUS = "0:jove_pinned"
