@@ -108,10 +108,6 @@ class CmdWatcher(sublime_plugin.EventListener):
 
         vs = ViewState.get(view)
 
-        if vs.should_reset_target_column and cmd == "move" and args["by"] == "lines":
-            vs.should_reset_target_column = False
-            return ('sbp_reset_target_column', {"next_cmd": cmd, "next_args": args})
-
         if args is None:
             args = {}
 
@@ -1274,12 +1270,6 @@ class SbpIncSearchEscapeCommand(SbpTextCommand):
             sublime.active_window().run_command(next_cmd, next_args)
         else:
             info.view.run_command(next_cmd, next_args)
-
-class SbpResetTargetColumnCommand(SbpTextCommand):
-    def run_cmd(self, util, next_cmd, next_args):
-        util.reset_target_column()
-        util.run_command(next_cmd, next_args)
-
 
 #
 # Indent for tab command. If the cursor is not within the existing indent, just call reindent. If

@@ -160,7 +160,7 @@ class SbpTextCommand(sublime_plugin.TextCommand):
             vs.argument_supplied = False
 
             if self.should_reset_target_column:
-                vs.should_reset_target_column = True
+                util.reset_target_column()
 
 #
 # Simple wrapper for window commands.
