@@ -90,7 +90,7 @@ def add_external_clipboard():
     entry = entries[index]
     clipboard = sublime.get_clipboard()
 
-    if clipboard and (entry is None or entry.regions[0] != clipboard):
+    if clipboard and (entry is None or not entry.matches_clipboard()):
         # We switched to another app and cut or copied something there, so add the clipboard
         # to our kill ring.
         result = [clipboard]
@@ -133,11 +133,16 @@ def get_current(n_regions, pop):
         result = entries[index].regions
         entries[index].set_clipboard()
 
-    # make sure we have enough data for the specified number of regions
+    # Make sure we have enough data for the specified number of regions, duplicating regions until
+    # we meet the requested number of cursors. Special case of 1 request region with multiple kill
+    # regions is handled by joining all the regions into a single Newline separated string.
     if result:
         if n_regions > 0:
-            while len(result) < n_regions:
-                result *= 2
+            if n_regions == 1 and len(result) > 1:
+                result = ["\n".join(result)]
+            else:
+                while len(result) < n_regions:
+                    result *= 2
             return result[0:n_regions]
         return result
     return None
@@ -193,10 +198,25 @@ class Kill(object):
         return text
 
     #
-    # We set the clipboard to the value of the first region.
+    # We set the clipboard to the concatenation of all the regions with "\n" like Sublime already
+    # did.
     #
     def set_clipboard(self):
-        sublime.set_clipboard(self.regions[0])
+        sublime.set_clipboard("\n".join(self.regions))
+
+    #
+    # Returns true if this region matches the current external clipboard.
+    #
+    def matches_clipboard(self):
+        clipboard = sublime.get_clipboard()
+        offset = 0
+        for region in self.regions:
+            length = len(region)
+            if region != clipboard[offset:offset+length]:
+                return False
+            # skip the region and the following newline character
+            offset += length + 1
+        return offset >= len(clipboard)
 
     def same_as(self, regions):
         if len(regions) != self.n_regions:
