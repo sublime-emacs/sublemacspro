@@ -1,0 +1,16 @@
+Emacs Pro Essentials v3.1.5 Update
+==================================
+
+- Added default emacs binding for UNDO.
+
+- Changed the kill ring behavior with respect to the clipboard. Now when multiple regions are killed
+  or copied, the clipboard takes on all those regions joined together with Newlines. This is the
+  default Sublime behavior now supported by this plugin.
+
+  This plugin still stores them as separate regions, and yank still works the way it used to, with
+  one exception: if you yank multiple regions into a single cursor, the regions are joined together
+  with Newlines like the clipboard. Previously we'd just yank back the first region. When there's
+  more than one cursor, the regions will be yanked into those cursors as before.
+
+- Fixed an issue with setting the target column for next and previous line commands after running
+  the s-expression commands. This was interfering with the ctrl+u command.
