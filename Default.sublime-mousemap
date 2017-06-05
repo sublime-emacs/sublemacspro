@@ -1,0 +1,20 @@
+[
+    {
+        "button": "button1", "count": 1, "modifiers": ["button2"],
+        "command": "sbp_mouse_mark",
+        "press_command": "drag_select"
+    },
+    {
+        "button": "button1", "count": 2, "modifiers": ["button2"],
+        "command": "expand_selection", "args": {"to": "line"},
+        "press_command": "drag_select"
+    },
+    {
+        "button": "button1", "count": 3, "modifiers": ["button2"],
+        "command": "expand_selection_to_paragraph"
+    },
+    {
+        "button": "button1", "count": 4, "modifiers": ["button2"],
+        "command": "select_all"
+    }
+]

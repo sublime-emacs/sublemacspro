@@ -181,20 +181,20 @@ class CmdWatcher(sublime_plugin.EventListener):
     #
     # Process the selection if it was created from a drag_select (mouse dragging) command.
     #
-    def on_selection_modified(self, view):
-        vs = ViewState.get(view)
-        selection = view.sel()
+    # def on_selection_modified(self, view):
+    #     vs = ViewState.get(view)
+    #     selection = view.sel()
 
-        if len(selection) == 1 and vs.this_cmd == 'drag_select':
-            cm = CmdUtil(view, vs);
-            if vs.drag_count == 2:
-                # second event - enable active mark
-                region = view.sel()[0]
-                cm.set_mark([sublime.Region(region.a)], and_selection=False)
-                cm.toggle_active_mark_mode(True)
-            elif vs.drag_count == 0:
-                cm.toggle_active_mark_mode(False)
-        vs.drag_count += 1
+    #     if len(selection) == 1 and vs.this_cmd == 'drag_select':
+    #         cm = CmdUtil(view, vs);
+    #         if vs.drag_count == 2:
+    #             # second event - enable active mark
+    #             region = view.sel()[0]
+    #             cm.set_mark([sublime.Region(region.a)], and_selection=False)
+    #             cm.toggle_active_mark_mode(True)
+    #         elif vs.drag_count == 0:
+    #             cm.toggle_active_mark_mode(False)
+    #     vs.drag_count += 1
 
 
     #
@@ -223,6 +223,17 @@ class WindowCmdWatcher(sublime_plugin.EventListener):
 
             args["next_pane"] = pos
             return cmd, args
+
+
+class SbpMouseMarkCommand(sublime_plugin.TextCommand):
+    """Called with right mouse button + left mouse button, it sets a mark at the cursor position."""
+
+    def run(self, edit):
+        vs = ViewState.get(self.view)
+        cm = CmdUtil(self.view, vs)
+        region = self.view.sel()[0]
+        cm.set_mark([sublime.Region(region.a)], and_selection=False)
+
 
 class SbpChainCommand(SbpTextCommand):
     """A command that easily runs a sequence of other commands."""
