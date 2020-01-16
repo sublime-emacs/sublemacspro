@@ -580,7 +580,7 @@ class CmdUtil:
             view = self.view
             scope_name = view.scope_name(point)
             if scope_name.find("comment") >= 0:
-                # we don't handle this brackets inside comments so just keep going
+                # we don't handle brackets inside comments so just keep going
                 return None
 
             brac = "([{'`\""

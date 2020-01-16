@@ -105,12 +105,15 @@ def add_external_clipboard():
 #
 # If n_regions is 0, the caller doesn't care how many regions there are: just return them all.
 #
-def get_current(n_regions, pop):
+# If index is specified, use it. Also, if index is specified, pop must be 0 or else it's ignored.
+#
+def get_current(n_regions, pop, index):
     global pop_index
 
     clipboard = result = None
     if pop == 0:
-        index = kill_index
+        if index is None:
+            index = kill_index
         entry = entries[index]
 
         # grab the external clipboard if available
