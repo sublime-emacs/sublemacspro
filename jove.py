@@ -247,8 +247,13 @@ class SbpDoTimesCommand(SbpTextCommand):
         window = view.window()
         visible = view.visible_region()
         def doit():
+            # for i in range(_times):
+            #     window.run_command(cmd, args)
+
+            # REMIND: window.run_command is much slower and I cannot remember why I used
+            # window.run_command...
             for i in range(_times):
-                window.run_command(cmd, args)
+                util.run_command(cmd, args)
 
         if cmd in ('redo', 'undo'):
             sublime.set_timeout(doit, 10)
@@ -485,7 +490,7 @@ class SbpMoveSexprCommand(SbpTextCommand):
                         break
                     else:
                         ch = view.substr(point - 1)
-                        if ch in ")}]`\"":
+                        if ch in ")}]`'\"":
                             next_point = util.to_other_end(point, direction)
                             if next_point is not None:
                                 point = next_point
@@ -1132,7 +1137,7 @@ class SbpMoveForKillLineCommand(SbpTextCommand):
 # Emacs Yank and Yank Pop commands.
 #
 class SbpYankCommand(SbpTextCommand):
-    def run_cmd(self, util, pop=0):
+    def run_cmd(self, util, pop=0, index=None):
         if pop and util.state.last_cmd != 'sbp_yank':
             util.set_status("Previous command was not yank!")
             return
@@ -1142,7 +1147,7 @@ class SbpYankCommand(SbpTextCommand):
         # Get the cursors as selection, because if there is a selection we want to replace it with
         # what we're yanking.
         cursors = list(view.sel())
-        data = kill_ring.get_current(len(cursors), pop)
+        data = kill_ring.get_current(len(cursors), pop, index)
         if not data:
             return
         if pop != 0:
@@ -1173,12 +1178,12 @@ class SbpChooseAndYank(SbpTextCommand):
 
         def on_done(idx):
             if idx >= 0:
-                kill_ring.set_current(items[idx][0])
+                index = items[idx][0]
 
                 if all_cursors:
-                    util.run_command("sbp_yank_all_cursors")
+                    util.run_command("sbp_yank_all_cursors", {"index": index})
                 else:
-                    util.run_command("sbp_yank", {})
+                    util.run_command("sbp_yank", {"index": index})
 
         if items:
             sublime.active_window().show_quick_panel([item[1] for item in items], on_done)
@@ -1191,11 +1196,11 @@ class SbpChooseAndYank(SbpTextCommand):
 # will automatically create 10 cursors on 10 lines, and then perform the yank.
 #
 class SbpYankAllCursorsCommand(SbpTextCommand):
-    def run_cmd(self, util):
+    def run_cmd(self, util, index=None):
         view = self.view
 
         # request the regions of text from the current kill
-        texts = kill_ring.get_current(0, 0)
+        texts = kill_ring.get_current(0, 0, index)
         if texts is None:
             util.set_status("Nothing to yank")
 
