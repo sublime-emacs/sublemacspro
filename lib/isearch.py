@@ -144,7 +144,13 @@ class ISearchInfo():
             item = item.prev
         self.util.set_cursors(self.point)
         self.current = item
-        self.on_change(text)
+        if True or self.test_string(text):
+            # REMIND: always recreate the search one character at a time for now.
+            self.in_append_from_cursor = True
+            self.append_group_id += 1
+            for index in range(0, len(text)):
+                self.on_change(text[0:index])
+            self.in_append_from_cursor = False
         self.set_text(text, False)
         self.update()
 
@@ -192,11 +198,23 @@ class ISearchInfo():
 
         self.find(val)
 
-    def find(self, val):
+    def search_flags(self, search_string):
         # determine if this is case sensitive search or not
         flags = 0 if self.regex else sublime.LITERAL
-        if not re.search(r'[A-Z]', val):
+        if not re.search(r'[A-Z]', search_string):
             flags |= sublime.IGNORECASE
+        return flags
+
+    #
+    # Test a search string to see if it exists anywhere in the buffer.
+    #
+    def test_string(self, val):
+        flags = self.search_flags(val)
+        regions = self.view.find_all(val, flags)
+        return len(regions) > 0
+
+    def find(self, val):
+        flags = self.search_flags(val)
 
         # find all instances if we have a search string
         if len(val) > 0:
@@ -232,6 +250,9 @@ class ISearchInfo():
     def pop(self, is_group=False):
         if not self.current.prev:
             return
+
+        # TODO: when popping, skip over items that were not kept because it's a pain to rethink
+        # all those ...
 
         if is_group and self.current.group_id is not None:
             id = self.current.group_id
@@ -358,8 +379,7 @@ class ISearchInfo():
             # do something special if we invoke "i-search" twice at the beginning
             last_search = get_saved_search()
             if last_search is not None:
-                # insert the last search string
-                self.set_text(last_search, is_pop=False)
+                self.restart(last_search)
         else:
             if forward is None:
                 forward = self.current.forward
