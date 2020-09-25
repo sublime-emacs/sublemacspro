@@ -1,11 +1,32 @@
 Emacs Pro Essentials v3.1.5 Update
 ==================================
 
-- Added default emacs binding for UNDO.
+This is an extremely long overdue release. I was nervous about the changes so I needed to run with
+them for a long time to make sure I didn't screw anything up, and then I lost track of time. My
+apologies.
+
+Here's an overview of changes since my last release ... which was apparently 4 years ago!
+
+- I've improved the performance of ctrl+u repeated commands. If you do ctrl+u 64 ctrl+n to go down
+  64 lines it's instantaneous now, as it should be.
+
+- I've improved the way i-search works. When you are failing your search the selected text turns
+  red'ish according to the git delete coloring (assuming your theme supports git-gutter styling).
+  Also the text input itself is highlighted when the string becomes not found. You'll see what I
+  mean.
+
+- There were some subtle problems with the selection sometimes going whacky when you switch back to
+  the sublime text window and click for the first time. I've tried to mitigate those issues and I
+  have been happy with the changes.
+
+- The Tab indentation command is slightly smarter but I can't remember exactly how. I think it
+  requires fewer Tab key presses to get to where you are supposed to be.
+
+- Added the default EMACS binding for UNDO.
 
 - Changed the kill ring behavior with respect to the clipboard. Now when multiple regions are killed
   or copied, the clipboard takes on all those regions joined together with Newlines. This is the
-  default Sublime behavior now supported by this plugin.
+  default Sublime behaviour now supported by this plugin.
 
   This plugin still stores them as separate regions, and yank still works the way it used to, with
   one exception: if you yank multiple regions into a single cursor, the regions are joined together
@@ -14,3 +35,7 @@ Emacs Pro Essentials v3.1.5 Update
 
 - Fixed an issue with setting the target column for next and previous line commands after running
   the s-expression commands. This was interfering with the ctrl+u command.
+
+I hope you notice the differences and enjoy this update.
+
+Jonathan Payne

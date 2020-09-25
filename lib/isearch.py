@@ -114,7 +114,6 @@ class ISearchInfo():
         self.util = CmdUtil(view)
         self.window = view.window()
         self.point = self.util.get_cursors(True)
-        self.update()
         self.input_view = None
         self.in_changes = 0
         self.forward = forward
@@ -145,18 +144,23 @@ class ISearchInfo():
         self.util.set_cursors(self.point)
         self.current = item
         if True or self.test_string(text):
-            # REMIND: always recreate the search one character at a time for now.
+            # REMIND: recreate the search one character at a time unless it's > 500, in which case
+            # that can be quite slow
             self.in_append_from_cursor = True
             self.append_group_id += 1
-            for index in range(0, len(text)):
-                self.on_change(text[0:index])
+            if len(text) < 1000:
+                for index in range(0, len(text)):
+                    self.on_change(text[0:index])
+            else:
+                self.on_change(text)
             self.in_append_from_cursor = False
         self.set_text(text, False)
         self.update()
 
     def open(self):
         window = self.view.window()
-        self.input_view = window.show_input_panel("%sI-Search:" % ("Regexp " if self.regex else "", ),
+        in_error_str = "" if self.not_in_error() else "Failing "
+        self.input_view = window.show_input_panel("%s%sI-Search:" % (in_error_str, "Regexp " if self.regex else ""),
                                                   "", self.on_done, self.on_change, self.on_cancel)
         self.view_change_count = self.input_view.change_count()
 
@@ -311,6 +315,7 @@ class ISearchInfo():
         if self.current and self.current.search:
             save_search(self.current.search)
         util.set_status("", False)
+        util.toggle_active_mark_mode(False)
 
         point_set = False
         if not abort:
@@ -344,29 +349,44 @@ class ISearchInfo():
             self.hide_panel()
 
     def update(self):
-        si = self.current
-        if si is None:
+        current = self.current
+        if current is None:
             return
         not_in_error = self.not_in_error()
 
-        self.view.add_regions(REGION_FIND, si.regions, "text", "", sublime.DRAW_NO_FILL)
-        selected = si.selected or (not_in_error.selected and [not_in_error.selected[-1]]) or []
-        self.view.add_regions(REGION_SELECTED, selected, "string", "", sublime.DRAW_NO_OUTLINE)
+        # figure out which of the input is NOT in error
+        if not_in_error != current:
+            scope = "markup.deleted.git_gutter"
+        else:
+            scope = "string"
+
+        if not_in_error != current:
+            # highlight the part of the search that is in error
+            self.input_view.add_regions(REGION_FIND,
+                                        [sublime.Region(len(not_in_error.search), len(current.search))],
+                                        "text", "", sublime.DRAW_NO_OUTLINE)
+        elif self.input_view is not None:
+            # erase the error indicator
+            self.input_view.add_regions(REGION_FIND, [], "text", "", sublime.DRAW_NO_OUTLINE)
+
+        self.view.add_regions(REGION_FIND, current.regions, "text", "", sublime.DRAW_NO_FILL)
+        selected = current.selected or (not_in_error.selected and [not_in_error.selected[-1]]) or []
+        self.view.add_regions(REGION_SELECTED, selected, scope, "", sublime.DRAW_NO_OUTLINE)
         if selected:
             self.view.show(selected[-1])
 
         status = ""
-        if si != not_in_error or si.try_wrapped:
+        if current != not_in_error or current.try_wrapped:
             status += "Failing "
         if self.current.wrapped:
             status += "Wrapped "
         status += "I-Search " + ("Forward" if self.current.forward else "Reverse")
-        if si != not_in_error:
+        if current != not_in_error:
             if len(self.current.regions) > 0:
                 status += " %s %s" % (pluralize("match", len(self.current.regions), "es"), ("above" if self.forward else "below"))
         else:
-            n_cursors = min(len(si.selected), len(si.regions))
-            status += " %s, %s" % (pluralize("match", len(si.regions), "es"), pluralize("cursor", n_cursors))
+            n_cursors = min(len(current.selected), len(current.regions))
+            status += " %s, %s" % (pluralize("match", len(current.regions), "es"), pluralize("cursor", n_cursors))
 
         self.util.set_status(status, False)
 

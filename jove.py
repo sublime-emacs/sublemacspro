@@ -25,11 +25,11 @@ class ViewWatcher(sublime_plugin.EventListener):
     def on_close(self, view):
         ViewState.on_view_closed(view)
 
-    def on_modified(self, view):
-        CmdUtil(view).toggle_active_mark_mode(False)
-
     def on_activated(self, view):
         update_pinned_status(view)
+
+    def on_deactivated(self, view):
+        self.disable_empty_active_mark(view)
 
     def on_activated_async(self, view):
         info = isearch.info_for(view)
@@ -72,6 +72,25 @@ class ViewWatcher(sublime_plugin.EventListener):
                 dedup_views(sublime.active_window())
         sublime.set_timeout(doit, 50)
 
+    #
+    # Turn off active mark mode in all the views related to this view.
+    #
+    # REMIND: Sadly this is called N times for the N views that are related to the specified view,
+    # and then we iterator through all N views. So this is N-squared sadness, for usually 2 or fewer
+    # views ...
+    #
+    def on_modified(self, view):
+        self.disable_empty_active_mark(view, False)
+
+    def disable_empty_active_mark(self, view, must_be_empty = True):
+        for related_view in ViewState.most_recent_related_view(view):
+            util = CmdUtil(related_view)
+            selection = related_view.sel()
+            regions = list(selection)
+            if not must_be_empty or util.all_empty_regions(regions):
+                util.toggle_active_mark_mode(False)
+            ViewState.get(related_view).this_cmd = None
+
 #
 # CmdWatcher watches all the commands and tries to correctly process the following situations:
 #
@@ -83,7 +102,6 @@ class ViewWatcher(sublime_plugin.EventListener):
 class CmdWatcher(sublime_plugin.EventListener):
     def __init__(self, *args, **kwargs):
         super(CmdWatcher, self).__init__(*args, **kwargs)
-        self.pinned_text = None
 
     def on_post_window_command(self, window, cmd, args):
         # update_pinned_status(window.active_view())
@@ -96,7 +114,7 @@ class CmdWatcher(sublime_plugin.EventListener):
             info.done()
 
     #
-    # Override some commands to execute them N times if the numberic argument is supplied.
+    # Override some commands to execute them N times if the numeric argument is supplied.
     #
     def on_text_command(self, view, cmd, args):
         # escape the current isearch if one is in progress, unless the command is already related to
@@ -121,16 +139,24 @@ class CmdWatcher(sublime_plugin.EventListener):
         # region.
         #
         if cmd == 'drag_select':
+            # NOTE: This is called only when you click, NOT when you drag. So if you triple click
+            # it's called three times.
+
+            # NOTE: remember the view that performed the drag_select because of the
+            # on_selection_modified bug of using the wrong view if the same view is displayed more
+            # than once
+            self.drag_select_view = view
+
+            # cancel isearch if necessary
             info = isearch.info_for(view)
             if info:
                 info.done()
 
-            # Set drag_count to 0 when drag_select command occurs. BUT, if the 'by' parameter is
-            # present, that means a double or triple click occurred. When that happens we have a
-            # selection we want to start using, so we set drag_count to 2. 2 is the number of
-            # drag_counts we need in the normal course of events before we turn on the active mark
-            # mode.
-            vs.drag_count = 2 if 'by' in args else 0
+            # Set drag_count to 0 when first drag_select command occurs.
+            if 'by' not in args:
+                vs.drag_count = 0
+        else:
+            self.drag_select_view = None
 
         if cmd in ('move', 'move_to') and vs.active_mark and not args.get('extend', False):
             # this is necessary or else the built-in commands (C-f, C-b) will not move when there is
@@ -172,36 +198,37 @@ class CmdWatcher(sublime_plugin.EventListener):
             vs.argument_supplied = False
             vs.last_cmd = cmd
 
-        if vs.active_mark:
+        if vs.active_mark and cmd != 'drag_select':
             util.set_cursors(util.get_regions())
-
-        # if cmd in built_in_ensure_visible_cmds and util.just_one_cursor():
-        #     util.ensure_visible(util.get_last_cursor())
 
     #
     # Process the selection if it was created from a drag_select (mouse dragging) command.
     #
-    def on_selection_modified(self, view):
-        vs = ViewState.get(view)
-        selection = view.sel()
-
-        if len(selection) == 1 and vs.this_cmd == 'drag_select':
-            cm = CmdUtil(view, vs);
-            if vs.drag_count == 2:
-                # second event - enable active mark
-                region = view.sel()[0]
-                cm.set_mark([sublime.Region(region.a)], and_selection=False)
-                cm.toggle_active_mark_mode(True)
-            elif vs.drag_count == 0:
-                cm.toggle_active_mark_mode(False)
-        vs.drag_count += 1
-
-
+    # REMIND: This iterates all related views because sublime notifies for the same view N times, if
+    # there are N separate views open on the same buffer.
     #
-    # At a minimum this is called when bytes are inserted into the buffer.
-    #
-    def on_modified(self, view):
-        ViewState.get(view).this_cmd = None
+    def on_selection_modified(self, active_view):
+        for view in ViewState.most_recent_related_view(active_view):
+            vs = ViewState.get(view)
+            selection = view.sel()
+
+            if len(selection) == 1 and vs.this_cmd == 'drag_select':
+                cm = CmdUtil(view, vs)
+                # # REMIND: we cannot rely on drag_count unfortunately because if you have the same
+                # # buffer in multiple views, they each get notified.
+                # if vs.drag_count >= 2 and not vs.active_mark:
+                #     # wait until selection is at least 1 character long before activating
+                #     region = view.sel()[0]
+                #     if region.size() >= 1:
+                #         cm.set_mark([sublime.Region(region.a, region.b)], and_selection=False)
+                #         vs.active_mark = True
+                # elif vs.drag_count == 0:
+                #     cm.toggle_active_mark_mode(False)
+                # vs.drag_count += 1
+
+                # update the mark ring
+                sel = selection[0]
+                vs.mark_ring.set([sublime.Region(sel.a, sel.a)], True)
 
 
 class WindowCmdWatcher(sublime_plugin.EventListener):
@@ -781,18 +808,15 @@ class SbpSetMarkCommand(SbpTextCommand):
             cursors = state.mark_ring.pop()
             if cursors:
                 util.set_cursors(cursors)
-            else:
-                util.set_status("No mark to pop!")
-            state.this_cmd = "sbp_pop_mark"
+            state.this_cmd = 'sbp_pop_mark'
         elif state.this_cmd == state.last_cmd:
             # at least two set mark commands in a row: turn ON the highlight
             util.toggle_active_mark_mode()
         else:
             # set the mark
             util.set_mark()
-
-        if settings_helper.get("sbp_active_mark_mode", False):
-            util.set_active_mark_mode()
+            if settings_helper.get("sbp_active_mark_mode", False):
+                util.set_active_mark_mode()
 
 class SbpCancelMarkCommand(SbpTextCommand):
     def run_cmd(self, util):
@@ -1286,6 +1310,7 @@ class SbpTabCmdCommand(SbpTextCommand):
         point = util.get_point()
         indent,cursor = util.get_line_indent(point)
         tab_size = util.get_tab_size()
+
         if util.state.active_mark or cursor > indent:
             util.run_command("reindent", {})
         else:
@@ -1298,7 +1323,12 @@ class SbpTabCmdCommand(SbpTextCommand):
                     self.view.run_command("insert", {"characters": " " * delta})
                 if cursor < indent:
                     util.run_command("move_to", {"to": "bol", "extend": False})
+
+                # re-indent and then if we're in the same place, indent another level
                 util.run_command("reindent", {})
+                indent2, cursor2 = util.get_line_indent(point)
+                if indent2 == indent:
+                    util.run_command("indent", {})
 
 #
 # A quit command which is basically a no-op unless there are multiple cursors or a selection, in

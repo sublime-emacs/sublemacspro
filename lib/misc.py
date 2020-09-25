@@ -127,7 +127,7 @@ def preprocess_module(module):
                 kill_cmds.add(name)
 
 #
-# The baseclass for JOVE/SBP commands. This sets up state, creates a helper, processes the universal
+# The base class for JOVE/SBP commands. This sets up state, creates a helper, processes the universal
 # argument, and then calls the run_cmd method, which subclasses should override.
 #
 class SbpTextCommand(sublime_plugin.TextCommand):
@@ -367,6 +367,7 @@ class CmdUtil:
             return
 
         self.state.active_mark = value if value is not None else (not self.state.active_mark)
+
         if self.state.active_mark:
             self.set_cursors(self.get_regions(), ensure_visible=False)
         else:

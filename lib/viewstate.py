@@ -70,6 +70,23 @@ class ViewState():
         return [state.view for state in sorted_states]
 
     #
+    # Find all the existing views that are views into the same buffer as the specified view,
+    # and yield the most recently touched one to the caller.
+    #
+    @classmethod
+    def most_recent_related_view(cls, view):
+        view_states = cls.view_state_dict
+        buffer_id = view.buffer_id()
+        best = None
+        for view_id in view_states:
+            state = view_states[view_id]
+            if state.view.buffer_id() == buffer_id:
+                if best is None or best.touched < state.touched:
+                    best = state
+        if best is not None:
+            yield best.view
+
+    #
     # Reset the state for this view.
     #
     def reset(self):
