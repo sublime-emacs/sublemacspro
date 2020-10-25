@@ -14,7 +14,7 @@
   /* Set of characters for sexp navigation */
   "sbp_sexpr_separators": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?",
 
-  /* if true, sbp_cancel_mark command will is enabled */
+  /* if true, sbp_cancel_mark command is enabled */
   "sbp_cancel_mark_enabled": true,
 
   /* if true, this plugin uses the alt key for most of the emacs bindings */
