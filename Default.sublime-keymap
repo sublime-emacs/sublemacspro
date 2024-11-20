@@ -456,7 +456,6 @@
     {"keys": ["ctrl+x", "ctrl+m"], "command": "save_all"},
     {"keys": ["ctrl+x", "s"], "command": "save_all"},
     {"keys": ["ctrl+x", "ctrl+w"], "command": "prompt_save_as"},
-    {"keys": ["ctrl+x", "ctrl+c"], "command": "exit"},
 
     {"keys": ["ctrl+x", "h"], "command": "sbp_select_all", "args": {"activate_mark": true}},
 

@@ -720,7 +720,12 @@ class SbpShiftRegionCommand(SbpTextCommand):
                     count += 1
                     if cols < 0 and (line.size() < amount or not util.is_blank(line.a, line.a + amount)):
                         continue
-                    selection.add(sublime.Region(line.a, line.a))
+                    if cols < 0:
+                        # deleting, so select the range we're deleting
+                        selection.add(sublime.Region(line.a, line.a + amount))
+                    else:
+                        # inserting, so a single point
+                        selection.add(sublime.Region(line.a, line.a))
                     shifted += 1
 
             # shift the region
@@ -728,8 +733,7 @@ class SbpShiftRegionCommand(SbpTextCommand):
                 # shift right
                 self.view.run_command("insert", {"characters": " " * cols})
             else:
-                for i in range(amount):
-                    self.view.run_command("right_delete")
+                self.view.run_command("right_delete")
 
             # restore the region
             util.restore_cursors("shift")
@@ -977,6 +981,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             return False
 
         window.set_layout(lm.build())
+        window.focus_group(current)
 
         # couldn't find an existing view so we have to clone the current one
         window.run_command("clone_file")
@@ -1004,13 +1009,16 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             new_view.show(point)
             view.show(point)
 
-        sublime.set_timeout(setup_views, 10)
+        setup_views()
+        window.focus_view(new_view)
+
         return True
 
     #
     # Destroy the specified pane=self|others.
     #
     def destroy(self, window, pane):
+        window.run_command('unselect_others')
         if window.num_groups() == 1:
             return
         view = window.active_view()
@@ -1028,7 +1036,6 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             views = [window.active_view()]
 
         window.set_layout(lm.build())
-
 
         for i in range(window.num_groups()):
             view = views[i]
@@ -1559,14 +1566,19 @@ class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
 #
 def dedup_views(window):
     # remember the current group so we can focus back to it when we're done
-    group = window.active_group()
+    active_group = window.active_group()
+
     for g in range(window.num_groups()):
         # get views for current group sorted by most recently used
-        active = window.active_view_in_group(g)
         views = ViewState.sorted_views(window, g)
         view_by_buffer_id = dict()
+
+        # preload the active view of the active group which should prevent it from being deleted
+        active_view = window.active_view_in_group(g)
+        view_by_buffer_id[active_view.buffer_id()] = active_view
+
         for v in views:
-            if v.is_dirty():
+            if v.is_dirty() or v == active_view:
                 # we cannot nuke a dirty buffer or we'll get an annoying popup
                 continue
             id = v.buffer_id()
@@ -1576,8 +1588,7 @@ def dedup_views(window):
                 window.run_command('close')
             else:
                  view_by_buffer_id[id] = v
-        window.focus_view(active)
-    window.focus_group(group)
+    window.focus_group(active_group)
 
 def plugin_loaded():
     kill_ring.initialize()

@@ -1,4 +1,4 @@
-import os, re, time, traceback
+import os, re, time, traceback, sys
 import sublime, sublime_plugin
 
 from .viewstate import *
@@ -25,6 +25,7 @@ def bracket_highlighter_installed():
             is_bracket_highlighter_installed = False
         else:
             is_bracket_highlighter_installed = True
+
     return is_bracket_highlighter_installed
 
 def pluralize(string, count, es="s"):

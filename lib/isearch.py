@@ -354,20 +354,21 @@ class ISearchInfo():
             return
         not_in_error = self.not_in_error()
 
-        # figure out which of the input is NOT in error
+        # use scope names to determine the coloring of errors vs. succeeding search
         if not_in_error != current:
-            scope = "markup.deleted.git_gutter"
+            scope = "isearch.fail"
         else:
-            scope = "string"
+            scope = "isearch.ok"
 
+        # figure out which of the input is NOT in error
         if not_in_error != current:
             # highlight the part of the search that is in error
             self.input_view.add_regions(REGION_FIND,
                                         [sublime.Region(len(not_in_error.search), len(current.search))],
-                                        "text", "", sublime.DRAW_NO_OUTLINE)
+                                        "isearch.fail", "", sublime.DRAW_NO_OUTLINE)
         elif self.input_view is not None:
             # erase the error indicator
-            self.input_view.add_regions(REGION_FIND, [], "text", "", sublime.DRAW_NO_OUTLINE)
+            self.input_view.add_regions(REGION_FIND, [], "isearch.fail", "", sublime.DRAW_NO_OUTLINE)
 
         self.view.add_regions(REGION_FIND, current.regions, "text", "", sublime.DRAW_NO_FILL)
         selected = current.selected or (not_in_error.selected and [not_in_error.selected[-1]]) or []

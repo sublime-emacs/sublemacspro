@@ -20,14 +20,12 @@ MAX_AUTO_COMPLETE_WORD_SIZE = 100
 class CompleteAllBuffers(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
         if settings_helper.get("sbp_use_internal_complete_all_buffers") != True:
-            return None
-        if view.settings().get("inhibit_all_complete"):
-            return None
+            return []
 
         # This happens if you type a non-word character. We don't want to process any completions in
         # this case because there are too many.
         if len(prefix) == 0:
-            return None
+            return []
 
         seen = set()
         seen_buffers = set()
@@ -108,9 +106,10 @@ class CompleteAllBuffers(sublime_plugin.EventListener):
                     trigger = "%s\t  %s" % (word, file_name)
                 words.append((trigger, word.replace("$", "\\$")))
         tm = time.time() - start
-        if tm > 0.20:
+        if tm > 0.05:
             print("COMPLETE in", time.time() - start)
-        return (words, sublime.INHIBIT_WORD_COMPLETIONS)
+        # return (words, sublime.DYNAMIC_COMPLETIONS)
+        return (words, sublime.DYNAMIC_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS)
 
     def extract_from_view(self, view, prefix, point):
         return view.extract_completions(prefix, point)
