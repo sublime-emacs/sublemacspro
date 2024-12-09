@@ -62,15 +62,15 @@ class ViewWatcher(sublime_plugin.EventListener):
         if key == "sbp_catchall":
             return True
 
-    def on_post_save(self, view):
-        # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
-        # saving all the buffers right now. So we schedule it for the future.
-        self.pending_dedups += 1
-        def doit():
-            self.pending_dedups -= 1
-            if self.pending_dedups == 0:
-                dedup_views(sublime.active_window())
-        sublime.set_timeout(doit, 50)
+    # def on_post_save(self, view):
+    #     # Schedule a dedup, but do not do it NOW because it seems to cause a crash if, say, we're
+    #     # saving all the buffers right now. So we schedule it for the future.
+    #     self.pending_dedups += 1
+    #     def doit():
+    #         self.pending_dedups -= 1
+    #         if self.pending_dedups == 0:
+    #             dedup_views(sublime.active_window())
+    #     sublime.set_timeout(doit, 50)
 
     #
     # Turn off active mark mode in all the views related to this view.
@@ -1009,7 +1009,7 @@ class SbpPaneCmdCommand(SbpWindowCommand):
             new_view.show(point)
             view.show(point)
 
-        setup_views()
+        sublime.set_timeout(setup_views, 50)
         window.focus_view(new_view)
 
         return True
@@ -1560,13 +1560,13 @@ class SbpPreSaveWhiteSpaceHook(sublime_plugin.EventListener):
                              {"trim_whitespace": trim, "ensure_newline": ensure})
 
 #
-# Function to dedup views in all the groups of the specified window. This does not close views that
-# have changes because that causes a warning to popup. So we have a monitor which dedups views
-# whenever a file is saved in order to dedup them then when it's safe.
+# Function to dedup views in all the groups of the specified window. Views with changes are marked
+# as scratch before the are closed and then restored to their previous value of scratch.
 #
 def dedup_views(window):
     # remember the current group so we can focus back to it when we're done
-    active_group = window.active_group()
+    original_group = window.active_group()
+    original_view = window.active_view()
 
     for g in range(window.num_groups()):
         # get views for current group sorted by most recently used
@@ -1578,17 +1578,24 @@ def dedup_views(window):
         view_by_buffer_id[active_view.buffer_id()] = active_view
 
         for v in views:
-            if v.is_dirty() or v == active_view:
-                # we cannot nuke a dirty buffer or we'll get an annoying popup
+            if v == active_view:
+                # don't nuke the active view of the active group
                 continue
             id = v.buffer_id()
             if id in view_by_buffer_id:
                 # already have a view with this buffer - so nuke this one - it's older
                 window.focus_view(v)
+
+                # so we can close it even if modified
+                v.set_scratch(True)
                 window.run_command('close')
+
+                # put it back or else the remaining one will be marked as not modified
+                v.set_scratch(False)
             else:
                  view_by_buffer_id[id] = v
-    window.focus_group(active_group)
+    window.focus_group(original_group)
+    window.focus_view(original_view)
 
 def plugin_loaded():
     kill_ring.initialize()

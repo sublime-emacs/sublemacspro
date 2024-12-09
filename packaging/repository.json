@@ -5,10 +5,6 @@
 			"details": "https://github.com/sublime-emacs/sublemacspro",
 			"releases": [
 				{
-					"sublime_text": "<3000",
-					"branch": "st2"
-				},
-				{
 					"sublime_text": ">=3000",
 					"tags": true
 				}

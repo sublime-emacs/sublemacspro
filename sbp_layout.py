@@ -94,7 +94,7 @@ class LayoutManager:
     cell = self.coord_cells[index]
     del(self.coord_cells[index])
 
-    # First check if there are neighbouring cells atop or below
+    # First check if there are neighboring cells atop or below
     expand = []
 
     # Shift top
